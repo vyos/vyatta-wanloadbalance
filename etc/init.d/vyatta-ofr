@@ -1,0 +1,214 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          ofr
+# Required-Start:    $syslog $time $local_fs
+# Required-Stop:     $syslog $time $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      S 0 1 6
+# Short-Description: Vyatta Router
+# Description:       Debian init script for the Vyatta Router
+### END INIT INFO
+# **** License ****
+# Version: VPL 1.0
+#
+# The contents of this file are subject to the Vyatta Public License
+# Version 1.0 ("License"); you may not use this file except in
+# compliance with the License. You may obtain a copy of the License at
+# http://www.vyatta.com/vpl
+#
+# Software distributed under the License is distributed on an "AS IS"
+# basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See
+# the License for the specific language governing rights and limitations
+# under the License.
+#
+# This code was originally developed by Vyatta, Inc.
+# Portions created by Vyatta are Copyright (C) 2007 Vyatta, Inc.
+# All Rights Reserved.
+#
+# Author:	Tom Grennan <tgrennan@vyatta.com>
+# **** End License ****
+
+. /lib/lsb/init-functions
+
+: ${vyatta_env:=/etc/default/vyatta}
+source $vyatta_env
+
+declare progname=${0##*/}
+declare action=$1; shift
+
+declare -x BOOTFILE=$vyatta_sysconfdir/config/config.boot
+
+declare -a subinit
+declare -a all_subinits=(
+    rl-system
+    firewall
+    dhcpd
+    dhcrelay
+    lighttpd )
+
+if [ $# -gt 0 ] ; then
+    for s in $@ ; do
+	[ -x ${vyatta_sbindir}/${s}.init ] && subinit[${#subinit}]=$s
+    done
+else
+    for s in ${all_subinits[@]} ; do
+	[ -x ${vyatta_sbindir}/${s}.init ] && subinit[${#subinit}]=$s
+    done
+#   NOTE: rtrmgr (i.e. xorp) is mutually exclusive of quagga
+    if [ -x /etc/init.d/quagga ] ; then
+        # quagga should already be started.
+	GROUP=quaggavty
+    elif [ -x ${vyatta_sbindir}/rtrmgr.init ] ; then
+	subinit[${#subinit}]=rtrmgr
+	GROUP=xorp
+    fi
+fi
+
+
+have_rl_system () {
+    test -x $vyatta_sbindir/rl-system.init
+}
+
+use_floppy () {
+    _fd_=/media/floppy
+
+    if have_rl_system ; then
+##	only do this if we have the rl-system package
+##	if we donot discover an fd device, try loading the floppy module
+	grep -q fd /proc/devices || modprobe -q floppy 2>/dev/null
+	if grep -q fd /proc/devices ; then
+	    if  awk -- '$1 ~ /\/dev\/fd/ { exit 1 }' /proc/mounts
+	    then
+		mkdir -p $_fd_
+		mount -t ext2 /dev/fd0 $_fd_ -o sync 2>/dev/null
+		test $? -eq 32 && mount -t vfat /dev/fd0 $_fd_ 2>/dev/null
+	    fi
+	fi
+    fi
+    test -d ${_fd_}/config
+}
+
+setup_configdir() {
+    [ -f $BOOTFILE ] && return 0
+    mkdir -m 0775 -p ${vyatta_sysconfdir}/config
+    chgrp ${GROUP} ${vyatta_sysconfdir}/config
+    if [ -d ~root/vyatta/config ] ; then
+	mount -o bind ~root/vyatta/config $vyatta_sysconfdir/config
+    elif use_floppy ; then
+	mount -o bind /media/floppy/config $vyatta_sysconfdir/config
+    else
+	mkdir -m 0775 -p ~root/vyatta/config
+	chgrp ${GROUP} ~root/vyatta ~root/vyatta/config
+	mount -o bind ~root/vyatta/config $vyatta_sysconfdir/config
+    fi
+}
+
+setup_rclocal () {
+    [ -f /etc/rc.local ] || touch /etc/rc.local
+    if [ -f ~root/vyatta/rc.local ]; then
+	mount -o bind ~root/vyatta/rc.local /etc/rc.local
+    elif [ -f /media/floppy/rc.local ]; then
+	mount -o bind /media/floppy/rc.local /etc/rc.local
+    fi
+}
+
+restore_rclocal () {
+    umount /etc/rc.local >& /dev/null
+}
+
+# if necessary, provide initial config
+init_bootfile () {
+    if [ ! -f $BOOTFILE ] ; then
+	if [ -f $vyatta_sysconfdir/config.boot.default ]; then
+	  cp $vyatta_sysconfdir/config.boot.default $BOOTFILE
+        else
+          $vyatta_sbindir/vyatta_current_conf_ver.pl > $BOOTFILE
+        fi
+    fi
+    chgrp ${GROUP} $BOOTFILE 
+    chmod 660 $BOOTFILE
+    ## remove the unnecessary and potentially conflicting
+    ## config-directory statement (i.e. /mnt/floppy vs. /media/floppy
+    sed -i '/^rtrmgr {$/,/^}$/d' $BOOTFILE
+}
+
+# if necessary, migrate initial config
+migrate_bootfile ()
+{
+    if [ -x $vyatta_sbindir/vyatta_config_migrate.pl ]; then
+        log_progress_msg migrate
+        $vyatta_sbindir/vyatta_config_migrate.pl $BOOTFILE
+    fi
+}
+
+# load the initial config
+load_bootfile ()
+{
+  if [ -x $vyatta_sbindir/vyatta-config-loader.pl ]; then
+    log_progress_msg configure
+    sg ${GROUP} -c "$vyatta_sbindir/vyatta-config-loader.pl $BOOTFILE"
+  fi
+}
+
+# this handles the "config dir" (/opt/vyatta/config), which is different
+# from the directory for config files (/opt/vyatta/etc/config).
+mount_cfg_dir ()
+{
+    if [ ! -d ${vyatta_configdir} ] ; then
+	mkdir -m 0775 -p ${vyatta_configdir}
+	chgrp ${GROUP} ${vyatta_configdir}
+    fi
+    mount -o nosuid,nodev -t tmpfs none ${vyatta_configdir}
+}
+
+unmount_cfg_dir ()
+{
+    umount ${vyatta_configdir}
+}
+
+start ()
+{
+    log_daemon_msg "Starting Vyatta Router"
+    setup_configdir
+    setup_rclocal
+    mount_cfg_dir
+    init_bootfile
+    migrate_bootfile
+    for s in ${subinit[@]} ; do
+	log_progress_msg $s
+	${vyatta_sbindir}/${s}.init start || (log_end_msg $? && return)
+    done
+    load_bootfile
+    echo -n $BOOTFILE > ${vyatta_sysconfdir}/bootfile_path
+    log_end_msg $?
+}
+
+stop()
+{
+    local -i status=0
+    log_daemon_msg "Stopping Vyatta Router"
+    for ((i=${#sub_inits[@]} - 1; i >= 0; i--)) ; do
+	s=${subinit[$i]}
+	log_progress_msg $s
+	${vyatta_sbindir}/${s}.init stop
+	let status\|=$?
+    done
+    unmount_cfg_dir
+    restore_rclocal
+    log_end_msg $status
+}
+
+case "$action" in
+    start) start ;;
+    stop)  stop ;;
+    restart|force-reload) stop && start ;;
+    *)	log_failure_msg "usage: $progname [ start|stop|restart ] [ subinit ... ]" ;
+	false ;;
+esac
+
+exit $?
+
+# Local Variables:
+# mode: shell-script
+# sh-indentation: 4
+# End:

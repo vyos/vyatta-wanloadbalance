@@ -1,0 +1,5 @@
+vyatta-wanloadbalance (0.1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Michael Larson <mike@vyatta.com>  Fri, 14 Dec 2007 17:31:53 -0700

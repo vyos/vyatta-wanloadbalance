@@ -1,0 +1,6 @@
+The Debian Package vyatta-wanloadbalance
+----------------------------
+
+This package contains the wan load balance project developed by vyatta. This package includes the process, plus cli operational and commands.
+ 
+ -- Michael Larson <mike@vyatta.com>  12/14/07

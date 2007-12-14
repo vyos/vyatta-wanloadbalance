@@ -1,0 +1,6 @@
+#!/bin/bash
+
+prefix=@prefix@
+sysconfdir=@sysconfdir@
+
+#nothing
