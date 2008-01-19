@@ -1,3 +1,5 @@
+cfgdir = $(datadir)/vyatta-cfg/templates
+
 initddir	 = /etc/init.d
 
 AM_CPPFLAGS = -I src -Wall -DDEBUG
@@ -19,3 +21,7 @@ sbin_PROGRAMS = src/wan_lb
 
 cpiop = find  . ! -regex '\(.*~\|.*\.bak\|.*\.swp\|.*\#.*\#\)' -print0 | \
 	cpio -0pd
+
+install-exec-hook:
+	mkdir -p $(DESTDIR)$(cfgdir)
+	cd templates; $(cpiop) $(DESTDIR)$(cfgdir)
