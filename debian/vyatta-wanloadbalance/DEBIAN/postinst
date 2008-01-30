@@ -1,6 +1,0 @@
-#!/bin/bash
-
-prefix=/opt/vyatta
-sysconfdir=${prefix}/etc
-
-#nothing

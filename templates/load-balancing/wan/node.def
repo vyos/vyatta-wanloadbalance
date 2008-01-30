@@ -1,0 +1,4 @@
+help: "wan load-balance configuration"
+commit: exec "\\${vyatta_sbindir}/vyatta-wanloadbalance.pl"
+
+
