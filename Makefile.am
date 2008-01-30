@@ -7,6 +7,7 @@ AM_CPPFLAGS = -I src -Wall -DDEBUG
 CLEANFILES = src/main.o src/lbdata.o src/lbdatafactory.o src/loadbalance.o src/rl_str_proc.o src/lbpathtest.o src/lboutput.o
 
 sbin_SCRIPTS = scripts/wlb.init
+sbin_SCRIPTS += scripts/vyatta-wanloadbalance.pl
 
 src_wan_lb_SOURCES = src/main.cc
 src_wan_lb_SOURCES += src/lbdata.cc
