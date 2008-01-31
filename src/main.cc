@@ -42,6 +42,7 @@ static void usage()
   cout << "lb -ftidh" << endl;
   cout << "-f [file] configuration file" << endl;
   cout << "-t load configuration file only and exit" << endl;
+  cout << "-v print debug output" << endl;
   cout << "-i specify location of pid directory" << endl;
   cout << "-d run as daemon" << endl;
   cout << "-h help" << endl;
@@ -70,12 +71,13 @@ static void sig_user(int signo)
 int main(int argc, char* argv[])
 {
   int ch;
+  bool debug = false;
   bool config_debug_mode = false, daemon = false;
   string pid_path;
   string c_file;
 
   //grab inputs
-  while ((ch = getopt(argc, argv, "f:hti:d")) != -1) {
+  while ((ch = getopt(argc, argv, "f:hti:dv")) != -1) {
     switch (ch) {
     case 'f':
       c_file = optarg;
@@ -86,11 +88,14 @@ int main(int argc, char* argv[])
     case 't':
       config_debug_mode = true;
       break;
+    case 'i':
+      pid_path = optarg;
+      break;
     case 'd':
       daemon = true;
       break;
-    case 'i':
-      pid_path = optarg;
+    case 'v':
+      debug = true;
       break;
     default:
       usage();
@@ -115,7 +120,7 @@ int main(int argc, char* argv[])
     pid_output(pid_path.c_str());
   }
 
-  g_lb = new LoadBalance();
+  g_lb = new LoadBalance(debug);
   
   bool success = g_lb->set_conf(c_file);
   if (success == false) {
@@ -127,9 +132,9 @@ int main(int argc, char* argv[])
     exit(0);
   }
 
-#ifdef DEBUG
-  cout << "STARTING CYCLE" << endl;
-#endif
+  if (debug) {
+    cout << "STARTING CYCLE" << endl;
+  }
 
   g_lb->init();
 
@@ -142,9 +147,9 @@ int main(int argc, char* argv[])
 
     //drop into event loop
   do {
-#ifdef DEBUG
-    cout << "main.cc: starting new cycle" << endl;
-#endif
+    if (debug) {
+      cout << "main.cc: starting new cycle" << endl;
+    }
 
     //health test
     g_lb->health_test();
@@ -157,6 +162,11 @@ int main(int argc, char* argv[])
 
     g_lb->sleep();
   } while (g_lb->start_cycle());
+
+  if (g_lb) {
+    delete g_lb;
+  }
+
   exit(0);
 }
 

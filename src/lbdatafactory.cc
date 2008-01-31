@@ -40,7 +40,8 @@
 using namespace std;
 
 
-LBDataFactory::LBDataFactory()
+LBDataFactory::LBDataFactory(bool debug) :
+  _debug(debug)
 {
 }
 
@@ -55,7 +56,9 @@ LBDataFactory::load(const string &conf_file)
   //open file
   FILE *fp = fopen(conf_file.c_str(), "r");
   if (fp == NULL) {
-    cerr << "Error opening configuration file: " << conf_file << endl;
+    if (_debug) {
+      cerr << "Error opening configuration file: " << conf_file << endl;
+    }
     syslog(LOG_ERR, "wan_lb: configuration file not found: %s", conf_file.c_str());
     return false;
   }
@@ -96,7 +99,9 @@ LBDataFactory::load(const string &conf_file)
       process(path,depth,key,value);
     }
     if (depth > 9 || depth < 0) {
-      cerr << "configuration error: malformed configuration file: brackets" << endl;
+      if (_debug) {
+	cerr << "configuration error: malformed configuration file: brackets" << endl;
+      }
       syslog(LOG_ERR, "wan_lb: malformed configuration file: brackets");
       return false;
     }
@@ -104,14 +109,16 @@ LBDataFactory::load(const string &conf_file)
 
   fclose(fp);
   if (depth != 0) {
-    cerr << "configuration error: mismatched brackets in configuration file" << endl;
+    if (_debug) {
+      cerr << "configuration error: mismatched brackets in configuration file" << endl;
+    }
     syslog(LOG_ERR, "wan_lb: configuration error due to mismatched brackets");
     return false;
   }
 
-#ifdef DEBUG
-  _lb_data.dump();
-#endif
+  if (_debug) {
+    _lb_data.dump();
+  }
   return true;
 }
 
@@ -177,7 +184,9 @@ LBDataFactory::process_health_interface(const string &key, const string &value)
       _health_iter->second._success_ct = num;
     }
     else {
-      cerr << "illegal success-ct specified: " << value << endl;
+      if (_debug) {
+	cerr << "illegal success-ct specified: " << value << endl;
+      }
       syslog(LOG_ERR, "wan_lb: illegal success-ct specified in configuration file: %s", value.c_str());
     }
   }
@@ -187,7 +196,9 @@ LBDataFactory::process_health_interface(const string &key, const string &value)
       _health_iter->second._failure_ct = num;
     }
     else {
-      cerr << "illegal failure-ct specified: " << value << endl;
+      if (_debug) {
+	cerr << "illegal failure-ct specified: " << value << endl;
+      }
       syslog(LOG_ERR, "wan_lb: illegal failure-ct specified in configuration file: %s", value.c_str());
     }
   }
@@ -197,7 +208,9 @@ LBDataFactory::process_health_interface(const string &key, const string &value)
       _health_iter->second._ping_resp_time = num;
     }
     else {
-      cerr << "illegal ping-resp specified: " << value << endl;
+      if (_debug) {
+	cerr << "illegal ping-resp specified: " << value << endl;
+      }
       syslog(LOG_ERR, "wan_lb: illegal ping-resp specified in configuration file: %s", value.c_str());
     }
   }
@@ -205,7 +218,9 @@ LBDataFactory::process_health_interface(const string &key, const string &value)
     //nothing
   }
   else {
-    cout << "LBDataFactory::process_health(): " << "don't understand this symbol: " << key << endl;
+    if (_debug) {
+      cout << "LBDataFactory::process_health(): " << "don't understand this symbol: " << key << endl;
+    }
     //nothing
   }
 
@@ -217,15 +232,17 @@ LBDataFactory::process_rule(const string &key, const string &value)
   if (key.empty()) {
     return;
   }
-#ifdef DEBUG
-  cout << "LBDataFactor::process_rule(): " << key << ", " << value << endl;
-#endif
+  if (_debug) {
+    cout << "LBDataFactor::process_rule(): " << key << ", " << value << endl;
+  }
   int num = strtoul(value.c_str(), NULL, 10);
   if (num > 0) {
     _lb_data._lb_rule_coll.insert(pair<int,LBRule>(num,LBRule()));
   }
   else {
-    cerr << "Rule number: illegal value" << endl;
+    if (_debug) {
+      cerr << "Rule number: illegal value" << endl;
+    }
     syslog(LOG_ERR, "wan_lb: illegal rule number: %s", value.c_str());
     return;
   }
@@ -249,7 +266,9 @@ LBDataFactory::process_rule_protocol(const string &key, const string &value)
       _rule_iter->second._proto = "tcp";      
     }
     else {
-      cerr << "protocol not recognized: " << key << ", " << value << endl;
+      if (_debug) {
+	cerr << "protocol not recognized: " << key << ", " << value << endl;
+      }
       syslog(LOG_ERR, "wan_lb: illegal protocol specified: %s", value.c_str());
     }
   }
@@ -260,7 +279,9 @@ LBDataFactory::process_rule_source(const string &key, const string &value)
 {
   if (key == "address") {
     if (inet_addr(value.c_str()) == (unsigned)-1) {
-      cerr << "malformed ip address: " << key << ", " << value << endl;
+      if (_debug) {
+	cerr << "malformed ip address: " << key << ", " << value << endl;
+      }
       syslog(LOG_ERR, "wan_lb, malformed ip address in configuration: %s,%s", key.c_str(),value.c_str());
       return;
     }
@@ -282,7 +303,9 @@ LBDataFactory::process_rule_destination(const string &key, const string &value)
 {
   if (key == "address") {
     if (inet_addr(value.c_str()) == (unsigned)-1) {
-      cerr << "malformed ip address: " << key << ", " << value << endl;
+      if (_debug) {
+	cerr << "malformed ip address: " << key << ", " << value << endl;
+      }
       syslog(LOG_ERR, "wan_lb, malformed ip address in configuration: %s,%s", key.c_str(),value.c_str());
       return;
     }
@@ -302,9 +325,9 @@ LBDataFactory::process_rule_destination(const string &key, const string &value)
 void
 LBDataFactory::process_rule_interface(const string &key, const string &value)
 {
-#ifdef DEBUG
-  cout << "LBDataFactory::process_rule_interface(): " << key << ", " << value << endl;
-#endif
+  if (_debug) {
+    cout << "LBDataFactory::process_rule_interface(): " << key << ", " << value << endl;
+  }
   if (key == "interface") {
     _rule_iter->second._iface_dist_coll.insert(pair<string,int>(value,0));
     _rule_iface_iter = _rule_iter->second._iface_dist_coll.find(value);
@@ -315,12 +338,16 @@ LBDataFactory::process_rule_interface(const string &key, const string &value)
       _rule_iface_iter->second = num;
     }
     else {
-      cerr << "illegal interface weight specified: " << value << endl;
+      if (_debug) {
+	cerr << "illegal interface weight specified: " << value << endl;
+      }
       syslog(LOG_ERR, "wan_lb: illegal interface weight specified in configuration file: %s", value.c_str());
     }
   }
   else {
-    cerr << "LBDataFactory::process_rule(): " << "don't understand this symbol: " << key << endl;
+    if (_debug) {
+      cerr << "LBDataFactory::process_rule(): " << "don't understand this symbol: " << key << endl;
+    }
   }
 }
 

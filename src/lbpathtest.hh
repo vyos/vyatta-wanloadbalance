@@ -47,7 +47,7 @@ public:
 class LBPathTest
 {
 public:
-  LBPathTest();
+  LBPathTest(bool debug);
   ~LBPathTest();
 
   void
@@ -64,6 +64,7 @@ private:
   in_checksum(const unsigned short *buf, int lenght) const;
 
 private:
+  bool _debug;
   int _send_sock;
   int _recv_sock;
   int _packet_id;

@@ -45,7 +45,7 @@ using namespace std;
 class LoadBalance
 {
  public:
-  LoadBalance();
+  LoadBalance(bool debug);
   ~LoadBalance();
 
   bool set_conf(const string &filename);
@@ -64,6 +64,7 @@ class LoadBalance
   void sleep() {::sleep(5);}
 
  private:
+  bool _debug;
   LBDataFactory _lbdata_factory;
   LBData _lbdata;
   LBPathTest _ph;

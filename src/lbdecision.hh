@@ -41,7 +41,7 @@ public:
   typedef map<string,int>::iterator InterfaceMarkIter;
 
 public:
-  LBDecision();
+  LBDecision(bool debug);
   ~LBDecision();
 
   void
@@ -64,6 +64,7 @@ private:
   get_application_cmd(LBRule &rule);
 
 private:
+  bool _debug;
   InterfaceMarkColl _iface_mark_coll;
 };
 

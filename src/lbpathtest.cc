@@ -50,7 +50,8 @@
 
 using namespace std;
 
-LBPathTest::LBPathTest() : 
+LBPathTest::LBPathTest(bool debug) : 
+  _debug(debug),
   _send_sock(0),
   _recv_sock(0),
   _packet_id(0)
@@ -58,7 +59,9 @@ LBPathTest::LBPathTest() :
   struct protoent *ppe = getprotobyname("icmp");
   _send_sock = socket(PF_INET, SOCK_RAW, ppe->p_proto);
   if (_send_sock < 0){
-    cerr << "LBPathTest::LBPathTest(): no send sock: " << _send_sock << endl;
+    if (_debug) {
+      cerr << "LBPathTest::LBPathTest(): no send sock: " << _send_sock << endl;
+    }
     syslog(LOG_ERR, "wan_lb: failed to acquired socket");
     _send_sock = 0;
     return;
@@ -77,13 +80,17 @@ LBPathTest::LBPathTest() :
 
   _recv_sock = socket(PF_INET, SOCK_RAW, ppe->p_proto);
   if (_recv_sock < 0) {
-    cerr << "LBPathTest::LBPathTest(): no recv sock: " << _recv_sock << endl;
+    if (_debug) {
+      cerr << "LBPathTest::LBPathTest(): no recv sock: " << _recv_sock << endl;
+    }
     syslog(LOG_ERR, "wan_lb: failed to acquired socket");
     _recv_sock = 0;
     return;
   }
   if (bind(_recv_sock, (struct sockaddr*)&addr, sizeof(addr))==-1) {
-    cerr << "failed on bind" << endl;
+    if (_debug) {
+      cerr << "failed on bind" << endl;
+    }
     syslog(LOG_ERR, "wan_lb: failed to bind recv sock");
   }
 }
@@ -100,9 +107,9 @@ LBPathTest::~LBPathTest()
 void
 LBPathTest::start(LBData &lb_data)
 {
-#ifdef DEBUG
-  cout << "LBPathTest::start(): starting health test. client ct: " << lb_data._iface_health_coll.size() << endl;
-#endif
+  if (_debug) {
+    cout << "LBPathTest::start(): starting health test. client ct: " << lb_data._iface_health_coll.size() << endl;
+  }
 
   map<int,PktData> results;
 
@@ -113,9 +120,9 @@ LBPathTest::start(LBData &lb_data)
   //iterate over packets and send
   LBData::InterfaceHealthIter iter = lb_data._iface_health_coll.begin();
   while (iter != lb_data._iface_health_coll.end()) {
-#ifdef DEBUG
-    cout << "LBPathTest::start(): sending ping test for: " << iter->first << " for " << iter->second._ping_target << endl;
-#endif
+    if (_debug) {
+      cout << "LBPathTest::start(): sending ping test for: " << iter->first << " for " << iter->second._ping_target << endl;
+    }
     _packet_id = ++_packet_id % 32767;
     send(iter->first, iter->second._ping_target, _packet_id);
     results.insert(pair<int,PktData>(_packet_id,PktData(iter->first,-1)));
@@ -136,9 +143,9 @@ LBPathTest::start(LBData &lb_data)
   //then iterate over recv socket and receive and record
   while (ct > 0 && cur_time < timeout) {
     int id = receive();
-#ifdef DEBUG 
-    cout << "LBPathTest::start(): " << id << endl;
-#endif
+    if (_debug) {
+      cout << "LBPathTest::start(): " << id << endl;
+    }
     //update current time for comparison
     sysinfo(&si);
     timeval recv_time;
@@ -162,9 +169,9 @@ LBPathTest::start(LBData &lb_data)
       LBData::InterfaceHealthIter iter = lb_data._iface_health_coll.find(r_iter->second._iface);
       if (iter != lb_data._iface_health_coll.end()) {
 	//check to see if this returned in the configured time, otherwise apply timeout
-#ifdef DEBUG
-	cout << "LBPathTest::start(): received pkt: " << iter->first << ", rtt: " << rtt << endl;
-#endif
+	if (_debug) {
+	  cout << "LBPathTest::start(): received pkt: " << iter->first << ", rtt: " << rtt << endl;
+	}
 	if (rtt < iter->second._ping_resp_time) {
 	  iter->second.put(rtt);
 	}
@@ -187,9 +194,9 @@ LBPathTest::start(LBData &lb_data)
     ++r_iter;
   }
 
-#ifdef DEBUG
-  cout << "LBPathTest::start(): finished heath test" << endl;
-#endif
+  if (_debug) {
+    cout << "LBPathTest::start(): finished heath test" << endl;
+  }
 }
 
 void
@@ -208,7 +215,9 @@ LBPathTest::send(const string &iface, const string &target_addr, int packet_id)
   //convert target_addr to ip addr
   struct hostent *h = gethostbyname(target_addr.c_str());
   if (h == NULL) {
-    cerr << "LBPathTest::send() Error in resolving hostname" << endl;
+    if (_debug) {
+      cerr << "LBPathTest::send() Error in resolving hostname" << endl;
+    }
     syslog(LOG_ERR, "wan_lb: error in resolving configured hostname: %s", target_addr.c_str());
     return;
   }
@@ -248,38 +257,39 @@ LBPathTest::send(const string &iface, const string &target_addr, int packet_id)
 
   //need to direct this packet out a specific interface!!!!!!!!!!!!!
   err = sendto(_send_sock, buffer, icmp_pktsize, 0, (struct sockaddr*)&taddr, sizeof(taddr));
-#ifdef DEBUG
-  cout << "lbpathtest: sendto: " << err << ", packet id: " << packet_id << endl;
-#endif
+  if (_debug) {
+    cout << "lbpathtest: sendto: " << err << ", packet id: " << packet_id << endl;
+  }
   if(err < 0)
   {
-    if (errno == EBADF)
-      cout << "EBADF" << endl;
-    else if (errno == ENOTSOCK)
-      cout << "ENOTSOCK" << endl;
-    else if (errno == EFAULT)
-      cout << "EFAULT" << endl;
-    else if (errno == EMSGSIZE)
-      cout << "EMSGSIZE" << endl;
-    else if (errno == EWOULDBLOCK)
-      cout << "EWOULDBLOCK" << endl;
-    else if (errno == EAGAIN)
-      cout << "EAGAIN" << endl;
-    else if (errno == ENOBUFS)
-      cout << "ENOBUFS" << endl;
-    else if (errno == EINTR)
-      cout << "EINTR" << endl;
-    else if (errno == ENOMEM)
-      cout << "ENOMEM" << endl;
-    else if (errno == EACCES)
-      cout << "EACCES" << endl;
-    else if (errno == EINVAL)
-      cout << "EINVAL" << endl;
-    else if (errno == EPIPE)
-      cout << "EPIPE" << endl;
-    else
-      cout << "unknown error: " << errno << endl;
-
+    if (_debug) {
+      if (errno == EBADF)
+	cout << "EBADF" << endl;
+      else if (errno == ENOTSOCK)
+	cout << "ENOTSOCK" << endl;
+      else if (errno == EFAULT)
+	cout << "EFAULT" << endl;
+      else if (errno == EMSGSIZE)
+	cout << "EMSGSIZE" << endl;
+      else if (errno == EWOULDBLOCK)
+	cout << "EWOULDBLOCK" << endl;
+      else if (errno == EAGAIN)
+	cout << "EAGAIN" << endl;
+      else if (errno == ENOBUFS)
+	cout << "ENOBUFS" << endl;
+      else if (errno == EINTR)
+	cout << "EINTR" << endl;
+      else if (errno == ENOMEM)
+	cout << "ENOMEM" << endl;
+      else if (errno == EACCES)
+	cout << "EACCES" << endl;
+      else if (errno == EINVAL)
+	cout << "EINVAL" << endl;
+      else if (errno == EPIPE)
+	cout << "EPIPE" << endl;
+      else
+	cout << "unknown error: " << errno << endl;
+    }
     syslog(LOG_ERR, "wan_lb: error on sending icmp packet: %d", errno);
   }
 }
@@ -308,9 +318,9 @@ LBPathTest::receive()
       icmp_hdr = (struct icmphdr *)(resp_buf + sizeof(iphdr));
       if (icmp_hdr->type == ICMP_ECHOREPLY)
       {
-#ifdef DEBUG
-	cout << "LBPathTest::receive(): " << endl;
-#endif
+	if (_debug) {
+	  cout << "LBPathTest::receive(): " << endl;
+	}
 	//process packet data
 	  char* data;
 	  int id = 0; 

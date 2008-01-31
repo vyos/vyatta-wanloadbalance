@@ -69,7 +69,8 @@ ip ro fl ca
  *
  *
  **/
-LBDecision::LBDecision()
+LBDecision::LBDecision(bool debug) : 
+  _debug(debug)
 {
 
 }
@@ -151,18 +152,18 @@ iptables -t mangle -A PREROUTING -i eth0 -j MARK --set-mark 2
 void
 LBDecision::run(LBData &lb_data)
 {
-#ifdef DEBUG
-  cout << "LBDecision::run(), starting decision" << endl;
-#endif
+  if (_debug) {
+    cout << "LBDecision::run(), starting decision" << endl;
+  }
 
   //first determine if we need to alter the rule set
   if (!lb_data.state_changed()) {
     return;
   }
 
-#ifdef DEBUG
-  cout << "LBDecision::run(), state changed, applying new rule set" << endl;
-#endif
+  if (_debug) {
+    cout << "LBDecision::run(), state changed, applying new rule set" << endl;
+  }
 
   //then if we do, flush all
   execute("iptables -t mangle -F PREROUTING");
@@ -206,6 +207,8 @@ LBDecision::run(LBData &lb_data)
 void
 LBDecision::shutdown()
 {
+  cout << "LBDecision::shutdown(): " << _iface_mark_coll.size() << endl;
+
   char buf[20];
 
   //then if we do, flush all
@@ -215,6 +218,9 @@ LBDecision::shutdown()
   InterfaceMarkIter iter = _iface_mark_coll.begin();
   while (iter != _iface_mark_coll.end()) {
     sprintf(buf,"%d",iter->second);
+
+    cout << "LBDecision::shutdown(): removing " << buf << endl;
+
     execute(string("ip rule del fwmark ") + buf);
     ++iter;
   }
@@ -227,19 +233,23 @@ LBDecision::shutdown()
 void
 LBDecision::execute(string cmd)
 {
-#ifdef DEBUG
-  cout << "LBDecision::execute(): applying command to system: " << cmd << endl;
-#endif 
+  if (_debug) {
+    cout << "LBDecision::execute(): applying command to system: " << cmd << endl;
+  }
   
   FILE *f = popen(cmd.c_str(), "w");
   if (f) {
     if (pclose(f) != 0) {
-      cerr << "LBDecision::execute(): error executing command: " << cmd << endl;
+      if (_debug) {
+	cerr << "LBDecision::execute(): error executing command: " << cmd << endl;
+      }
       syslog(LOG_ERR, "Error executing system command: %s", cmd.c_str());
     }
   }
   else {
-    cerr << "LBDecision::execute(): error executing command: " << cmd << endl;
+    if (_debug) {
+      cerr << "LBDecision::execute(): error executing command: " << cmd << endl;
+    }
     syslog(LOG_ERR, "Error executing system command: %s", cmd.c_str());
   }
 }
@@ -252,9 +262,9 @@ LBDecision::get_new_weights(LBData &data, LBRule &rule)
   int ct = 1;
   LBRule::InterfaceDistIter iter = rule._iface_dist_coll.begin();
   while (iter != rule._iface_dist_coll.end()) {
-#ifdef DEBUG
-    cout << "LBDecision::get_new_weights(): " << iter->first << " is active: " << (data.is_active(iter->first) ? "true" : "false") << endl;
-#endif
+    if (_debug) {
+      cout << "LBDecision::get_new_weights(): " << iter->first << " is active: " << (data.is_active(iter->first) ? "true" : "false") << endl;
+    }
     if (data.is_active(iter->first)) {
       weights.insert(pair<int,float>(ct,iter->second));
       group += iter->second;

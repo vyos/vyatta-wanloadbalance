@@ -41,7 +41,7 @@ public:
   typedef vector<string>::iterator ConfIter;
 
 public:
-  LBDataFactory();
+  LBDataFactory(bool debug);
   ~LBDataFactory();
 
   bool
@@ -82,6 +82,7 @@ private:
   process_rule_interface(const string &key, const string &value);
 
 private:
+  bool _debug;
   LBHealth _lb_health;
   LBRule _lb_rule;
   LBData _lb_data;

@@ -3,37 +3,19 @@
 declare progname=${0##*/}
 declare action=$1; shift
 
-pid_dir=/var/run/vyatta/quagga
-
 conf=$1; shift
 
 
 test -x $bb  || exit 0
 
-running_pid ()
-{
-    pidof $bb | while read pid ; do
-	f=$(tr '\000' '\t' < /proc/$pid/cmdline 2>/dev/null | cut -f2)
-	if [ "$f" == wan_lb ] ; then
-	    echo $pid
-	    return
-	fi
-    done
-    false
-}
-
 start ()
 {
-    local -i pid=$( running_pid )
-
-    [ $pid -ne 0 ] && return
-    /opt/vyatta/sbin/wan_lb -f $conf -d -i $pid_dir/wlb.pid
+    /opt/vyatta/sbin/wan_lb -f $conf -d -i /var/run/vyatta/wlb.pid
 }
 
 stop ()
 {
-    local -i pid=$( running_pid )
-    [ $pid -ne 0 ] && kill $pid
+    kill -s SIGTERM $( cat /var/run/vyatta/wlb.pid )
 }
 
 case "$action" in

@@ -35,11 +35,14 @@ using namespace std;
 class LBOutput
 {
 public:
-  LBOutput() {}
+  LBOutput(bool debug) : _debug(debug) {}
   ~LBOutput() {}
 
   void
   write(const LBData &lbdata);
+
+private:
+  bool _debug;
 
 };
 #endif //__LBOUTPUT_HH__
