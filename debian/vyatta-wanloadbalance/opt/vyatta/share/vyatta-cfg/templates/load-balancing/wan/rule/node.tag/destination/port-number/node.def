@@ -1,3 +1,7 @@
 tag:
 type: u32
+syntax: $(@) >= 0 && $(@) <= 65535; "port number must be between 1 and 65535"
 help: "Port number"
+#comp_help: possible completions:
+#<1-65535>	    Port number
+

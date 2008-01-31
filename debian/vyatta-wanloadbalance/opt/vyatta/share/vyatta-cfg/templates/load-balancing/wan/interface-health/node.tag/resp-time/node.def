@@ -1,2 +1,5 @@
 type: u32
-help: "response time envelope"
+syntax: $(@) >= 0 && $(@) <= 30; "response must be between 1 and 30 seconds"
+help: "Ping Response Time (seconds)"
+#comp_help: possible completions:
+#<1-30>	    Set Response time (seconds)

@@ -1,2 +1,5 @@
 type: u32
+syntax: $(@) >= 0 && $(@) <= 255; "Interface weight must be between 1 and 255"
 help: "Load-balance weight"
+#comp_help: possible completions:
+#<1-255>    Set Interface weight

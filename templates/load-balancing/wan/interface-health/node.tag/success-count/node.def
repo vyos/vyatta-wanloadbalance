@@ -1,2 +1,6 @@
 type: u32
-help: "success count"
+syntax: $(@) >= 0 && $(@) <= 10; "success count must be between 1 and 10"
+help: "Success count"
+#comp_help: possible completions:
+#<1-10>	    Set Success count
+

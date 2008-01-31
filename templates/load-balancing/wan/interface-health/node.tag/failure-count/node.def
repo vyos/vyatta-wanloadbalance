@@ -1,2 +1,5 @@
 type: u32
-help: "failure count"
+syntax: $(@) >= 0 && $(@) <= 10; "failure count must be between 1-10"
+help: "Failure count"
+#comp_help: possible completions:
+#<1-10>	    Set Failure count

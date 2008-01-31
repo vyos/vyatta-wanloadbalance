@@ -25,6 +25,8 @@
  * **** End License ****
  *
  */
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <signal.h>
 #include <syslog.h>
 #include <stdio.h>
@@ -32,13 +34,16 @@
 #include "loadbalance.hh"
 
 LoadBalance *g_lb = NULL;
+pid_t pid_output (const char *path);
 
 
 static void usage()
 {
-  cout << "lb -fh" << endl;
+  cout << "lb -ftidh" << endl;
   cout << "-f [file] configuration file" << endl;
   cout << "-t load configuration file only and exit" << endl;
+  cout << "-i specify location of pid directory" << endl;
+  cout << "-d run as daemon" << endl;
   cout << "-h help" << endl;
 
 }
@@ -65,11 +70,12 @@ static void sig_user(int signo)
 int main(int argc, char* argv[])
 {
   int ch;
-  bool config_debug_mode = false;
+  bool config_debug_mode = false, daemon = false;
+  string pid_path;
   string c_file;
 
   //grab inputs
-  while ((ch = getopt(argc, argv, "f:ht")) != -1) {
+  while ((ch = getopt(argc, argv, "f:hti:d")) != -1) {
     switch (ch) {
     case 'f':
       c_file = optarg;
@@ -80,11 +86,18 @@ int main(int argc, char* argv[])
     case 't':
       config_debug_mode = true;
       break;
+    case 'd':
+      daemon = true;
+      break;
+    case 'i':
+      pid_path = optarg;
+      break;
     default:
       usage();
       exit(0);
     }
   }
+
 
   //parse conf file
   if (c_file.empty()) {
@@ -92,6 +105,16 @@ int main(int argc, char* argv[])
     exit(0);
   }
  
+  if (daemon) {
+    if (fork() != 0) {
+      exit(0);
+    }
+  }
+
+  if (pid_path.empty() == false) {
+    pid_output(pid_path.c_str());
+  }
+
   g_lb = new LoadBalance();
   
   bool success = g_lb->set_conf(c_file);
@@ -135,4 +158,35 @@ int main(int argc, char* argv[])
     g_lb->sleep();
   } while (g_lb->start_cycle());
   exit(0);
+}
+
+/**
+ *
+ *below borrowed from quagga library.
+ **/
+#define PIDFILE_MASK 0644
+pid_t
+pid_output (const char *path)
+{
+  FILE *fp;
+  pid_t pid;
+  mode_t oldumask;
+
+  pid = getpid();
+
+  oldumask = umask(0777 & ~PIDFILE_MASK);
+  fp = fopen (path, "w");
+  if (fp != NULL) 
+    {
+      fprintf (fp, "%d\n", (int) pid);
+      fclose (fp);
+      umask(oldumask);
+      return pid;
+    }
+  /* XXX Why do we continue instead of exiting?  This seems incompatible
+     with the behavior of the fcntl version below. */
+  syslog(LOG_ERR,"Can't fopen pid lock file %s, continuing",
+            path);
+  umask(oldumask);
+  return -1;
 }

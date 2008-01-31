@@ -3,6 +3,8 @@
 declare progname=${0##*/}
 declare action=$1; shift
 
+pid_dir=/var/run/vyatta/quagga
+
 conf=$1; shift
 
 
@@ -12,7 +14,7 @@ running_pid ()
 {
     pidof $bb | while read pid ; do
 	f=$(tr '\000' '\t' < /proc/$pid/cmdline 2>/dev/null | cut -f2)
-	if [ "$f" == wlb ] ; then
+	if [ "$f" == wan_lb ] ; then
 	    echo $pid
 	    return
 	fi
@@ -25,7 +27,7 @@ start ()
     local -i pid=$( running_pid )
 
     [ $pid -ne 0 ] && return
-    sh -c wlb -f $conf
+    /opt/vyatta/sbin/wan_lb -f $conf -d -i $pid_dir/wlb.pid
 }
 
 stop ()
