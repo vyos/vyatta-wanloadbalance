@@ -4,18 +4,21 @@ declare progname=${0##*/}
 declare action=$1; shift
 
 conf=$1; shift
-
+pid=/var/run/vyatta/wlb.pid
 
 test -x $bb  || exit 0
 
 start ()
 {
-    /opt/vyatta/sbin/wan_lb -f $conf -d -i /var/run/vyatta/wlb.pid
+    /opt/vyatta/sbin/wan_lb -f $conf -d -i $pid
 }
 
 stop ()
 {
-    kill -s SIGTERM $( cat /var/run/vyatta/wlb.pid )
+    if [ -f $pid ]
+    then
+	kill -s SIGTERM $( cat $pid ) 2>/dev/null
+    fi
 }
 
 case "$action" in

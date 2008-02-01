@@ -1,0 +1,2 @@
+help: Show wan load-balancing status
+run:  cat /var/load-balance/wlb.out

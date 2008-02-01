@@ -35,7 +35,7 @@ using namespace std;
 class LBOutput
 {
 public:
-  LBOutput(bool debug) : _debug(debug) {}
+  LBOutput(bool debug, string &output_path) : _debug(debug), _output_path(output_path) {}
   ~LBOutput() {}
 
   void
@@ -43,6 +43,6 @@ public:
 
 private:
   bool _debug;
-
+  string _output_path;
 };
 #endif //__LBOUTPUT_HH__

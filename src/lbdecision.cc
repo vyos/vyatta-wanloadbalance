@@ -207,8 +207,6 @@ LBDecision::run(LBData &lb_data)
 void
 LBDecision::shutdown()
 {
-  cout << "LBDecision::shutdown(): " << _iface_mark_coll.size() << endl;
-
   char buf[20];
 
   //then if we do, flush all
@@ -218,8 +216,6 @@ LBDecision::shutdown()
   InterfaceMarkIter iter = _iface_mark_coll.begin();
   while (iter != _iface_mark_coll.end()) {
     sprintf(buf,"%d",iter->second);
-
-    cout << "LBDecision::shutdown(): removing " << buf << endl;
 
     execute(string("ip rule del fwmark ") + buf);
     ++iter;

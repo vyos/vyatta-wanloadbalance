@@ -27,6 +27,7 @@
  */
 #include <sys/time.h>
 #include <time.h>
+#include <syslog.h>
 
 #include <iostream>
 
@@ -39,15 +40,45 @@ LBOutput::write(const LBData &lbdata)
   timeval tv;
   gettimeofday(&tv,NULL);
 
+  string wlb_out = _output_path + "/wlb.out";
+  string wlb_app_out = _output_path + "/wlb_app.out";
+
+  //open file
+  FILE *fp = fopen(wlb_out.c_str(), "w");
+  if (fp == NULL) {
+    if (_debug) {
+      cerr << "Error opening output file: " << wlb_out << endl;
+    }
+    syslog(LOG_ERR, "wan_lb: error ordering output file %s", wlb_out.c_str());
+    return;
+  }
+
   //dump out the health data
   LBData::InterfaceHealthConstIter iter = lbdata._iface_health_coll.begin();
   while (iter != lbdata._iface_health_coll.end()) {
-    cout << iter->first << " "; //interface
-    cout << string(iter->second._is_active ? "true" : "false") << " "; //status
-    cout << tv.tv_sec - iter->second._last_success << " "; //last success
-    cout << tv.tv_sec - iter->second._last_failure << " "; //last failure
+    if (_debug) {
+      cout << iter->first << " "; //interface
+      cout << string(iter->second._is_active ? "true" : "false") << " "; //status
+      cout << tv.tv_sec - iter->second._last_success << " "; //last success
+      cout << tv.tv_sec - iter->second._last_failure << " "; //last failure
+      cout << endl;
+    }
     ++iter;
   }
+
+  string line("Interface\tStatus\tLast Success\tLast Failure\tNum Failure\n");
+  fputs(line.c_str(),fp);
+  iter = lbdata._iface_health_coll.begin();
+  while (iter != lbdata._iface_health_coll.end()) {
+    char buf1[256],buf2[256];
+    sprintf(buf1,"%ld",iter->second._last_success);
+    sprintf(buf2,"%ld",iter->second._last_failure);
+    line = string(iter->first) + "\t" + string(iter->second._is_active?"true":"false") + "\t" + buf1 + "\t" + buf2 + "\n";
+    fputs(line.c_str(),fp);
+    ++iter;
+  }
+  fclose(fp);
+
 
   //dump out the application data
   LBData::LBRuleConstIter r_iter = lbdata._lb_rule_coll.begin();

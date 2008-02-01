@@ -44,6 +44,7 @@ static void usage()
   cout << "-t load configuration file only and exit" << endl;
   cout << "-v print debug output" << endl;
   cout << "-i specify location of pid directory" << endl;
+  cout << "-o specify location of output directory" << endl;
   cout << "-d run as daemon" << endl;
   cout << "-h help" << endl;
 
@@ -73,11 +74,12 @@ int main(int argc, char* argv[])
   int ch;
   bool debug = false;
   bool config_debug_mode = false, daemon = false;
-  string pid_path;
+  string pid_path = "/var/run";
+  string output_path = "/var/load-balance";
   string c_file;
 
   //grab inputs
-  while ((ch = getopt(argc, argv, "f:hti:dv")) != -1) {
+  while ((ch = getopt(argc, argv, "f:hti:o:dv")) != -1) {
     switch (ch) {
     case 'f':
       c_file = optarg;
@@ -90,6 +92,9 @@ int main(int argc, char* argv[])
       break;
     case 'i':
       pid_path = optarg;
+      break;
+    case 'o':
+      output_path = optarg;
       break;
     case 'd':
       daemon = true;
@@ -120,7 +125,7 @@ int main(int argc, char* argv[])
     pid_output(pid_path.c_str());
   }
 
-  g_lb = new LoadBalance(debug);
+  g_lb = new LoadBalance(debug, output_path);
   
   bool success = g_lb->set_conf(c_file);
   if (success == false) {

@@ -45,7 +45,7 @@ using namespace std;
 class LoadBalance
 {
  public:
-  LoadBalance(bool debug);
+  LoadBalance(bool debug, string &output_path);
   ~LoadBalance();
 
   bool set_conf(const string &filename);

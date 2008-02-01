@@ -34,12 +34,12 @@ using namespace std;
 /**
  *
  **/
-LoadBalance::LoadBalance(bool debug) :
+LoadBalance::LoadBalance(bool debug, string &output_path) :
   _debug(debug),
   _lbdata_factory(debug),
   _ph(debug),
   _decision(debug),
-  _output(debug),
+  _output(debug, output_path),
   _cycle_interval(5000)
 {
 }
