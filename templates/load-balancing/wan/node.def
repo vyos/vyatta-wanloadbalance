@@ -1,4 +1,4 @@
-help: "wan load-balance configuration"
-commit: exec "\\${vyatta_sbindir}/vyatta-wanloadbalance.pl"
+help: wan load-balance configuration
+commit:expression: exec "${vyatta_sbindir}/vyatta-wanloadbalance.pl"
 
 

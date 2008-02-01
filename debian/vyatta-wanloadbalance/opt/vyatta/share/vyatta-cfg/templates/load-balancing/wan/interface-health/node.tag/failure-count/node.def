@@ -1,5 +1,6 @@
 type: u32
-syntax: $(@) >= 0 && $(@) <= 10; "failure count must be between 1-10"
-help: "Failure count"
-#comp_help: possible completions:
-#<1-10>	    Set Failure count
+default: 1
+syntax:expression: $VAR(@) >= 0 && $VAR(@) <= 10; "failure count must be between 1-10"
+help: Failure count
+comp_help: possible completions:
+<1-10>	    Set Failure count

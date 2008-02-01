@@ -9,4 +9,7 @@ sysconfdir=${prefix}/etc
 mkdir -p $LOADBALANCE_DIR
 chmod 0755 $LOADBALANCE_DIR
 
+rm -f /etc/init.d/vyatta-wanloadbalance 2>/dev/null
+ln -s /opt/vyatta/sbin/vyatta-wanloadbalance.init /etc/init.d/vyatta-wanloadbalance 2>/dev/null
+
 #nothing
