@@ -88,15 +88,19 @@ class LBHealth {
     _ping_resp_time(0),
     _hresults(10),
     _is_active(true),
-    _state_changed(true),
-    _last_success(0),
-    _last_failure(0)
+    _state_changed(true)
       {}
 
   void put(int rtt);
 
   bool 
-  state_changed() {return _state_changed;}
+  state_changed() const {return _state_changed;}
+
+  unsigned long
+  last_success() const {return _hresults._last_success;}
+
+  unsigned long
+  last_failure() const {return _hresults._last_failure;}
 
   int _success_ct;
   int _failure_ct;
@@ -105,8 +109,6 @@ class LBHealth {
   LBHealthHistory _hresults;
   bool _is_active;
   bool _state_changed;
-  unsigned long _last_success;
-  unsigned long _last_failure;
 };
 
 

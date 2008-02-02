@@ -59,8 +59,8 @@ LBOutput::write(const LBData &lbdata)
     if (_debug) {
       cout << iter->first << " "; //interface
       cout << string(iter->second._is_active ? "true" : "false") << " "; //status
-      cout << tv.tv_sec - iter->second._last_success << " "; //last success
-      cout << tv.tv_sec - iter->second._last_failure << " "; //last failure
+      cout << tv.tv_sec - iter->second.last_success() << " "; //last success
+      cout << tv.tv_sec - iter->second.last_failure() << " "; //last failure
       cout << endl;
     }
     ++iter;
@@ -69,11 +69,105 @@ LBOutput::write(const LBData &lbdata)
   string line("Interface\tStatus\tLast Success\tLast Failure\tNum Failure\n");
   fputs(line.c_str(),fp);
   iter = lbdata._iface_health_coll.begin();
+
+  timeval cur_t;
+  gettimeofday(&cur_t,NULL);
+
   while (iter != lbdata._iface_health_coll.end()) {
-    char buf1[256],buf2[256];
-    sprintf(buf1,"%ld",iter->second._last_success);
-    sprintf(buf2,"%ld",iter->second._last_failure);
-    line = string(iter->first) + "\t" + string(iter->second._is_active?"true":"false") + "\t" + buf1 + "\t" + buf2 + "\n";
+    line = string(iter->first) + "\t\t" + string(iter->second._is_active?"active":"failed") + "\t";
+    char btmp[256];
+    string time_buf;
+    
+    unsigned long diff_t;
+    if (iter->second.last_success() > 0) {
+      diff_t = cur_t.tv_sec - iter->second.last_success();
+    }
+    else {
+      diff_t = 0;
+    }
+
+    unsigned long days,hours,mins,secs;
+
+    days = diff_t / (60*60*24);
+    diff_t -= days * (60*60*24);
+    if (days > 0) {
+      sprintf(btmp,"%ld",days);
+      time_buf += string(btmp) + "d";
+    }
+
+    hours = diff_t / (60*60);
+    diff_t -= hours * (60*60);
+    if (hours > 0) {
+      sprintf(btmp,"%ld",hours);
+      time_buf += string(btmp) + "h";
+    }
+
+    mins = diff_t / (60);
+    diff_t -= mins * (60);
+    if (mins > 0) {
+      sprintf(btmp,"%ld",mins);
+      time_buf += string(btmp) + "m";
+    }
+
+    secs = diff_t;
+    if (secs > 0) {
+      sprintf(btmp,"%ld",secs);
+      time_buf += string(btmp) + "s";
+    }
+
+    if (time_buf.empty() == true) {
+      line += string("0s") + string("\t\t");
+    }
+    else {
+      line += time_buf + string("\t");
+    }
+
+    time_buf = "";
+
+    if (iter->second.last_success() > 0) {
+      diff_t = cur_t.tv_sec - iter->second.last_failure();
+    }
+    else {
+      diff_t = 0;
+    }
+
+    days = diff_t / (60*60*24);
+    diff_t -= days * (60*60*24);
+    if (days > 0) {
+      sprintf(btmp,"%ld",days);
+      time_buf += string(btmp) + "d";
+    }
+
+    hours = diff_t / (60*60);
+    diff_t -= hours * (60*60);
+    if (hours > 0) {
+      sprintf(btmp,"%ld",hours);
+      time_buf += string(btmp) + "h";
+    }
+
+    mins = diff_t / (60);
+    diff_t -= mins * (60);
+    if (mins > 0) {
+      sprintf(btmp,"%ld",mins);
+      time_buf += string(btmp) + "m";
+    }
+
+    secs = diff_t;
+    if (secs > 0) {
+      sprintf(btmp,"%ld",secs);
+      time_buf += string(btmp) + "s";
+    }
+
+    if (time_buf.empty() == true) {
+      line += string("0s") + string("\t\t");
+    }
+    else {
+      line += time_buf + string("\t");
+    }
+
+
+    line += "\n";
+
     fputs(line.c_str(),fp);
     ++iter;
   }
