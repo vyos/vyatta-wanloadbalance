@@ -1,3 +1,5 @@
 tag:
-type: txt
+type: u32
 help: Rule number
+
+

@@ -85,7 +85,12 @@ sub write_rules {
 	if (defined $option) {
 	    print FILE_LCK "\tprotocol " . $option . "\n"
 	}
-	
+
+	my $protocol = "all";
+	if (defined $option) {
+	    $protocol = $option;
+	}
+
 	#destination
 	print FILE_LCK "\tdestination {\n";
 	$option = $config->returnValue("$rule destination address");
@@ -101,13 +106,22 @@ sub write_rules {
 	$config->setLevel("load-balancing wan rule $rule destination port-number");
 	my @dport_nums = $config->listNodes();
 	foreach my $dport_num (@dport_nums) {
+	    if ($protocol ne "tcp" && $protocol ne "udp") {
+		print "Please specify protocol tcp or udp when configuring ports\n";
+		exit 2;
+	    }
+
 	    print FILE_LCK "\t\tport-number " . $dport_num . "\n";
 	}
 
 	$config->setLevel("load-balancing wan rule $rule destination port-name");
 	my @dport_names = $config->listNodes();
 	foreach my $dport_name (@dport_names) {
-	    print FILE_LCK "\t\tport-number " . $dport_name . "\n";
+	    if ($protocol ne "tcp" && $protocol ne "udp") {
+		print "Please specify protocol tcp or udp when configuring ports\n";
+		exit 2;
+	    }
+	    print FILE_LCK "\t\tport-name " . $dport_name . "\n";
 	}
 	print FILE_LCK "\t}\n";
 
@@ -126,13 +140,21 @@ sub write_rules {
 	$config->setLevel("load-balancing wan rule $rule source port-number");
 	my @sport_nums = $config->listNodes();
 	foreach my $sport_num (@sport_nums) {
+	    if ($protocol ne "tcp" && $protocol ne "udp") {
+		print "Please specify protocol tcp or udp when configuring ports\n";
+		exit 2;
+	    }
 	    print FILE_LCK "\t\tport-number " . $sport_num . "\n";
 	}
 
 	$config->setLevel("load-balancing wan rule $rule source port-name");
 	my @sport_names = $config->listNodes();
 	foreach my $sport_name (@sport_names) {
-	    print FILE_LCK "\t\tport-number " . $sport_name . "\n";
+	    if ($protocol ne "tcp" && $protocol ne "udp") {
+		print "Please specify protocol tcp or udp when configuring ports\n";
+		exit 2;
+	    }
+	    print FILE_LCK "\t\tport-name " . $sport_name . "\n";
 	}
 	print FILE_LCK "\t}\n";
 

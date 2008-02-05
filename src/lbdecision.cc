@@ -190,6 +190,7 @@ LBDecision::run(LBData &lb_data)
       sprintf(fbuf,"%f",w_iter->second);
       sprintf(dbuf,"%d",w_iter->first);
       execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf);
+
       ++w_iter;
     }
     //last one is special case, the catch all rule
@@ -317,6 +318,13 @@ LBDecision::get_application_cmd(LBRule &rule)
     }
     else if (rule._s_port_num.empty() == false) {
       filter += "--source-port " + rule._s_port_num + " ";
+    }
+
+    if (rule._d_port_name.empty() == false) {
+      filter += "--destination-port " + rule._d_port_name + " ";
+    }
+    else if (rule._d_port_num.empty() == false) {
+      filter += "--destination-port " + rule._d_port_num + " ";
     }
   }
 

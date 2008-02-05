@@ -75,6 +75,8 @@ public:
   unsigned long _last_success;
   unsigned long _last_failure;
 
+  unsigned long _failure_count;
+
   static int _buffer_size;
   vector<int> _resp_data;
   int _index;
@@ -101,6 +103,9 @@ class LBHealth {
 
   unsigned long
   last_failure() const {return _hresults._last_failure;}
+
+  unsigned long
+  failure_count() const {return _failure_ct;}
 
   int _success_ct;
   int _failure_ct;

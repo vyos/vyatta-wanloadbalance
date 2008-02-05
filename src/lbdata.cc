@@ -67,6 +67,7 @@ LBHealth::put(int rtt)
 LBHealthHistory::LBHealthHistory(int buffer_size) :
   _last_success(0),
   _last_failure(0),
+  _failure_count(0),
   _index(0)
 {
   _resp_data.resize(10);
@@ -90,8 +91,10 @@ LBHealthHistory::push(int rtt)
 
   if (rtt == -1) {
     _last_failure = tv.tv_sec;
+    ++_failure_count;
   }
   else {
+    _failure_count = 0;
     _last_success = tv.tv_sec;
   }
 
@@ -115,9 +118,10 @@ LBHealthHistory::push(int rtt)
       ++ct;
     }
     else {
-      return ct;
+      break;
     }
   }
+  
   return ct;
 }
 

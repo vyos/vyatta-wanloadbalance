@@ -89,42 +89,43 @@ LBOutput::write(const LBData &lbdata)
     unsigned long days,hours,mins,secs;
 
     days = diff_t / (60*60*24);
-    diff_t -= days * (60*60*24);
     if (days > 0) {
+      diff_t -= days * (60*60*24);
       sprintf(btmp,"%ld",days);
       time_buf += string(btmp) + "d";
     }
 
     hours = diff_t / (60*60);
-    diff_t -= hours * (60*60);
     if (hours > 0) {
+      diff_t -= hours * (60*60);
       sprintf(btmp,"%ld",hours);
       time_buf += string(btmp) + "h";
     }
 
     mins = diff_t / (60);
-    diff_t -= mins * (60);
     if (mins > 0) {
+      diff_t -= mins * (60);
       sprintf(btmp,"%ld",mins);
       time_buf += string(btmp) + "m";
     }
 
     secs = diff_t;
-    if (secs > 0) {
-      sprintf(btmp,"%ld",secs);
-      time_buf += string(btmp) + "s";
-    }
+    sprintf(btmp,"%ld",secs);
+    time_buf += string(btmp) + "s";
 
-    if (time_buf.empty() == true) {
-      line += string("0s") + string("\t\t");
+    if (iter->second.last_success() == 0) {
+      line += string("n/a") + string("\t\t");
     }
     else {
       line += time_buf + string("\t");
+      if (time_buf.size() < 6) {
+	line += string("\t");
+      }
     }
 
     time_buf = "";
 
-    if (iter->second.last_success() > 0) {
+    if (iter->second.last_failure() > 0) {
       diff_t = cur_t.tv_sec - iter->second.last_failure();
     }
     else {
@@ -132,39 +133,43 @@ LBOutput::write(const LBData &lbdata)
     }
 
     days = diff_t / (60*60*24);
-    diff_t -= days * (60*60*24);
     if (days > 0) {
+      diff_t -= days * (60*60*24);
       sprintf(btmp,"%ld",days);
       time_buf += string(btmp) + "d";
     }
 
     hours = diff_t / (60*60);
-    diff_t -= hours * (60*60);
     if (hours > 0) {
+      diff_t -= hours * (60*60);
       sprintf(btmp,"%ld",hours);
       time_buf += string(btmp) + "h";
     }
 
     mins = diff_t / (60);
-    diff_t -= mins * (60);
     if (mins > 0) {
+      diff_t -= mins * (60);
       sprintf(btmp,"%ld",mins);
       time_buf += string(btmp) + "m";
     }
 
     secs = diff_t;
-    if (secs > 0) {
-      sprintf(btmp,"%ld",secs);
-      time_buf += string(btmp) + "s";
-    }
+    sprintf(btmp,"%ld",secs);
+    time_buf += string(btmp) + "s";
 
-    if (time_buf.empty() == true) {
-      line += string("0s") + string("\t\t");
+    if (iter->second.last_failure() == 0) {
+      line += string("n/a") + string("\t\t");
     }
     else {
       line += time_buf + string("\t");
+      if (time_buf.size() < 6) {
+	line += string("\t");
+      }
     }
 
+    //now failure count
+    sprintf(btmp, "%ld", iter->second._hresults._failure_count);
+    line += string(btmp);
 
     line += "\n";
 

@@ -1,3 +1,4 @@
+help: "protocol"
 type: txt
-help: protocol
-
+default: "all"
+syntax:expression: $VAR(@) in "all", "tcp", "udp", "icmp"; "must be (all, tcp, udp, icmp)"
