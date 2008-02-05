@@ -232,6 +232,7 @@ LBDecision::execute(string cmd)
 {
   if (_debug) {
     cout << "LBDecision::execute(): applying command to system: " << cmd << endl;
+    syslog(LOG_DEBUG, "LBDecision::execute(): applying command to system: %s",cmd.c_str());
   }
   
   FILE *f = popen(cmd.c_str(), "w");

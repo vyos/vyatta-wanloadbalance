@@ -1,0 +1,2 @@
+help: Show wan load-balancing statistics
+run:  iptables -L PREROUTING -t mangle -vv
