@@ -50,13 +50,11 @@ class LBRule {
   string _proto;
   string _s_addr;
   string _s_net;
-  string _s_port_num;
-  string _s_port_name;
+  string _s_port;
 
   string _d_addr;
   string _d_net;
-  string _d_port_num;
-  string _d_port_name;
+  string _d_port;
 
   InterfaceDistColl _iface_dist_coll;
 };

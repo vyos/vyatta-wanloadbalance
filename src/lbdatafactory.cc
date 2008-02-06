@@ -290,11 +290,8 @@ LBDataFactory::process_rule_source(const string &key, const string &value)
   else if (key == "network") {
     _rule_iter->second._s_net = value;
   }
-  else if (key == "port-name") {
-    _rule_iter->second._s_port_name = value;
-  }
-  else if (key == "port-number") {
-    _rule_iter->second._s_port_num = value;
+  else if (key == "port") {
+    _rule_iter->second._s_port = value;
   }
 }
 
@@ -314,11 +311,8 @@ LBDataFactory::process_rule_destination(const string &key, const string &value)
   else if (key == "network") {
     _rule_iter->second._d_net = value;
   }
-  else if (key == "port-name") {
-    _rule_iter->second._d_port_name = value;
-  }
-  else if (key == "port-number") {
-    _rule_iter->second._d_port_num = value;
+  else if (key == "port") {
+    _rule_iter->second._d_port = value;
   }
 }
 

@@ -314,18 +314,12 @@ LBDecision::get_application_cmd(LBRule &rule)
       filter += "--destination " + rule._d_net + " ";
     }
 
-    if (rule._s_port_name.empty() == false) {
-      filter += "--source-port " + rule._s_port_name + " ";
-    }
-    else if (rule._s_port_num.empty() == false) {
-      filter += "--source-port " + rule._s_port_num + " ";
+    if (rule._s_port.empty() == false) {
+      filter += "-m multiport --source-port " + rule._s_port + " ";
     }
 
-    if (rule._d_port_name.empty() == false) {
-      filter += "--destination-port " + rule._d_port_name + " ";
-    }
-    else if (rule._d_port_num.empty() == false) {
-      filter += "--destination-port " + rule._d_port_num + " ";
+    if (rule._d_port.empty() == false) {
+      filter += "-m multiport --destination-port " + rule._d_port + " ";
     }
   }
 
