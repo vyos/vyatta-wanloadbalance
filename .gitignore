@@ -32,4 +32,9 @@ libtool
 /src/cli_parse.h
 /src/cli_val.c
 /tools/rl_passwd
+debian/vyatta-wanloadbalance.postinst
+debian/vyatta-wanloadbalance.postrm
+debian/vyatta-wanloadbalance
+scripts/vyatta-wanloadbalance.init
+src/wan_lb
 
