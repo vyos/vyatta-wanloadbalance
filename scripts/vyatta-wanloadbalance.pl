@@ -74,26 +74,26 @@ sub write_health {
 sub write_rules {
     my $config = new VyattaConfig;
 
-    $config->setLevel("load-balancing wan rule");
+    $config->setLevel('load-balancing wan rule');
     my @rules = $config->listNodes();
     
     #destination
     foreach my $rule (@rules) {
 	print FILE_LCK "rule " . $rule . " {\n";
 	
-	my $option = $config->returnValue("$rule protocol");
-	if (defined $option) {
-	    print FILE_LCK "\tprotocol " . $option . "\n"
-	}
+	$config->setLevel('load-balancing wan rule');
 
-	my $protocol = "all";
-	if (defined $option) {
-	    $protocol = $option;
+	my $protocol = $config->returnValue("$rule protocol");
+	if (defined $protocol) {
+	    print FILE_LCK "\tprotocol " . $protocol . "\n"
+	}
+	else {
+	    $protocol = "";
 	}
 
 	#destination
 	print FILE_LCK "\tdestination {\n";
-	$option = $config->returnValue("$rule destination address");
+	my $option = $config->returnValue("$rule destination address");
 	if (defined $option) {
 	    print FILE_LCK "\t\taddress " . $option . "\n";
 	}
@@ -103,20 +103,21 @@ sub write_rules {
 	    print FILE_LCK "\t\tnetwork " . $option . "\n";
 	}
 
-	$config->setLevel("load-balancing wan rule $rule destination port");
-	my @dport = $config->listNodes();
-	foreach my $dp (@dport) {
+	$option = $config->returnValue("$rule destination port");
+	if (defined $option) {
 	    if ($protocol ne "tcp" && $protocol ne "udp") {
 		print "Please specify protocol tcp or udp when configuring ports\n";
 		exit 2;
 	    }
-
-	    print FILE_LCK "\t\tport " . $dp . "\n";
+	    print FILE_LCK "\t\tport " . $option . "\n";
 	}
 
 	print FILE_LCK "\t}\n";
 
 	#source
+	$config->setLevel('load-balancing wan rule');
+
+
 	print FILE_LCK "\tsource {\n";
 	$option = $config->returnValue("$rule source address");
 	if (defined $option) {
@@ -128,16 +129,14 @@ sub write_rules {
 	    print FILE_LCK "\t\tnetwork " . $option . "\n";
 	}
 
-	$config->setLevel("load-balancing wan rule $rule source port");
-	my @sports = $config->listNodes();
-	foreach my $sp (@sports) {
+	$option = $config->returnValue("$rule source port");
+	if (defined $option) {
 	    if ($protocol ne "tcp" && $protocol ne "udp") {
 		print "Please specify protocol tcp or udp when configuring ports\n";
 		exit 2;
 	    }
-	    print FILE_LCK "\t\tports " . $sp . "\n";
+	    print FILE_LCK "\t\tport " . $option . "\n";
 	}
-
 	print FILE_LCK "\t}\n";
 
 	#interface
