@@ -138,6 +138,8 @@ sub write_rules {
 	    print FILE_LCK "\t\tports " . $sp . "\n";
 	}
 
+	print FILE_LCK "\t}\n";
+
 	#interface
 	$config->setLevel("load-balancing wan rule $rule interface");
 	my @eths = $config->listNodes();
