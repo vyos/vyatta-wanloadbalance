@@ -15,6 +15,7 @@ ln -s /opt/vyatta/sbin/vyatta-wanloadbalance.init /etc/init.d/vyatta-wanloadbala
 #because I'm lazy and don't want to have to create an extra pkg for the show cmd
 mkdir -p /opt/vyatta/share/vyatta-op/templates/show/wan-load-balance/
 mv /opt/vyatta/share/vyatta-cfg/templates/show/wan-load-balance/node.def /opt/vyatta/share/vyatta-op/templates/show/wan-load-balance/.
+mv /opt/vyatta/share/vyatta-cfg/templates/show/wan-load-balance/status/node.def /opt/vyatta/share/vyatta-op/templates/show/wan-load-balance/status/.
 
 
 #nothing
