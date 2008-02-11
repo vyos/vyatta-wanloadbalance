@@ -1,6 +1,0 @@
-tag:
-type: u32
-syntax:expression: $VAR(@) >= 0 && $VAR(@) <= 65535; "port number must be between 1 and 65535"
-help: port number
-comp_help: possible completions:
-<1-65535>	    Port number
