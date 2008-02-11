@@ -28,8 +28,7 @@ AC_ARG_ENABLE([nostrip],
 AC_CONFIG_FILES(
 	[Makefile]
   [debian/vyatta-wanloadbalance.postinst]
-  [debian/vyatta-wanloadbalance.postrm]
-  [scripts/vyatta-wanloadbalance.init])
+  [debian/vyatta-wanloadbalance.postrm])
 
 AC_SUBST(NOSTRIP)
 

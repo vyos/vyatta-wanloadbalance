@@ -3,10 +3,11 @@
 LOADBALANCE_DIR=/var/load-balance
 
 
-prefix=@prefix@
-sysconfdir=@sysconfdir@
+prefix=/opt/vyatta
+sysconfdir=${prefix}/etc
 
 mkdir -p $LOADBALANCE_DIR
 chmod 0755 $LOADBALANCE_DIR
 
-#nothing
+update-rc.d -f vyatta-wanloadbalance defaults 2>/dev/null
+
