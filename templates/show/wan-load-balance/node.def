@@ -1,2 +1,9 @@
 help: Show wan load-balancing status
-run:  cat /var/load-balance/wlb.out
+run:  if [ -f /var/load-balance/wlb.out ] ; then 
+         cat /var/load-balance/wlb.out
+      else
+         echo wan load-balance is not configured
+      fi 
+
+
+
