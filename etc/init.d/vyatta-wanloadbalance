@@ -10,7 +10,11 @@ test -x $bb  || exit 0
 
 start ()
 {
-    /opt/vyatta/sbin/wan_lb -f $conf -d -i $pid
+    if [ -n "$conf" ] ; then
+	/opt/vyatta/sbin/wan_lb -f $conf -d -i $pid 2>/dev/null
+    else 
+	/opt/vyatta/sbin/wan_lb -f /var/load-balance/wlb.conf -d -i $pid 2>/dev/null
+    fi
 }
 
 stop ()
