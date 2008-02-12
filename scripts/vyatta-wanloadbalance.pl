@@ -163,8 +163,8 @@ my $conf_file = '/var/load-balance/wlb.conf';
 my $conf_lck_file = '/var/load-balance/wlb.conf.lck';
 
 #open file
-open FILE, "<$conf_file"; 
-open FILE_LCK, "+>$conf_lck_file";
+open(FILE, "<$conf_file") or die "Can't open wlb config file"; 
+open(FILE_LCK, "+>$conf_lck_file") or die "Can't open wlb lock file";
 
 write_health();
 
