@@ -1,4 +1,4 @@
 help: wan load-balance configuration
 commit:expression: exec "${vyatta_sbindir}/vyatta-wanloadbalance.pl"
-
+delete:expression: exec "/etc/init.d/vyatta-wanloadbalance stop"
 
