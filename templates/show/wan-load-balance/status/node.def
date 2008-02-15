@@ -1,6 +1,6 @@
 help: Show wan load-balancing statistics
 run:  if [ -f /var/load-balance/wlb.out ] ; then 
-         iptables -L PREROUTING -t mangle -vv
+         sudo ${vyatta_bindir}/sudo-users/iptables -L PREROUTING -t mangle -vv
       else
          echo wan load-balance is not configured
       fi 
