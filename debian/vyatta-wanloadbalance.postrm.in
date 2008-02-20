@@ -1,5 +1,4 @@
 #!/bin/bash
-which /etc/init.d/vyatta-wanloadbalance >/dev/null && /etc/init.d/vyatta-wanloadbalance stop
+which /opt/vyatta/sbin/vyatta-wanloadbalance >/dev/null && /opt/vyatta/sbin/vyatta-wanloadbalance stop
 
-update-rc.d -f vyatta-wanloadbalance remove
 

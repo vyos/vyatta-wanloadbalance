@@ -4,14 +4,11 @@ LOADBALANCE_DIR=/var/load-balance
 
 
 prefix=/opt/vyatta
-sysconfdir=${prefix}/etc
 
 mkdir -p $LOADBALANCE_DIR
 chmod 0755 $LOADBALANCE_DIR
 
 touch ${LOADBALANCE_DIR}/wlb.conf
-
-update-rc.d -f vyatta-wanloadbalance defaults 2>/dev/null
 
 #now move op cmds to correct location
 rm -fr /opt/vyatta/share/vyatta-op/templates/show/wan-load-balance/*

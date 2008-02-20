@@ -178,6 +178,6 @@ unlink($conf_lck_file);
 
 
 #finally kick the process
-system "/etc/init.d/vyatta-wanloadbalance restart $conf_file";
+system "/opt/vyatta/sbin/vyatta-wanloadbalance.init restart $conf_file";
 
 exit 0;
