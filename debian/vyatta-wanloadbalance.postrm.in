@@ -1,4 +1,4 @@
 #!/bin/bash
-which /opt/vyatta/sbin/vyatta-wanloadbalance >/dev/null && /opt/vyatta/sbin/vyatta-wanloadbalance stop
+which /opt/vyatta/sbin/vyatta-wanloadbalance.init >/dev/null && /opt/vyatta/sbin/vyatta-wanloadbalance.init stop
 
 
