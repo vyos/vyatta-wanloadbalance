@@ -59,7 +59,7 @@ sub write_health {
 	
 	$option = $config->returnValue("$ethNode resp-time");
 	if (defined $option) {
-	    print FILE_LCK "\t\tping-resp  " . $option . "\n";
+	    print FILE_LCK "\t\tping-resp  " . $option*1000 . "\n";
 	}
 	
 	$option = $config->returnValue("$ethNode success-count");
