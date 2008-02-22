@@ -93,17 +93,21 @@ sub write_rules {
 
 	#destination
 	print FILE_LCK "\tdestination {\n";
-	my $option = $config->returnValue("$rule destination address");
-	if (defined $option) {
-	    print FILE_LCK "\t\taddress " . $option . "\n";
+	my $daddr = $config->returnValue("$rule destination address");
+	if (defined $daddr) {
+	    print FILE_LCK "\t\taddress " . $daddr . "\n";
 	}
 
-	$option = $config->returnValue("$rule destination network");
-	if (defined $option) {
-	    print FILE_LCK "\t\tnetwork " . $option . "\n";
+	my $dnet = $config->returnValue("$rule destination network");
+	if (defined $dnet && !defined $daddr) {
+	    print FILE_LCK "\t\tnetwork " . $dnet . "\n";
+	}
+	elsif (defined $dnet && defined $daddr) {
+	    print "Please specify either destination address or source network\n";
+	    exit 2;
 	}
 
-	$option = $config->returnValue("$rule destination port");
+	my $option = $config->returnValue("$rule destination port");
 	if (defined $option) {
 	    if ($protocol ne "tcp" && $protocol ne "udp") {
 		print "Please specify protocol tcp or udp when configuring ports\n";
@@ -119,14 +123,18 @@ sub write_rules {
 
 
 	print FILE_LCK "\tsource {\n";
-	$option = $config->returnValue("$rule source address");
-	if (defined $option) {
-	    print FILE_LCK "\t\taddress " . $option . "\n";
+	my $saddr = $config->returnValue("$rule source address");
+	if (defined $saddr) {
+	    print FILE_LCK "\t\taddress " . $saddr . "\n";
 	}
 
-	$option = $config->returnValue("$rule source network");
-	if (defined $option) {
-	    print FILE_LCK "\t\tnetwork " . $option . "\n";
+	my $snet = $config->returnValue("$rule source network");
+	if (defined $snet && !defined $saddr) {
+	    print FILE_LCK "\t\tnetwork " . $snet . "\n";
+	}
+	elsif (defined $snet && defined $saddr) {
+	    print "Please specify either source address or source network\n";
+	    exit 2;
 	}
 
 	$option = $config->returnValue("$rule source port");
