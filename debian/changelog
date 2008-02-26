@@ -1,3 +1,75 @@
+vyatta-wanloadbalance (0.2) unstable; urgency=low
+
+  vc4.0.0
+  [ Mark O'Brien ]
+
+
+  [ Michael Larson ]
+  * added init script
+  * more minor project modifications
+  * asdf
+  * fix debian files so pkg is created correctly
+  * more package mods--added conf file, removed configuration files that
+    shouldn't be part of this package.
+  * initial checkin of skeletal cli commands for wan load-balancing,
+    plus other packaging changes.
+  * checkin of cli commands for wan loadbalancing. some cleanup of the
+    project--more cli work to follow...
+  * additional changes to go with last push
+  * numerous changes: added help, added init script, modified source to
+    support daemon and pid creation, fixed conf file creation when
+  * moved most stdout messages to new debug output command. reworked
+    (simplified) init script so that rules table is properly cleaned
+  * fixed postinst for init script,+ other cleanup
+  * fixed up node.def files as per an-cheng's changes. more pkg stuff
+    for the init script. added default values.
+  * init script fix. set up show commands. create output file for wan lb
+    status and provide show status cmd.
+  * processing added to compute elapsed time in pretty output format for
+    show commands. time since last failure/success per
+  * whole raft of cli related changes. Fixed bugs in display output--
+    added error checking on some configuration combinations. added
+  * added status command, more cli bugfixes and postinst fix.
+  * changed port definition to be consistent with fw/nat (i.e. single
+    port line allow multi-port configuration). init script fix
+  * missing bracket in conf file creation.
+  * more install stuff--
+  * added back status command to inst instructions.
+  * fix for post instruction for status show cmd
+  * fixed errors introduced when converting to new port definitions.
+  * fixing installation of init script.
+  * more cleanup.
+  * added postinst instruction for moving show cmds.
+  * fix for bug 2780.
+  * more packaging tweaks and bugfixes.
+  * fixed init script for no start argument provided for configuration
+    file. def is /var/load-balance/wlb.con
+  * stop wan lb process on delete of load-balance node.
+  * provide help string at root of load-balancing configuration.
+  * fix for bug 2781. sudo needed for non-root login for file operations
+  * non-root support for status op cmd
+  * fix for bug 2841. wanloadbalance is started on configuration, and on
+    load of configuration (including boot
+  * added vyatta-wanloadbalance.init
+  * suppress stderr from commit.
+  * fix postrm install script to point to current init script
+  * cli specifies timeout value in seconds--conf takes value in
+    milliseconds. Need to multiple cli value by
+  * add check in cli for both address and network configured--in this
+    case generate configuration error.
+  * fixed bug where protocol is all or icmp and source/destination
+    address/network are set. address/network were being ignore--now
+  * clean up cosmetics in help
+  * critical fix for bug 2882 :)
+
+  [ rbalocca ]
+  * Remove derived files
+  * Add derived files to .gitignore
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@vyatta.com>  Mon, 25 Feb 2008 17:40:18 -0800
+
 vyatta-wanloadbalance (0.1) unstable; urgency=low
 
   * Initial Release.
