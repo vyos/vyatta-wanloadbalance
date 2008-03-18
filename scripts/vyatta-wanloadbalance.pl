@@ -2,23 +2,9 @@
 #
 # Module: vyatta-wanloadbalance.pl
 # 
-# **** License ****
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License version 2 as
-# published by the Free Software Foundation.
-# 
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-# 
-# This code was originally developed by Vyatta, Inc.
-# Portions created by Vyatta are Copyright (C) 2008 Vyatta, Inc.
-# All Rights Reserved.
-# 
-# Author: Michael Larson
-# Date: January 2008
-# Description: Writes exclusion list for linkstatus
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 as published
+# by the Free Software Foundation.
 # 
 # **** End License ****
 #
@@ -34,6 +20,8 @@ use File::Copy;
 sub write_health {
 #open conf
     my $config = new VyattaConfig;
+
+    my $valid = "false";
 
     $config->setLevel("load-balancing wan interface-health");
     my @eths = $config->listNodes();
@@ -52,6 +40,7 @@ sub write_health {
 	$option = $config->returnValue("$ethNode ping");
 	if (defined $option) {
 	    print FILE_LCK "\t\ttarget  " . $option . "\n";
+	    $valid = "true";
 	}
 	
 	$option = $config->returnValue("$ethNode resp-time");
@@ -66,10 +55,17 @@ sub write_health {
 	print FILE_LCK "\t}\n";
     }
     print FILE_LCK "}\n\n";
+
+    if ($valid eq "false") {
+	print "valid wan load-balance configuration requires an interface with a ping target\n";
+    }
+    return $valid;
 }
 
 sub write_rules {
     my $config = new VyattaConfig;
+
+    my $valid = "false";
 
     $config->setLevel('load-balancing wan rule');
     my @rules = $config->listNodes();
@@ -149,6 +145,9 @@ sub write_rules {
 	my @eths = $config->listNodes();
 	
 	foreach my $ethNode (@eths) {
+
+	    $valid = "true";
+
 	    print FILE_LCK "\tinterface " . $ethNode . " {\n";
 	    
 	    $option = $config->returnValue("$ethNode weight");
@@ -159,6 +158,11 @@ sub write_rules {
 	}
 	print FILE_LCK "}\n";
     }
+
+    if ($valid eq "false") {
+	print "At least one interface must be configured for a rule to be valid\n";
+    }
+    return $valid;
 }
 
 
@@ -171,9 +175,15 @@ my $conf_lck_file = '/var/load-balance/wlb.conf.lck';
 open(FILE, "<$conf_file") or die "Can't open wlb config file"; 
 open(FILE_LCK, "+>$conf_lck_file") or die "Can't open wlb lock file";
 
-write_health();
+my $success = write_health();
+if ($success eq "false") {
+    exit 1;
+}
 
-write_rules();
+$success = write_rules();
+if ($success eq "false") {
+    exit 1;
+}
 
 close FILE;
 close FILE_LCK;
