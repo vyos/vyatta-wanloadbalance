@@ -11,6 +11,7 @@
 use lib "/opt/vyatta/share/perl5/";
 use VyattaConfig;
 use VyattaMisc;
+use VyattaTypeChecker;
 
 use warnings;
 use strict;
@@ -88,7 +89,13 @@ sub write_rules {
 	print FILE_LCK "\tdestination {\n";
 	my $daddr = $config->returnValue("$rule destination address");
 	if (defined $daddr) {
-	    print FILE_LCK "\t\taddress \"" . $daddr . "\"\n";
+	    if (VyattaTypeChecker::validate_iptables4_addr($daddr) eq "1") {
+		print FILE_LCK "\t\taddress \"" . $daddr . "\"\n";
+	    }
+	    else {
+		print "Error in destination address configuration\n";
+		exit 1;
+	    }
 	}
 
 	my $option = $config->returnValue("$rule destination port");
@@ -119,7 +126,13 @@ sub write_rules {
 	print FILE_LCK "\tsource {\n";
 	my $saddr = $config->returnValue("$rule source address");
 	if (defined $saddr) {
-	    print FILE_LCK "\t\taddress \"" . $saddr . "\"\n";
+	    if (VyattaTypeChecker::validate_iptables4_addr($saddr) eq "1") {
+		print FILE_LCK "\t\taddress \"" . $saddr . "\"\n";
+	    }
+	    else {
+		print "Error in source address configuration\n";
+		exit 1;
+	    }
 	}
 
 	$option = $config->returnValue("$rule source port");

@@ -281,11 +281,43 @@ LBDecision::get_application_cmd(LBRule &rule)
   }
 
   if (rule._s_addr.empty() == false) {
-    filter += "--source " + rule._s_addr + " ";
+    bool negate_flag = false;
+    string tmp(rule._s_addr);
+    if (tmp.find("!") != string::npos) {
+      negate_flag = true;
+      tmp = tmp.substr(1,tmp.length()-1);
+    }
+
+    if (tmp.find("-") != string::npos) {
+      if (negate_flag) {
+	filter += "-m iprange ! --src-range " + tmp + " ";
+      }
+      else {
+	filter += "-m iprange --src-range " + tmp + " ";
+      }
+    }
+    else {
+      if (negate_flag) {
+	filter += "--source ! " + tmp + " ";
+      }
+      else {
+	filter += "--source " + tmp + " ";
+      }
+    }
   }
   
   if (rule._d_addr.empty() == false) {
-    filter += "--destination " + rule._d_addr + " ";
+    string tmp(rule._d_addr);
+    if (tmp.find("!") != string::npos) {
+      tmp = "! " + tmp.substr(1,tmp.length()-1);
+    }
+
+    if (tmp.find("-") != string::npos) {
+      filter += "-m iprange --dst-range " + tmp + " ";
+    }
+    else {
+      filter += "--destination " + tmp + " ";
+    }
   }
 
   if (rule._proto == "udp" || rule._proto == "tcp") {
