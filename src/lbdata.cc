@@ -144,11 +144,9 @@ LBData::dump()
     cout << "  rule: " << r_iter->first << endl;
     cout << "    " << r_iter->second._proto << endl;
     cout << "    " << r_iter->second._s_addr << endl;
-    cout << "    " << r_iter->second._s_net << endl;
     cout << "    " << r_iter->second._s_port << endl;
 
     cout << "    " << r_iter->second._d_addr << endl;
-    cout << "    " << r_iter->second._d_net << endl;
     cout << "    " << r_iter->second._d_port << endl;
     
     LBRule::InterfaceDistIter ri_iter = r_iter->second._iface_dist_coll.begin();

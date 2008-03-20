@@ -283,24 +283,24 @@ LBDecision::get_application_cmd(LBRule &rule)
   if (rule._s_addr.empty() == false) {
     filter += "--source " + rule._s_addr + " ";
   }
-  else if (rule._s_net.empty() == false && rule._s_addr.empty() == true) {
-    filter += "--source " + rule._s_net + " ";
-  }
   
   if (rule._d_addr.empty() == false) {
     filter += "--destination " + rule._d_addr + " ";
   }
-  else if (rule._d_net.empty() == false && rule._d_addr.empty() == true) {
-    filter += "--destination " + rule._d_net + " ";
-  }
 
-  else if (rule._proto == "udp" || rule._proto == "tcp") {
-    if (rule._s_port.empty() == false) {
+  if (rule._proto == "udp" || rule._proto == "tcp") {
+    if (rule._s_port.empty() == false && rule._s_port_ipt.empty() == true) {
       filter += "-m multiport --source-port " + rule._s_port + " ";
     }
+    else if (rule._s_port_ipt.empty() == false) {
+      filter += rule._s_port_ipt + " ";
+    }
 
-    if (rule._d_port.empty() == false) {
+    if (rule._d_port.empty() == false && rule._d_port_ipt.empty() == true) {
       filter += "-m multiport --destination-port " + rule._d_port + " ";
+    }
+    else if (rule._d_port_ipt.empty() == false) {
+      filter += rule._d_port_ipt + " ";
     }
   }
 

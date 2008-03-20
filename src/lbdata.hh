@@ -29,12 +29,12 @@ class LBRule {
  public:
   string _proto;
   string _s_addr;
-  string _s_net;
   string _s_port;
+  string _s_port_ipt;
 
   string _d_addr;
-  string _d_net;
   string _d_port;
+  string _d_port_ipt;
 
   InterfaceDistColl _iface_dist_coll;
 };

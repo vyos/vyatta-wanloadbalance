@@ -88,25 +88,26 @@ sub write_rules {
 	print FILE_LCK "\tdestination {\n";
 	my $daddr = $config->returnValue("$rule destination address");
 	if (defined $daddr) {
-	    print FILE_LCK "\t\taddress " . $daddr . "\n";
-	}
-
-	my $dnet = $config->returnValue("$rule destination network");
-	if (defined $dnet && !defined $daddr) {
-	    print FILE_LCK "\t\tnetwork " . $dnet . "\n";
-	}
-	elsif (defined $dnet && defined $daddr) {
-	    print "Please specify either destination address or source network\n";
-	    exit 2;
+	    print FILE_LCK "\t\taddress \"" . $daddr . "\"\n";
 	}
 
 	my $option = $config->returnValue("$rule destination port");
 	if (defined $option) {
-	    if ($protocol ne "tcp" && $protocol ne "udp") {
-		print "Please specify protocol tcp or udp when configuring ports\n";
-		exit 2;
+	    my $can_use_port;
+	    my $port_str;
+	    my $port_err;
+
+	    if ($protocol eq "tcp" || $protocol eq "udp") {
+		$can_use_port = "yes";
 	    }
-	    print FILE_LCK "\t\tport " . $option . "\n";
+	    ($port_str, $port_err) = VyattaMisc::getPortRuleString($option, $can_use_port, "d", $protocol);
+	    if (defined $port_str) {
+		print FILE_LCK "\t\tport-ipt \"" . $port_str . "\"\n";
+	    }
+	    else {
+		print $port_err;
+		exit 1;
+	    }
 	}
 
 	print FILE_LCK "\t}\n";
@@ -118,25 +119,26 @@ sub write_rules {
 	print FILE_LCK "\tsource {\n";
 	my $saddr = $config->returnValue("$rule source address");
 	if (defined $saddr) {
-	    print FILE_LCK "\t\taddress " . $saddr . "\n";
-	}
-
-	my $snet = $config->returnValue("$rule source network");
-	if (defined $snet && !defined $saddr) {
-	    print FILE_LCK "\t\tnetwork " . $snet . "\n";
-	}
-	elsif (defined $snet && defined $saddr) {
-	    print "Please specify either source address or source network\n";
-	    exit 2;
+	    print FILE_LCK "\t\taddress \"" . $saddr . "\"\n";
 	}
 
 	$option = $config->returnValue("$rule source port");
 	if (defined $option) {
-	    if ($protocol ne "tcp" && $protocol ne "udp") {
-		print "Please specify protocol tcp or udp when configuring ports\n";
-		exit 2;
+	    my $can_use_port;
+	    my $port_str;
+	    my $port_err;
+
+	    if ($protocol eq "tcp" || $protocol eq "udp") {
+		$can_use_port = "yes";
 	    }
-	    print FILE_LCK "\t\tport " . $option . "\n";
+	    ($port_str, $port_err) = VyattaMisc::getPortRuleString($option, $can_use_port, "d", $protocol);
+	    if (defined $port_str) {
+		print FILE_LCK "\t\tport-ipt \"" . $port_str . "\"\n";
+	    }
+	    else {
+		print $port_err;
+		exit 1;
+	    }
 	}
 	print FILE_LCK "\t}\n";
 

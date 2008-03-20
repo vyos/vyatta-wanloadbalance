@@ -1,2 +1,9 @@
-type: ipv4
-help: IPv4 address
+type: txt
+help: Source IP address, subnet, or range
+comp_help: Possible completions:
+  <IP address>                  IP address to match
+  <IP address>/<prefix length>  Subnet to match
+  <IP address>-<IP address>     IP range to match
+  !<IP address>                 Match everything except the specified address
+  !<IP address>/<prefix length> Match everything except the specified subnet
+  !<IP address>-<IP address>    Match everything except the specified range

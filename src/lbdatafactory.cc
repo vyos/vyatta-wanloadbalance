@@ -46,11 +46,11 @@ LBDataFactory::load(const string &conf_file)
   //read line by line and populate vect
   char str[1025];
   int depth(0);
-  vector<string> path(10);
+  vector<string> path(32);
   while (fgets(str, 1024, fp) != 0) {
     string line(str);
 
-    int pos = line.find("#");
+    unsigned int pos = line.find("#");
     line = line.substr(0,pos);
     
     string key,value;
@@ -64,6 +64,10 @@ LBDataFactory::load(const string &conf_file)
 	  key = symbol;
 	}
 	else if (value.empty()) {
+	  if ((pos = line.find("\"")) != string::npos) {
+	    unsigned int end_pos = line.rfind("\"");
+	    symbol = line.substr(pos+1,end_pos-pos-1);
+	  }
 	  value = symbol;
 	}
 	path[depth] = key;
@@ -78,7 +82,7 @@ LBDataFactory::load(const string &conf_file)
     if (tokens.size() != 0) {
       process(path,depth,key,value);
     }
-    if (depth > 9 || depth < 0) {
+    if (depth > 31 || depth < 0) {
       if (_debug) {
 	cerr << "configuration error: malformed configuration file: brackets" << endl;
       }
@@ -258,17 +262,10 @@ void
 LBDataFactory::process_rule_source(const string &key, const string &value)
 {
   if (key == "address") {
-    if (inet_addr(value.c_str()) == (unsigned)-1) {
-      if (_debug) {
-	cerr << "malformed ip address: " << key << ", " << value << endl;
-      }
-      syslog(LOG_ERR, "wan_lb, malformed ip address in configuration: %s,%s", key.c_str(),value.c_str());
-      return;
-    }
     _rule_iter->second._s_addr = value;
   }
-  else if (key == "network") {
-    _rule_iter->second._s_net = value;
+  else if (key == "port-ipt") {
+    _rule_iter->second._s_port_ipt = value;
   }
   else if (key == "port") {
     _rule_iter->second._s_port = value;
@@ -279,17 +276,10 @@ void
 LBDataFactory::process_rule_destination(const string &key, const string &value)
 {
   if (key == "address") {
-    if (inet_addr(value.c_str()) == (unsigned)-1) {
-      if (_debug) {
-	cerr << "malformed ip address: " << key << ", " << value << endl;
-      }
-      syslog(LOG_ERR, "wan_lb, malformed ip address in configuration: %s,%s", key.c_str(),value.c_str());
-      return;
-    }
     _rule_iter->second._d_addr = value;
   }
-  else if (key == "network") {
-    _rule_iter->second._d_net = value;
+  else if (key == "port-ipt") {
+    _rule_iter->second._d_port_ipt = value;
   }
   else if (key == "port") {
     _rule_iter->second._d_port = value;
