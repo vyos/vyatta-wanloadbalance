@@ -175,7 +175,9 @@ sub write_rules {
     }
 
     if ($valid eq "false") {
-	print "At least one interface must be configured for a rule to be valid\n";
+	print "At least one rule with interface must be defined for wan load balancing to be active\n";
+	#allow this configuration, just generate the warning
+	return "true";
     }
     return $valid;
 }
