@@ -58,7 +58,7 @@ sub write_health {
     print FILE_LCK "}\n\n";
 
     if ($valid eq "false") {
-	print "valid wan load-balance configuration requires an interface with a ping target\n";
+	print "A valid WAN load-balance configuration requires an interface with a ping target\n";
     }
     return $valid;
 }
@@ -175,7 +175,7 @@ sub write_rules {
     }
 
     if ($valid eq "false") {
-	print "At least one rule with interface must be defined for wan load balancing to be active\n";
+	print "At least one rule with interface must be defined for WAN load balancing to be active\n";
 	#allow this configuration, just generate the warning
 	return "true";
     }
