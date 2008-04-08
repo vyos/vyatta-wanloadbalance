@@ -1,4 +1,4 @@
-help: Show wan load-balancing status
+help: Show Wide Area Network (WAN) load-balancing information
 run:  if [ -f /var/load-balance/wlb.out ] ; then 
          cat /var/load-balance/wlb.out
       else
