@@ -1,3 +1,27 @@
+vyatta-wanloadbalance (0.4) unstable; urgency=low
+
+  3.0.2
+  [ Mark O'Brien ]
+
+  * 3.0.1
+
+  [ Michael Larson ]
+  * modified configuration to mirror nat/firewall for port/address
+    configuration. added port configuration support for common port
+  * added final validation to address ranges and negation operators. now
+    behavior is the same as firewall and nat.
+  * removed network from configuration. changed configuration error
+    without valid rule to warning. fixed up path to iptables for status
+    show command.
+
+  [ rbalocca ]
+  * Fix debian dependencies
+  * Set dependencies on either bash or vyatta-bash
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@vyatta.com>  Fri, 04 Apr 2008 18:01:25 -0700
+
 vyatta-wanloadbalance (0.3) unstable; urgency=low
 
   VC4.0.1
