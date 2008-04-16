@@ -1,3 +1,17 @@
+vyatta-wanloadbalance (0.5) unstable; urgency=low
+
+  VC4.0.2
+  [ Mark O'Brien ]
+
+
+  [ Stephen Hemminger ]
+  * validate interface name in template
+  * allow vlan for load-balancing interface
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@vyatta.com>  Wed, 16 Apr 2008 09:50:33 -0700
+
 vyatta-wanloadbalance (0.4) unstable; urgency=low
 
   3.0.2
