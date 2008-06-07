@@ -108,7 +108,7 @@ if so then this stuff goes here!
     //NOTE, WILL NEED A WAY TO CLEAN UP THIS RULE ON RESTART...
     execute(string("iptables -t mangle -A ISP_") + buf + " -j ACCEPT");
 
-    execute(string("ip route replace table ") + buf + " default dev " + iface);
+    execute(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop);
     execute(string("ip rule add fwmark ") + buf + " table " + buf);
 
     _iface_mark_coll.insert(pair<string,int>(iface,ct));
@@ -176,7 +176,7 @@ LBDecision::run(LBData &lb_data)
     //last one is special case, the catch all rule
     ++w_iter;
     sprintf(dbuf,"%d",w_iter->first);
-    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j ISP_" + dbuf);
+    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf);
     ++iter;
   }
 }

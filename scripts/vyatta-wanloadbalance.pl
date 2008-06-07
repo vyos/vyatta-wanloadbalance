@@ -53,6 +53,11 @@ sub write_health {
 	if (defined $option) {
 	    print FILE_LCK "\t\tsuccess-ct  " . $option . "\n";
 	}
+
+	$option = $config->returnValue("$ethNode nexthop");
+	if (defined $option) {
+	    print FILE_LCK "\t\tnexthop  " . $option . "\n";
+	}
 	print FILE_LCK "\t}\n";
     }
     print FILE_LCK "}\n\n";

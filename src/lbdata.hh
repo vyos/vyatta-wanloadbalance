@@ -89,6 +89,7 @@ class LBHealth {
   int _failure_ct;
   string _ping_target;
   int _ping_resp_time;
+  string _nexthop;
   LBHealthHistory _hresults;
   bool _is_active;
   bool _state_changed;

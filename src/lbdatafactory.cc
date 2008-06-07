@@ -198,6 +198,9 @@ LBDataFactory::process_health_interface(const string &key, const string &value)
       syslog(LOG_ERR, "wan_lb: illegal ping-resp specified in configuration file: %s", value.c_str());
     }
   }
+  else if (key == "nexthop") {
+    _health_iter->second._nexthop = value;
+  }
   else if (key == "health") {
     //nothing
   }
