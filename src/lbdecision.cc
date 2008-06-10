@@ -169,14 +169,14 @@ LBDecision::run(LBData &lb_data)
     while (w_iter != w_end) {
       sprintf(fbuf,"%f",w_iter->second);
       sprintf(dbuf,"%d",w_iter->first);
-      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf);
+      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW,ESTABLISHED -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf);
 
       ++w_iter;
     }
     //last one is special case, the catch all rule
     ++w_iter;
     sprintf(dbuf,"%d",w_iter->first);
-    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf);
+    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW,ESTABLISHED -j ISP_" + dbuf);
     ++iter;
   }
 }
