@@ -160,6 +160,12 @@ sub write_rules {
 	}
 	print FILE_LCK "\t}\n";
 
+	#inbound-interface
+	$option = $config->returnValue("$rule inbound-interface");
+	if (defined $option) {
+	    print FILE_LCK "\tinbound-interface " . $option . "\n"
+	}
+
 	#interface
 	$config->setLevel("load-balancing wan rule $rule interface");
 	my @eths = $config->listNodes();

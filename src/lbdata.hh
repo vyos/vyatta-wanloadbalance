@@ -36,6 +36,7 @@ class LBRule {
   string _d_port;
   string _d_port_ipt;
 
+  string _in_iface;
   InterfaceDistColl _iface_dist_coll;
 };
 

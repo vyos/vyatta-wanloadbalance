@@ -61,6 +61,9 @@ private:
   void
   process_rule_interface(const string &key, const string &value);
 
+  void
+  process_rule_inbound_interface(const string &key, const string &value);
+
 private:
   bool _debug;
   LBHealth _lb_health;

@@ -130,6 +130,9 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
     else if (depth > 0 && path[1] == "destination") {
       process_rule_destination(l_key,l_value);
     }
+    else if (depth > 0 && path[1] == "inbound-interface") {
+      process_rule_inbound_interface(l_key,l_value);
+    }
     else if (depth > 1 && path[1] == "interface") {
       process_rule_interface(l_key,l_value);
     }
@@ -288,6 +291,24 @@ LBDataFactory::process_rule_destination(const string &key, const string &value)
     _rule_iter->second._d_port = value;
   }
 }
+
+void
+LBDataFactory::process_rule_inbound_interface(const string &key, const string &value)
+{
+  if (_debug) {
+    cout << "LBDataFactory::process_rule_inbound_interface(): " << key << ", " << value << endl;
+  }
+  if (key == "inbound-interface") {
+    _rule_iter->second._in_iface = value;
+  }
+  else {
+    if (_debug) {
+      cerr << "LBDataFactory::process_rule(): " << "don't understand this symbol: " << key << endl;
+    }
+  }
+}
+
+
 
 void
 LBDataFactory::process_rule_interface(const string &key, const string &value)
