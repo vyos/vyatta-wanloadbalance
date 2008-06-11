@@ -189,6 +189,10 @@ LBPathTest::send(const string &iface, const string &target_addr, int packet_id)
   int icmp_pktsize = 40;
   char buffer[icmp_pktsize];
 
+  if (iface.empty() || target_addr.empty()) {
+    return;
+  }
+
   // bind a socket to a device name (might not work on all systems):
   setsockopt(_send_sock, SOL_SOCKET, SO_BINDTODEVICE, iface.c_str(), iface.size());
 
