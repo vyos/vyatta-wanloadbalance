@@ -191,11 +191,11 @@ LBDecision::run(LBData &lb_data)
 
     char fbuf[20],dbuf[20];
     while (w_iter != w_end) {
-      sprintf(fbuf,"%f",w_iter->second);
-      sprintf(dbuf,"%d",w_iter->first);
-      //      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j CONNMARK --set-mark " + dbuf);
-      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf);
-
+      if (w_iter->second > 0) {
+	sprintf(fbuf,"%f",w_iter->second);
+	sprintf(dbuf,"%d",w_iter->first);
+	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf);
+      }
       ++w_iter;
     }
     //last one is special case, the catch all rule
@@ -273,6 +273,9 @@ LBDecision::get_new_weights(LBData &data, LBRule &rule)
     if (data.is_active(iter->first)) {
       weights.insert(pair<int,float>(ct,iter->second));
       group += iter->second;
+    }
+    else {
+      weights.insert(pair<int,float>(ct,0));
     }
     ++ct;
     ++iter;
