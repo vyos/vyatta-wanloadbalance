@@ -5,6 +5,14 @@
  * under the terms of the GNU General Public License version 2 as published
  * by the Free Software Foundation.
  */
+#include <sys/sysinfo.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <net/if.h>
+
+#include <sys/types.h>
+#include <sys/ioctl.h>
 #include <syslog.h>
 #include <iostream>
 #include "lbdata.hh"
@@ -96,6 +104,10 @@ if so then this stuff goes here!
   //note: doesn't appear to clean up rule table, may need to individually erase each rule
   //  execute(string("ip rule flush"));
 
+  //set up special nat rules
+  execute(string("iptables -t nat -N WANLOADBALANCE"));
+  execute(string("iptables -t nat -F WANLOADBALANCE"));
+
   LBData::InterfaceHealthIter iter = lbdata._iface_health_coll.begin();
   while (iter != lbdata._iface_health_coll.end()) {
     string iface = iter->first;
@@ -113,6 +125,15 @@ if so then this stuff goes here!
 
     execute(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop);
     execute(string("ip rule add fwmark ") + buf + " table " + buf);
+
+    //now insert special source nat rules here
+
+    //need to pick up primary address from interface
+    
+
+
+    //    execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._nexthop);
+    execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + fetch_iface_addr(iface));
 
     _iface_mark_coll.insert(pair<string,int>(iface,ct));
     ++ct;
@@ -348,3 +369,29 @@ LBDecision::get_application_cmd(LBRule &rule)
 
   return filter;
 }
+
+
+/* Fetch interface configuration */
+string
+LBDecision::fetch_iface_addr(const string &iface)
+{
+  struct ifreq ifr;
+  int fd;
+
+  fd = socket(AF_INET, SOCK_STREAM, 0);
+  if (fd < 0) {
+    exit(1);
+  }
+  strncpy(ifr.ifr_name, iface.c_str(), IFNAMSIZ);
+  if (ioctl(fd, SIOCGIFADDR, &ifr) == 0) {
+    struct sockaddr_in *sin = (struct sockaddr_in *)&ifr.ifr_addr;
+    struct in_addr in;
+    in.s_addr = sin->sin_addr.s_addr;
+    char *tmp_buf = inet_ntoa(in);
+    return string(tmp_buf);
+  }
+  close(fd);
+  return string("");
+}
+
+

@@ -43,6 +43,9 @@ private:
   string
   get_application_cmd(LBRule &rule);
 
+  string
+  fetch_iface_addr(const string &iface);
+
 private:
   bool _debug;
   InterfaceMarkColl _iface_mark_coll;
