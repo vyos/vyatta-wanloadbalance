@@ -107,6 +107,7 @@ if so then this stuff goes here!
   //set up special nat rules
   execute(string("iptables -t nat -N WANLOADBALANCE"));
   execute(string("iptables -t nat -F WANLOADBALANCE"));
+  execute(string("iptables -t nat -A POSTROUTING -j WANLOADBALANCE"));
 
   LBData::InterfaceHealthIter iter = lbdata._iface_health_coll.begin();
   while (iter != lbdata._iface_health_coll.end()) {
@@ -117,25 +118,17 @@ if so then this stuff goes here!
     execute(string("iptables -t mangle -N ISP_") + buf);
     execute(string("iptables -t mangle -F ISP_") + buf);
     execute(string("iptables -t mangle -A ISP_") + buf + " -j CONNMARK --set-mark " + buf);
-    //    execute(string("iptables -t mangle -A ISP_") + buf + " -j MARK --set-mark " + buf);
 
     //NOTE, WILL NEED A WAY TO CLEAN UP THIS RULE ON RESTART...
     execute(string("iptables -t mangle -A ISP_") + buf + " -j ACCEPT");
 
-
     execute(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop);
     execute(string("ip rule add fwmark ") + buf + " table " + buf);
-
-    //now insert special source nat rules here
-
-    //need to pick up primary address from interface
     
-
-
-    //    execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._nexthop);
     execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + fetch_iface_addr(iface));
 
-    _iface_mark_coll.insert(pair<string,int>(iface,ct));
+    string tmp = string("table ") + buf + " default dev " + iface + " via " + iter->second._nexthop;
+    _iface_mark_coll.insert(pair<string,string>(iface,tmp));
     ++ct;
     ++iter;
   }
@@ -169,6 +162,26 @@ LBDecision::run(LBData &lb_data)
     cout << "LBDecision::run(), state changed, applying new rule set" << endl;
   }
 
+  //now reapply the routing tables.
+  LBData::InterfaceHealthIter h_iter = lb_data._iface_health_coll.begin();
+  while (h_iter != lb_data._iface_health_coll.end()) {
+    string route_str;
+    InterfaceMarkIter m_iter = _iface_mark_coll.find(h_iter->first);
+    if (m_iter != _iface_mark_coll.end()) {
+      route_str = m_iter->second;
+      
+      if (h_iter->second._is_active == true) {
+	execute(string("ip route replace ") + route_str);
+      }
+      else {
+	//right now replace route, but don't delete until race condition is resolved
+
+	//	execute(string("ip route delete ") + route_str);
+      }
+    }
+    ++h_iter;
+  }
+
   //then if we do, flush all
   execute("iptables -t mangle -F PREROUTING");
 
@@ -190,18 +203,18 @@ LBDecision::run(LBData &lb_data)
     string app_cmd = get_application_cmd(iter->second);
 
     char fbuf[20],dbuf[20];
-    while (w_iter != w_end) {
+    while (w_iter != w_end) {      
       if (w_iter->second > 0) {
 	sprintf(fbuf,"%f",w_iter->second);
 	sprintf(dbuf,"%d",w_iter->first);
 	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf);
+
       }
       ++w_iter;
     }
     //last one is special case, the catch all rule
     ++w_iter;
     sprintf(dbuf,"%d",w_iter->first);
-    //    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j CONNMARK --set-mark " + dbuf);
     execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf);
     execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark");
     ++iter;
@@ -215,17 +228,17 @@ LBDecision::run(LBData &lb_data)
 void
 LBDecision::shutdown()
 {
-  char buf[20];
-
   //then if we do, flush all
   execute("iptables -t mangle -F PREROUTING");
 
   //remove the policy entries
   InterfaceMarkIter iter = _iface_mark_coll.begin();
   while (iter != _iface_mark_coll.end()) {
-    sprintf(buf,"%d",iter->second);
 
-    execute(string("ip rule del fwmark ") + buf);
+    execute(string("ip rule del table ") + iter->second);
+
+    //need to delete ip rule here as well!
+
     ++iter;
   }
 }
@@ -241,7 +254,7 @@ LBDecision::execute(string cmd)
     cout << "LBDecision::execute(): applying command to system: " << cmd << endl;
     syslog(LOG_DEBUG, "LBDecision::execute(): applying command to system: %s",cmd.c_str());
   }
-  
+ 
   FILE *f = popen(cmd.c_str(), "w");
   if (f) {
     if (pclose(f) != 0) {

@@ -17,8 +17,8 @@ using namespace std;
 class LBDecision
 {
 public:
-  typedef map<string,int> InterfaceMarkColl;
-  typedef map<string,int>::iterator InterfaceMarkIter;
+  typedef map<string,string> InterfaceMarkColl;
+  typedef map<string,string>::iterator InterfaceMarkIter;
 
 public:
   LBDecision(bool debug);
