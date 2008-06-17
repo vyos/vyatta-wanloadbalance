@@ -1,3 +1,37 @@
+vyatta-wanloadbalance (0.10) unstable; urgency=low
+
+	  3.1.0
+  [ Mark O'Brien ]
+
+
+  [ Michael Larson ]
+  * added connmark snat rules. means that nat does not need to be
+    configured separately for wlb to work--this is
+  * catch empty ping target on ping send. fixes error msgs for
+    unresolved configured host name--possible fix for bug 3245.
+  * needs accept to truncation rule evaluation on a match. this should
+    now distribute traffic across interfaces.
+  * modified prerouting decisions to work with connmark. user needs to
+    specify inbound interface now (although
+  * fix for iptables rules in tcp state. should fix main problem with
+    wan
+  * added contract entry for state NEW for initial interface. Also add
+    parameter to specify nexthop via interface in
+
+  [ rbalocca ]
+  * Ignore log file
+  * Convert to our method of changelog creation
+
+  [ Mohit Mehta ]
+  * Fix Bug 3069 Help strings should be standardized
+
+  [ Michael Larson ]
+  * minor text change on conf error: bug 2951
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@firebolt.vyatta.com>  Tue, 17 Jun 2008 09:27:42 -0700
+
 vyatta-wanloadbalance (0.9) unstable; urgency=low
 
   3.0.5
