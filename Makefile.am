@@ -1,4 +1,5 @@
 cfgdir = $(datadir)/vyatta-cfg/templates
+curverdir = $(sysconfdir)/config-migrate/current
 
 initddir	 = /etc/init.d
 etcdir           = /etc
@@ -9,6 +10,8 @@ CLEANFILES = src/main.o src/lbdata.o src/lbdatafactory.o src/loadbalance.o src/r
 
 sbin_SCRIPTS = scripts/vyatta-wanloadbalance.pl
 sbin_SCRIPTS += scripts/vyatta-wanloadbalance.init
+
+curver_DATA = cfg-version/wanloadbalance@1
 
 src_wan_lb_SOURCES = src/main.cc
 src_wan_lb_SOURCES += src/lbdata.cc
