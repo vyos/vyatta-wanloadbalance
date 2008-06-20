@@ -190,34 +190,35 @@ LBDecision::run(LBData &lb_data)
   while (iter != lb_data._lb_rule_coll.end()) {
     map<int,float> weights = get_new_weights(lb_data,iter->second);
     map<int,float>::iterator w_iter = weights.begin();
-    map<int,float>::iterator w_end = weights.end();
-    if (w_iter == w_end) {
-      ++iter;
-      continue;
-    }      
-    else {
-      --w_end;
-    }
-
     //NEED TO HANDLE APPLICATION SPECIFIC DETAILS
     string app_cmd = get_application_cmd(iter->second);
 
     char fbuf[20],dbuf[20];
-    while (w_iter != w_end) {      
-      if (w_iter->second > 0) {
+    if (weights.empty()) {
+      //no rules here!
+    }
+    else if (weights.size() == 1) {
+      sprintf(dbuf,"%d",w_iter->first);
+      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf);
+      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark");
+    }
+    else {
+      map<int,float>::iterator w_end = weights.end();
+      --w_end;
+      while (w_iter != w_end) {      
 	sprintf(fbuf,"%f",w_iter->second);
 	sprintf(dbuf,"%d",w_iter->first);
 	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf);
-
+	++w_iter;
       }
+      //last one is special case, the catch all rule
       ++w_iter;
+      sprintf(dbuf,"%d",w_iter->first);
+      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf);
+      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark");
     }
-    //last one is special case, the catch all rule
-    ++w_iter;
-    sprintf(dbuf,"%d",w_iter->first);
-    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf);
-    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark");
     ++iter;
+    continue;
   }
 }
 
@@ -284,25 +285,39 @@ LBDecision::get_new_weights(LBData &data, LBRule &rule)
       cout << "LBDecision::get_new_weights(): " << iter->first << " is active: " << (data.is_active(iter->first) ? "true" : "false") << endl;
     }
     if (data.is_active(iter->first)) {
+      cout << "active: " << ct << ", " << iter->second << endl;
       weights.insert(pair<int,float>(ct,iter->second));
       group += iter->second;
     }
     else {
-      weights.insert(pair<int,float>(ct,0));
+      cout << "INactive: " << ct << ", " << iter->second << endl;
+      weights.insert(pair<int,float>(ct,0.));
     }
     ++ct;
     ++iter;
   }
-  
-  //now weight the overall distribution
-  map<int,float>::iterator w_iter = weights.begin();
-  while (w_iter != weights.end()) {
-    float w = float(w_iter->second) / float(group);
-    group -= w_iter->second;   //I THINK THIS NEEDS TO BE ADJUSTED TO THE OVERALL REMAINING VALUES. which is this...
-    w_iter->second = w;
-    ++w_iter;
-  }
 
+  if (group == 0) {
+    weights.erase(weights.begin(),weights.end());
+  }
+  else {
+    //now weight the overall distribution
+    map<int,float>::iterator w_iter = weights.begin();
+    while (w_iter != weights.end()) {
+      float w = 0.;
+      if (w_iter->second > 0.) { //can only be an integer value here
+	w = float(w_iter->second) / float(group);
+      }
+      cout << "weight is: " << w << endl;
+      group -= w_iter->second;   //I THINK THIS NEEDS TO BE ADJUSTED TO THE OVERALL REMAINING VALUES. which is this...
+      if (w < .01) {
+	weights.erase(w_iter++);
+	continue;
+      }
+      w_iter->second = w;
+      ++w_iter;
+    }
+  }
   return weights;
 }
 
