@@ -285,12 +285,10 @@ LBDecision::get_new_weights(LBData &data, LBRule &rule)
       cout << "LBDecision::get_new_weights(): " << iter->first << " is active: " << (data.is_active(iter->first) ? "true" : "false") << endl;
     }
     if (data.is_active(iter->first)) {
-      cout << "active: " << ct << ", " << iter->second << endl;
       weights.insert(pair<int,float>(ct,iter->second));
       group += iter->second;
     }
     else {
-      cout << "INactive: " << ct << ", " << iter->second << endl;
       weights.insert(pair<int,float>(ct,0.));
     }
     ++ct;
@@ -308,7 +306,6 @@ LBDecision::get_new_weights(LBData &data, LBRule &rule)
       if (w_iter->second > 0.) { //can only be an integer value here
 	w = float(w_iter->second) / float(group);
       }
-      cout << "weight is: " << w << endl;
       group -= w_iter->second;   //I THINK THIS NEEDS TO BE ADJUSTED TO THE OVERALL REMAINING VALUES. which is this...
       if (w < .01) {
 	weights.erase(w_iter++);
