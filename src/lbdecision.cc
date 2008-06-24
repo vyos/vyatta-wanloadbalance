@@ -107,7 +107,16 @@ if so then this stuff goes here!
   //set up special nat rules
   execute(string("iptables -t nat -N WANLOADBALANCE"));
   execute(string("iptables -t nat -F WANLOADBALANCE"));
+  execute(string("iptables -t nat -D POSTROUTING -j WANLOADBALANCE"));
   execute(string("iptables -t nat -A POSTROUTING -j WANLOADBALANCE"));
+
+  //set up the conntrack table
+  execute(string("iptables -t raw -N NAT_CONNTRACK"));
+  execute(string("iptables -t raw -F NAT_CONNTRACK"));
+  execute(string("iptables -t raw -A NAT_CONNTRACK -j ACCEPT"));
+  execute(string("iptables -t raw -D PREROUTING 1"));
+  execute(string("iptables -t raw -I PREROUTING 1 -j NAT_CONNTRACK"));
+
 
   LBData::InterfaceHealthIter iter = lbdata._iface_health_coll.begin();
   while (iter != lbdata._iface_health_coll.end()) {
@@ -123,6 +132,7 @@ if so then this stuff goes here!
     execute(string("iptables -t mangle -A ISP_") + buf + " -j ACCEPT");
 
     execute(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop);
+    execute(string("ip rule delete table ") + buf);
     execute(string("ip rule add fwmark ") + buf + " table " + buf);
     
     execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + fetch_iface_addr(iface));
