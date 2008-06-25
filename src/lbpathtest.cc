@@ -16,6 +16,7 @@
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <errno.h>
+#include <string.h>
 #include <memory>
 #include <time.h>
 #include <sys/timeb.h>
