@@ -420,13 +420,20 @@ LBDecision::fetch_iface_addr(const string &iface)
   if (fd < 0) {
     exit(1);
   }
-  strncpy(ifr.ifr_name, iface.c_str(), IFNAMSIZ);
-  if (ioctl(fd, SIOCGIFADDR, &ifr) == 0) {
-    struct sockaddr_in *sin = (struct sockaddr_in *)&ifr.ifr_addr;
-    struct in_addr in;
-    in.s_addr = sin->sin_addr.s_addr;
-    char *tmp_buf = inet_ntoa(in);
-    return string(tmp_buf);
+  
+  int ct = 2;
+  //try twice to retrieve this before failing
+  while (ct > 0) {
+    strncpy(ifr.ifr_name, iface.c_str(), IFNAMSIZ);
+    if (ioctl(fd, SIOCGIFADDR, &ifr) == 0) {
+      struct sockaddr_in *sin = (struct sockaddr_in *)&ifr.ifr_addr;
+      struct in_addr in;
+      in.s_addr = sin->sin_addr.s_addr;
+      char *tmp_buf = inet_ntoa(in);
+      return string(tmp_buf);
+    }
+    usleep(500 * 1000); //.5 second sleep
+    --ct;
   }
   close(fd);
   return string("");

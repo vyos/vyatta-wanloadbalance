@@ -1,6 +1,6 @@
 help: Show WAN load-balancing statistics
 run:  if [ -f /var/load-balance/wlb.out ] ; then 
-         sudo /sbin/iptables -L PREROUTING -t mangle -vv
+         sudo /sbin/iptables -L PREROUTING -t mangle -v
       else
          echo WAN load balancing is not configured
       fi 
