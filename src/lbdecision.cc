@@ -433,6 +433,7 @@ LBDecision::fetch_iface_addr(const string &iface)
       struct in_addr in;
       in.s_addr = sin->sin_addr.s_addr;
       char *tmp_buf = inet_ntoa(in);
+      close(fd);
       return string(tmp_buf);
     }
     usleep(500 * 1000); //.5 second sleep
