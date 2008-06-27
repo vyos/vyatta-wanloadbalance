@@ -418,7 +418,8 @@ LBDecision::fetch_iface_addr(const string &iface)
 
   fd = socket(AF_INET, SOCK_STREAM, 0);
   if (fd < 0) {
-    exit(1);
+    syslog(LOG_ERR, "Error obtaining socket");
+    return string("");
   }
   
   int ct = 2;
