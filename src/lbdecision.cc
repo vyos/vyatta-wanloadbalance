@@ -135,7 +135,10 @@ if so then this stuff goes here!
 
     execute(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop);
     execute(string("ip rule delete table ") + buf);
-    execute(string("ip rule add fwmark ") + buf + " table " + buf);
+
+    char hex_buf[40];
+    sprintf(hex_buf,"%X",ct);
+    execute(string("ip rule add fwmark ") + hex_buf + " table " + buf);
     
     execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + fetch_iface_addr(iface));
 
