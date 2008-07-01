@@ -17,8 +17,8 @@ using namespace std;
 class LBDecision
 {
 public:
-  typedef map<string,string> InterfaceMarkColl;
-  typedef map<string,string>::iterator InterfaceMarkIter;
+  typedef map<string,int> InterfaceMarkColl;
+  typedef map<string,int>::iterator InterfaceMarkIter;
 
 public:
   LBDecision(bool debug);
@@ -34,8 +34,11 @@ public:
   shutdown();
 
 private:
+  int
+  execute(string cmd, string &stdout, bool read = false);
+
   void
-  execute(string cmd);
+  insert_default(string cmd, int table);
 
   map<int,float> 
   get_new_weights(LBData &data, LBRule &rule);
