@@ -130,6 +130,7 @@ if so then this stuff goes here!
     execute(string("iptables -t mangle -N ISP_") + buf, stdout);
     execute(string("iptables -t mangle -F ISP_") + buf, stdout);
     execute(string("iptables -t mangle -A ISP_") + buf + " -j CONNMARK --set-mark " + buf, stdout);
+    execute(string("iptables -t mangle -A ISP_") + buf + " -j MARK --set-mark " + buf, stdout);
 
     //NOTE, WILL NEED A WAY TO CLEAN UP THIS RULE ON RESTART...
     execute(string("iptables -t mangle -A ISP_") + buf + " -j ACCEPT", stdout);
@@ -143,7 +144,7 @@ if so then this stuff goes here!
     sprintf(hex_buf,"%X",ct);
     execute(string("ip rule add fwmark ") + hex_buf + " table " + buf, stdout);
     
-    execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + fetch_iface_addr(iface), stdout);
+    execute(string("iptables -t nat -A WANLOADBALANCE -m CONNMARK --mark ") + buf + " -j SNAT --to-source " + fetch_iface_addr(iface), stdout);
 
     ++ct;
     ++iter;
