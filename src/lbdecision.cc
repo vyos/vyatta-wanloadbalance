@@ -106,18 +106,19 @@ if so then this stuff goes here!
   //note: doesn't appear to clean up rule table, may need to individually erase each rule
   //  execute(string("ip rule flush"));
 
+  string stdout;
   //set up special nat rules
-  execute(string("iptables -t nat -N WANLOADBALANCE"));
-  execute(string("iptables -t nat -F WANLOADBALANCE"));
-  execute(string("iptables -t nat -D POSTROUTING -j WANLOADBALANCE"));
-  execute(string("iptables -t nat -A POSTROUTING -j WANLOADBALANCE"));
+  execute(string("iptables -t nat -N WANLOADBALANCE"), stdout);
+  execute(string("iptables -t nat -F WANLOADBALANCE"), stdout);
+  execute(string("iptables -t nat -D POSTROUTING -j WANLOADBALANCE"), stdout);
+  execute(string("iptables -t nat -A POSTROUTING -j WANLOADBALANCE"), stdout);
 
   //set up the conntrack table
-  execute(string("iptables -t raw -N NAT_CONNTRACK"));
-  execute(string("iptables -t raw -F NAT_CONNTRACK"));
-  execute(string("iptables -t raw -A NAT_CONNTRACK -j ACCEPT"));
-  execute(string("iptables -t raw -D PREROUTING 1"));
-  execute(string("iptables -t raw -I PREROUTING 1 -j NAT_CONNTRACK"));
+  execute(string("iptables -t raw -N NAT_CONNTRACK"), stdout);
+  execute(string("iptables -t raw -F NAT_CONNTRACK"), stdout);
+  execute(string("iptables -t raw -A NAT_CONNTRACK -j ACCEPT"), stdout);
+  execute(string("iptables -t raw -D PREROUTING 1"), stdout);
+  execute(string("iptables -t raw -I PREROUTING 1 -j NAT_CONNTRACK"), stdout);
 
 
   LBData::InterfaceHealthIter iter = lbdata._iface_health_coll.begin();
@@ -126,28 +127,29 @@ if so then this stuff goes here!
 
     sprintf(buf,"%d",ct);
 
-    execute(string("iptables -t mangle -N ISP_") + buf);
-    execute(string("iptables -t mangle -F ISP_") + buf);
-    execute(string("iptables -t mangle -A ISP_") + buf + " -j CONNMARK --set-mark " + buf);
+    execute(string("iptables -t mangle -N ISP_") + buf, stdout);
+    execute(string("iptables -t mangle -F ISP_") + buf, stdout);
+    execute(string("iptables -t mangle -A ISP_") + buf + " -j CONNMARK --set-mark " + buf, stdout);
+    execute(string("iptables -t mangle -A ISP_") + buf + " -j MARK --set-mark " + buf, stdout);
 
     //NOTE, WILL NEED A WAY TO CLEAN UP THIS RULE ON RESTART...
-    execute(string("iptables -t mangle -A ISP_") + buf + " -j ACCEPT");
+    execute(string("iptables -t mangle -A ISP_") + buf + " -j ACCEPT", stdout);
 
-    execute(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop);
-    execute(string("ip rule delete table ") + buf);
+    insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, ct);
+    _iface_mark_coll.insert(pair<string,int>(iface,ct));
+    
+    execute(string("ip rule delete table ") + buf, stdout);
 
     char hex_buf[40];
     sprintf(hex_buf,"%X",ct);
-    execute(string("ip rule add fwmark ") + hex_buf + " table " + buf);
+    execute(string("ip rule add fwmark ") + hex_buf + " table " + buf, stdout);
     
-    execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + fetch_iface_addr(iface));
+    execute(string("iptables -t nat -A WANLOADBALANCE -m CONNMARK --mark ") + buf + " -j SNAT --to-source " + fetch_iface_addr(iface), stdout);
 
-    string tmp = string("table ") + buf + " default dev " + iface + " via " + iter->second._nexthop;
-    _iface_mark_coll.insert(pair<string,string>(iface,tmp));
     ++ct;
     ++iter;
   }
-  execute("ip route flush cache");
+  execute("ip route flush cache", stdout);
 }
 
 
@@ -168,10 +170,7 @@ LBDecision::run(LBData &lb_data)
     cout << "LBDecision::run(), starting decision" << endl;
   }
 
-  //first determine if we need to alter the rule set
-  if (!lb_data.state_changed()) {
-    return;
-  }
+  string stdout;
 
   if (_debug) {
     cout << "LBDecision::run(), state changed, applying new rule set" << endl;
@@ -186,7 +185,9 @@ LBDecision::run(LBData &lb_data)
       route_str = m_iter->second;
       
       if (h_iter->second._is_active == true) {
-	execute(string("ip route replace ") + route_str);
+	char buf[40];
+	sprintf(buf,"%d",m_iter->second);
+	insert_default(string("ip route replace table ") + buf + " default dev " + h_iter->first + " via " + h_iter->second._nexthop, m_iter->second);
       }
       else {
 	//right now replace route, but don't delete until race condition is resolved
@@ -197,8 +198,13 @@ LBDecision::run(LBData &lb_data)
     ++h_iter;
   }
 
+  //first determine if we need to alter the rule set
+  if (!lb_data.state_changed()) {
+    return;
+  }
+
   //then if we do, flush all
-  execute("iptables -t mangle -F PREROUTING");
+  execute("iptables -t mangle -F PREROUTING", stdout);
 
   //and compute the new set and apply
   LBData::LBRuleIter iter = lb_data._lb_rule_coll.begin();
@@ -214,8 +220,8 @@ LBDecision::run(LBData &lb_data)
     }
     else if (weights.size() == 1) {
       sprintf(dbuf,"%d",w_iter->first);
-      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf);
-      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark");
+      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
+      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
     }
     else {
       map<int,float>::iterator w_end = weights.end();
@@ -223,14 +229,14 @@ LBDecision::run(LBData &lb_data)
       while (w_iter != w_end) {      
 	sprintf(fbuf,"%f",w_iter->second);
 	sprintf(dbuf,"%d",w_iter->first);
-	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf);
+	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	++w_iter;
       }
       //last one is special case, the catch all rule
       ++w_iter;
       sprintf(dbuf,"%d",w_iter->first);
-      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf);
-      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark");
+      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
+      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
     }
     ++iter;
     continue;
@@ -244,14 +250,18 @@ LBDecision::run(LBData &lb_data)
 void
 LBDecision::shutdown()
 {
+  string stdout;
+
   //then if we do, flush all
-  execute("iptables -t mangle -F PREROUTING");
+  execute("iptables -t mangle -F PREROUTING", stdout);
 
   //remove the policy entries
   InterfaceMarkIter iter = _iface_mark_coll.begin();
   while (iter != _iface_mark_coll.end()) {
-
-    execute(string("ip rule del table ") + iter->second);
+    char buf[40];
+    sprintf(buf,"%d",iter->second);
+    
+    execute(string("ip rule del table ") + buf, stdout);
 
     //need to delete ip rule here as well!
 
@@ -261,33 +271,44 @@ LBDecision::shutdown()
 
 /**
  *
- *
  **/
-void
-LBDecision::execute(string cmd)
+int
+LBDecision::execute(std::string cmd, std::string &stdout, bool read)
 {
+  int err = 0;
+
   if (_debug) {
     cout << "LBDecision::execute(): applying command to system: " << cmd << endl;
     syslog(LOG_DEBUG, "LBDecision::execute(): applying command to system: %s",cmd.c_str());
   }
  
-  FILE *f = popen(cmd.c_str(), "w");
+  string dir = "w";
+  if (read == true) {
+    dir = "r";
+  }
+  FILE *f = popen(cmd.c_str(), dir.c_str());
   if (f) {
-    if (pclose(f) != 0) {
-      if (_debug) {
-	cerr << "LBDecision::execute(): error executing command: " << cmd << endl;
+    if (read == true) {
+      fflush(f);
+      char *buf = NULL;
+      size_t len = 0;
+      size_t read_len = 0;
+      while ((read_len = getline(&buf, &len, f)) != -1) {
+	stdout += string(buf) + " ";
       }
-      syslog(LOG_ERR, "Error executing system command: %s", cmd.c_str());
+
+      if (buf) {
+	free(buf);
+      }
     }
+    err = pclose(f);
   }
-  else {
-    if (_debug) {
-      cerr << "LBDecision::execute(): error executing command: " << cmd << endl;
-    }
-    syslog(LOG_ERR, "Error executing system command: %s", cmd.c_str());
-  }
+  return err;
 }
 
+/**
+ *
+ **/
 map<int,float> 
 LBDecision::get_new_weights(LBData &data, LBRule &rule)
 {
@@ -414,7 +435,32 @@ LBDecision::get_application_cmd(LBRule &rule)
 }
 
 
-/* Fetch interface configuration */
+/**
+ * Check for the presence of a route entry in the policy table. Note this 
+ * should be replaced by netlink in the next release.
+ **/
+void
+LBDecision::insert_default(string cmd, int table)
+{
+  string stdout;
+  char buf[40];
+  string showcmd("ip route show table ");
+  sprintf(buf,"%d",table);
+  showcmd += string(buf);
+  execute(showcmd,stdout,true);
+
+  //  cout << "LBDecision::insert_default(stdout): '" << stdout << "'" << endl;
+
+  if (stdout.empty() == true) {
+    //    cout << "LBDecision::insert_default(cmd): " << cmd << endl;
+    execute(cmd,stdout);
+  }
+}
+
+
+/**
+ * Fetch interface configuration 
+ **/
 string
 LBDecision::fetch_iface_addr(const string &iface)
 {
