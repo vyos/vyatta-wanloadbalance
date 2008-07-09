@@ -1,3 +1,39 @@
+vyatta-wanloadbalance (0.11) unstable; urgency=low
+
+	  3.1.1
+  [ Mark O'Brien ]
+
+
+  [ Michael Larson ]
+  * fix for bug 3390, ip rule entry is now converted to a hex value.
+  * missing socket close statement.
+  * fix for bug 3373. also modified error message and return value on
+    not obtaining socket resource.
+  * fixed up status command output and add wait for interface address
+    check on wlb boot
+
+  [ rbalocca ]
+  * Add missing includes
+
+  [ Michael Larson ]
+  * need to add conntrack entry to the raw table. also cleaned up a few
+  * back out wait on parent pid for child--was causing problems when
+    loading config on boot.
+  * remove stdio statements
+  * reworked weight calculation. There were errors in how weights were
+    computed and applied when links failed.
+  * change on deamon option for parent process to wait
+  * added version information for wanloadbalance.
+  * fix jump instruction for source nat. fix route entry for interfaces
+    that are in admin/link down on wan lb
+  * fixed problem with ping target failure that is not the last listed
+    interface, now the correct mangle wan load balance is referenced
+    when an
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@firebolt.vyatta.com>  Sat, 28 Jun 2008 11:22:31 -0700
+
 vyatta-wanloadbalance (0.10) unstable; urgency=low
 
 	  3.1.0
