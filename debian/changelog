@@ -1,3 +1,29 @@
+vyatta-wanloadbalance (0.12) unstable; urgency=low
+
+	  3.1.2
+  [ Mark O'Brien ]
+
+
+  [ root ]
+  * my bad. last commit I changed the conntrack module name to uppercase
+    which caused the snat rules to not match the iptables module and
+    therefore fail on load. this should fix the problem, tested icmp
+    with standard configuration and default routes, works now.
+  * fix for bug 3245. need sudo for the rm.
+
+  [ Michael Larson ]
+  * fix for bug 3437
+  * fix for 2948--additional nodes need to refer to interface values.
+  * fix for bug 2779.
+  * fix for bug 3410. added entry for marking of connectionless packets.
+  * fix for bug 3393. apply default route on poll interval if route is
+    not present in policy table. This fixes a problem if the interface
+    is
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@firebolt.vyatta.com>  Wed, 23 Jul 2008 21:36:20 -0700
+
 vyatta-wanloadbalance (0.11) unstable; urgency=low
 
 	  3.1.1
