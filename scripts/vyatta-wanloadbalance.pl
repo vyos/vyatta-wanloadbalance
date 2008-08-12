@@ -58,6 +58,10 @@ sub write_health {
 	if (defined $option) {
 	    print FILE_LCK "\t\tnexthop  " . $option . "\n";
 	}
+	else {
+	    print "nexthop must be specified\n";
+	    exit 1;
+	}
 	print FILE_LCK "\t}\n";
     }
     print FILE_LCK "}\n\n";
@@ -164,6 +168,10 @@ sub write_rules {
 	$option = $config->returnValue("$rule inbound-interface");
 	if (defined $option) {
 	    print FILE_LCK "\tinbound-interface " . $option . "\n"
+	}
+	else {
+	    print "inbound-interface must be specified\n";
+	    exit 1;
 	}
 
 	#interface
