@@ -77,6 +77,7 @@ LBDataFactory::load(const string &conf_file)
 	++depth;
       }
       else if (symbol == "}") {
+	path[depth] = string("");
 	--depth;
       }
     }
@@ -116,6 +117,7 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
 		 static_cast < int(*)(int) > (std::tolower));
   std::transform(value.begin(), value.end(), std::back_inserter(l_value),
 		 static_cast < int(*)(int) > (std::tolower));
+
   if (path[0] == "health") {
     if (l_key == "interface") {
       process_health(l_key,l_value);
