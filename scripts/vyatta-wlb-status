@@ -1,0 +1,4 @@
+#!/bin/sh
+
+iptables -L PREROUTING -t mangle -v
+

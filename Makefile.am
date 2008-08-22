@@ -1,4 +1,5 @@
 cfgdir = $(datadir)/vyatta-cfg/templates
+bin_sudo_usersdir = $(bindir)/sudo-users
 curverdir = $(sysconfdir)/config-migrate/current
 
 initddir	 = /etc/init.d
@@ -10,6 +11,8 @@ CLEANFILES = src/main.o src/lbdata.o src/lbdatafactory.o src/loadbalance.o src/r
 
 sbin_SCRIPTS = scripts/vyatta-wanloadbalance.pl
 sbin_SCRIPTS += scripts/vyatta-wanloadbalance.init
+
+bin_sudo_users_SCRIPTS  = scripts/vyatta-wlb-status
 
 curver_DATA = cfg-version/wanloadbalance@1
 
