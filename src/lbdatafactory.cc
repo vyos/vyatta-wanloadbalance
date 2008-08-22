@@ -118,7 +118,10 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
   std::transform(value.begin(), value.end(), std::back_inserter(l_value),
 		 static_cast < int(*)(int) > (std::tolower));
 
-  if (path[0] == "health") {
+  if (path[0] == "disable-source-nat") {
+    process_disablesourcenat(l_key,l_value);
+  }
+  else if (path[0] == "health") {
     if (l_key == "interface") {
       process_health(l_key,l_value);
     }
@@ -151,6 +154,11 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
   }
 }
 
+void
+LBDataFactory::process_disablesourcenat(const string &key, const string &value)
+{
+  _lb_data._disable_source_nat = true;
+}
 
 void
 LBDataFactory::process_health(const string &key, const string &value) 

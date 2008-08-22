@@ -24,6 +24,11 @@ sub write_health {
 
     my $valid = "false";
 
+
+    if ($config->exists("load-balancing wan disable-source-nat")) {
+	print FILE_LCK "disable-source-nat\n";
+    }
+
     $config->setLevel("load-balancing wan interface-health");
     my @eths = $config->listNodes();
     

@@ -109,7 +109,7 @@ class LBData {
   typedef map<string,LBHealth>::iterator InterfaceHealthIter;
   typedef map<string,LBHealth>::const_iterator InterfaceHealthConstIter;
 
-  LBData() {}
+  LBData() : _disable_source_nat(false) {}
 
   bool
   error() {return false;}
@@ -131,6 +131,8 @@ class LBData {
 
   LBRuleColl _lb_rule_coll;
   InterfaceHealthColl _iface_health_coll;
+
+  bool _disable_source_nat;
 };
 
 #endif //__LBDATA_HH__

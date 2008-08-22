@@ -41,6 +41,9 @@ private:
   process(const vector<string> &path, int depth, const string &key, const string &value);
 
   void
+  process_disablesourcenat(const string &key, const string &value);
+
+  void
   process_health(const string &key, const string &value);
 
   void

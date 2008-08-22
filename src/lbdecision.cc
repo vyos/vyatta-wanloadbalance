@@ -108,11 +108,12 @@ if so then this stuff goes here!
 
   string stdout;
   //set up special nat rules
-  execute(string("iptables -t nat -N WANLOADBALANCE"), stdout);
-  execute(string("iptables -t nat -F WANLOADBALANCE"), stdout);
-  execute(string("iptables -t nat -D POSTROUTING -j WANLOADBALANCE"), stdout);
-  execute(string("iptables -t nat -A POSTROUTING -j WANLOADBALANCE"), stdout);
-
+  if (lbdata._disable_source_nat == false) {
+    execute(string("iptables -t nat -N WANLOADBALANCE"), stdout);
+    execute(string("iptables -t nat -F WANLOADBALANCE"), stdout);
+    execute(string("iptables -t nat -D POSTROUTING -j WANLOADBALANCE"), stdout);
+    execute(string("iptables -t nat -A POSTROUTING -j WANLOADBALANCE"), stdout);
+  }
   //set up the conntrack table
   execute(string("iptables -t raw -N NAT_CONNTRACK"), stdout);
   execute(string("iptables -t raw -F NAT_CONNTRACK"), stdout);
@@ -143,8 +144,10 @@ if so then this stuff goes here!
     char hex_buf[40];
     sprintf(hex_buf,"%X",ct);
     execute(string("ip rule add fwmark ") + hex_buf + " table " + buf, stdout);
-    
-    execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + fetch_iface_addr(iface), stdout);
+
+    if (lbdata._disable_source_nat == false) {
+      execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + fetch_iface_addr(iface), stdout);
+    }
 
     ++ct;
     ++iter;
@@ -260,6 +263,11 @@ LBDecision::shutdown()
 
   //then if we do, flush all
   execute("iptables -t mangle -F PREROUTING", stdout);
+
+  //clear out nat as well
+  execute("iptables -t nat -F WANLOADBALANCE", stdout);
+  execute("iptables -t nat -D POSTROUTING -j WANLOADBALANCE", stdout);
+
 
   //remove the policy entries
   InterfaceMarkIter iter = _iface_mark_coll.begin();
