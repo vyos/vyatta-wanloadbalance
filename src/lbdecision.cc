@@ -111,8 +111,8 @@ if so then this stuff goes here!
   if (lbdata._disable_source_nat == false) {
     execute(string("iptables -t nat -N WANLOADBALANCE"), stdout);
     execute(string("iptables -t nat -F WANLOADBALANCE"), stdout);
-    execute(string("iptables -t nat -D POSTROUTING -j WANLOADBALANCE"), stdout);
-    execute(string("iptables -t nat -A POSTROUTING -j WANLOADBALANCE"), stdout);
+    execute(string("iptables -t nat -D VYATTA_PRE_SNAT_HOOK -j WANLOADBALANCE"), stdout);
+    execute(string("iptables -t nat -I VYATTA_PRE_SNAT_HOOK 1 -j WANLOADBALANCE"), stdout);
   }
   //set up the conntrack table
   execute(string("iptables -t raw -N NAT_CONNTRACK"), stdout);
@@ -266,7 +266,7 @@ LBDecision::shutdown()
 
   //clear out nat as well
   execute("iptables -t nat -F WANLOADBALANCE", stdout);
-  execute("iptables -t nat -D POSTROUTING -j WANLOADBALANCE", stdout);
+  execute("iptables -t nat -D VYATTA_PRE_SNAT_HOOK -j WANLOADBALANCE", stdout);
 
 
   //remove the policy entries
