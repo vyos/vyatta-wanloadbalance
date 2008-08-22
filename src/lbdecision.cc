@@ -209,34 +209,40 @@ LBDecision::run(LBData &lb_data)
   //and compute the new set and apply
   LBData::LBRuleIter iter = lb_data._lb_rule_coll.begin();
   while (iter != lb_data._lb_rule_coll.end()) {
-    map<int,float> weights = get_new_weights(lb_data,iter->second);
-    map<int,float>::iterator w_iter = weights.begin();
     //NEED TO HANDLE APPLICATION SPECIFIC DETAILS
     string app_cmd = get_application_cmd(iter->second);
 
-    char fbuf[20],dbuf[20];
-    if (weights.empty()) {
-      //no rules here!
-    }
-    else if (weights.size() == 1) {
-      sprintf(dbuf,"%d",w_iter->first);
-      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
-      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
+    if (iter->second._exclude == true) {
+      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j ACCEPT", stdout);
     }
     else {
-      map<int,float>::iterator w_end = weights.end();
-      --w_end;
-      while (w_iter != w_end) {      
-	sprintf(fbuf,"%f",w_iter->second);
-	sprintf(dbuf,"%d",w_iter->first);
-	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
-	++w_iter;
+      map<int,float> weights = get_new_weights(lb_data,iter->second);
+      map<int,float>::iterator w_iter = weights.begin();
+      
+      char fbuf[20],dbuf[20];
+      if (weights.empty()) {
+	//no rules here!
       }
-      //last one is special case, the catch all rule
-      ++w_iter;
-      sprintf(dbuf,"%d",w_iter->first);
-      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
-      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
+      else if (weights.size() == 1) {
+	sprintf(dbuf,"%d",w_iter->first);
+	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
+      }
+      else {
+	map<int,float>::iterator w_end = weights.end();
+	--w_end;
+	while (w_iter != w_end) {      
+	  sprintf(fbuf,"%f",w_iter->second);
+	  sprintf(dbuf,"%d",w_iter->first);
+	  execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	  ++w_iter;
+	}
+	//last one is special case, the catch all rule
+	++w_iter;
+	sprintf(dbuf,"%d",w_iter->first);
+	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
+      }
     }
     ++iter;
     continue;

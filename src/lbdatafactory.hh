@@ -50,6 +50,9 @@ private:
   process_rule(const string &key, const string &value);
 
   void
+  process_rule_exclude(const string &key, const string &value);
+
+  void
   process_rule_protocol(const string &key, const string &value);
 
   void

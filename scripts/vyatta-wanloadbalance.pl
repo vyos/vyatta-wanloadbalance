@@ -86,6 +86,11 @@ sub write_rules {
 	
 	$config->setLevel('load-balancing wan rule');
 
+	if ($config->exists("$rule exclude")) {
+	    $valid = "true";
+	    print FILE_LCK "\texclude\n";
+	}
+
 	my $protocol = $config->returnValue("$rule protocol");
 	if (defined $protocol) {
 	    print FILE_LCK "\tprotocol " . $protocol . "\n"

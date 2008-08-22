@@ -140,6 +140,9 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
     else if (depth > 0 && path[1] == "protocol") {
       process_rule_protocol(l_key,l_value);
     }
+    else if (depth > 0 && path[1] == "exclude") {
+      process_rule_exclude(l_key,l_value);
+    }
     else {
       process_rule(l_key,l_value);
     }
@@ -263,6 +266,12 @@ LBDataFactory::process_rule_protocol(const string &key, const string &value)
       syslog(LOG_ERR, "wan_lb: illegal protocol specified: %s", value.c_str());
     }
   }
+}
+
+void
+LBDataFactory::process_rule_exclude(const string &key, const string &value)
+{
+  _rule_iter->second._exclude = true;
 }
 
 void

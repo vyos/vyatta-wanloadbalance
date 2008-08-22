@@ -23,7 +23,8 @@ class LBRule {
   typedef enum {ALL,ICMP,UDP,TCP} Protocol;
 
   LBRule() :
-    _proto("all")
+    _proto("all"),
+    _exclude(false)
       {}
 
  public:
@@ -35,6 +36,8 @@ class LBRule {
   string _d_addr;
   string _d_port;
   string _d_port_ipt;
+
+  bool _exclude;
 
   string _in_iface;
   InterfaceDistColl _iface_dist_coll;
