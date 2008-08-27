@@ -416,13 +416,14 @@ LBDecision::get_application_cmd(LBRule &rule)
   }
   
   if (rule._d_addr.empty() == false) {
+    string negation;
     string tmp(rule._d_addr);
     if (tmp.find("!") != string::npos) {
-      tmp = "! " + tmp.substr(1,tmp.length()-1);
+      negation = "! ";
     }
 
     if (tmp.find("-") != string::npos) {
-      filter += "-m iprange --dst-range " + tmp + " ";
+      filter += "-m iprange " + negation + "--dst-range " + tmp + " ";
     }
     else {
       filter += "--destination " + tmp + " ";
