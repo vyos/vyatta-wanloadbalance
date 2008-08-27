@@ -416,17 +416,28 @@ LBDecision::get_application_cmd(LBRule &rule)
   }
   
   if (rule._d_addr.empty() == false) {
-    string negation;
+    bool negate_flag = false;
     string tmp(rule._d_addr);
     if (tmp.find("!") != string::npos) {
-      negation = "! ";
+      negate_flag = true;
+      tmp = tmp.substr(1,tmp.length()-1);
     }
 
     if (tmp.find("-") != string::npos) {
-      filter += "-m iprange " + negation + "--dst-range " + tmp + " ";
+      if (negate_flag) {
+	filter += "-m iprange ! --dst-range " + tmp + " ";
+      }
+      else {
+	filter += "-m iprange --dst-range " + tmp + " ";
+      }
     }
     else {
-      filter += "--destination " + tmp + " ";
+      if (negate_flag) {
+	filter += "--destination ! " + tmp + " ";
+      }
+      else {
+	filter += "--destination " + tmp + " ";
+      }
     }
   }
 
