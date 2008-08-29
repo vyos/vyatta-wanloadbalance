@@ -336,14 +336,20 @@ LBDecision::get_new_weights(LBData &data, LBRule &rule)
     }
 
     if (rule._failover == true) { //add single entry if active
-      if (weights.empty() == false) {
-	weights.insert(pair<int,float>(ct,0.));
+      if (data.is_active(iter->first)) {
+	//select the active interface that has the highest weight
+	if (iter->second > group) {
+	  map<int,float>::iterator w_iter = weights.begin();
+	  while (w_iter != weights.end()) {
+	    w_iter->second = 0.; //zero out previous weight
+	    ++w_iter;
+	  }
+	}
+	weights.insert(pair<int,float>(ct,iter->second));
+	group = iter->second;
       }
       else {
-	if (data.is_active(iter->first)) {
-	  weights.insert(pair<int,float>(ct,1.));
-	  group = 1;
-	}
+	weights.insert(pair<int,float>(ct,0.));	
       }
     }
     else {
