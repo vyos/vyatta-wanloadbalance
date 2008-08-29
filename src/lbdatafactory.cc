@@ -148,6 +148,9 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
     else if (depth > 0 && path[1] == "exclude") {
       process_rule_exclude(l_key,l_value);
     }
+    else if (depth > 0 && path[1] == "failover") {
+      process_rule_failover(l_key,l_value);
+    }
     else {
       process_rule(l_key,l_value);
     }
@@ -282,6 +285,12 @@ void
 LBDataFactory::process_rule_exclude(const string &key, const string &value)
 {
   _rule_iter->second._exclude = true;
+}
+
+void
+LBDataFactory::process_rule_failover(const string &key, const string &value)
+{
+  _rule_iter->second._failover = true;
 }
 
 void

@@ -24,7 +24,8 @@ class LBRule {
 
   LBRule() :
     _proto("all"),
-    _exclude(false)
+    _exclude(false),
+    _failover(false)
       {}
 
  public:
@@ -38,6 +39,7 @@ class LBRule {
   string _d_port_ipt;
 
   bool _exclude;
+  bool _failover;
 
   string _in_iface;
   InterfaceDistColl _iface_dist_coll;

@@ -96,6 +96,15 @@ sub write_rules {
 	    print FILE_LCK "\texclude\n";
 	}
 
+	if ($config->exists("$rule failover")) {
+	    print FILE_LCK "\tfailover\n";
+	}
+
+	if ($config->exists("$rule failover") && $config->exists("$rule exclude")) {
+	    print "failover cannot be configured with exclude\n";
+	    exit 1;
+	}
+
 	my $protocol = $config->returnValue("$rule protocol");
 	if (defined $protocol) {
 	    print FILE_LCK "\tprotocol " . $protocol . "\n"

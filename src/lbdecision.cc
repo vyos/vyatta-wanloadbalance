@@ -307,7 +307,7 @@ LBDecision::execute(std::string cmd, std::string &stdout, bool read)
       char *buf = NULL;
       size_t len = 0;
       size_t read_len = 0;
-      while ((read_len = getline(&buf, &len, f)) != -1) {
+      while ((read_len = getline(&buf, &len, f)) != (size_t)-1) {
 	stdout += string(buf) + " ";
       }
 
@@ -334,12 +334,26 @@ LBDecision::get_new_weights(LBData &data, LBRule &rule)
     if (_debug) {
       cout << "LBDecision::get_new_weights(): " << iter->first << " is active: " << (data.is_active(iter->first) ? "true" : "false") << endl;
     }
-    if (data.is_active(iter->first)) {
-      weights.insert(pair<int,float>(ct,iter->second));
-      group += iter->second;
+
+    if (rule._failover == true) { //add single entry if active
+      if (weights.empty() == false) {
+	weights.insert(pair<int,float>(ct,0.));
+      }
+      else {
+	if (data.is_active(iter->first)) {
+	  weights.insert(pair<int,float>(ct,1.));
+	  group = 1;
+	}
+      }
     }
     else {
-      weights.insert(pair<int,float>(ct,0.));
+      if (data.is_active(iter->first)) {
+	weights.insert(pair<int,float>(ct,iter->second));
+	group += iter->second;
+      }
+      else {
+	weights.insert(pair<int,float>(ct,0.));
+      }
     }
     ++ct;
     ++iter;
@@ -356,7 +370,7 @@ LBDecision::get_new_weights(LBData &data, LBRule &rule)
       if (w_iter->second > 0.) { //can only be an integer value here
 	w = float(w_iter->second) / float(group);
       }
-      group -= w_iter->second;   //I THINK THIS NEEDS TO BE ADJUSTED TO THE OVERALL REMAINING VALUES. which is this...
+      group -= (int)w_iter->second;   //I THINK THIS NEEDS TO BE ADJUSTED TO THE OVERALL REMAINING VALUES. which is this...
       if (w < .01) {
 	weights.erase(w_iter++);
 	continue;
