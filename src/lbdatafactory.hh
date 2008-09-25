@@ -78,6 +78,7 @@ private:
   LBHealth _lb_health;
   LBRule _lb_rule;
   LBData _lb_data;
+  int _interface_index;
 
   LBData::LBRuleIter _rule_iter;
   LBData::InterfaceHealthIter _health_iter;

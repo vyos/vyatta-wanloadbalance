@@ -68,13 +68,14 @@ public:
 
 class LBHealth {
  public:
-  LBHealth() :
+  LBHealth(int interface_index) :
     _success_ct(0),
     _failure_ct(0),
     _ping_resp_time(0),
     _hresults(10),
     _is_active(true),
-    _state_changed(true)
+    _state_changed(true),
+    _interface_index(interface_index)
       {}
 
   void put(int rtt);
@@ -99,6 +100,7 @@ class LBHealth {
   LBHealthHistory _hresults;
   bool _is_active;
   bool _state_changed;
+  int _interface_index;
 };
 
 

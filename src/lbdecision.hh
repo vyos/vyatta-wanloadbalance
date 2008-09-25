@@ -17,10 +17,6 @@ using namespace std;
 class LBDecision
 {
 public:
-  typedef map<string,int> InterfaceMarkColl;
-  typedef map<string,int>::iterator InterfaceMarkIter;
-
-public:
   LBDecision(bool debug);
   ~LBDecision();
 
@@ -31,7 +27,7 @@ public:
   run(LBData &lbdata);
 
   void
-  shutdown();
+  shutdown(LBData &lbdata);
 
 private:
   int
@@ -51,7 +47,6 @@ private:
 
 private:
   bool _debug;
-  InterfaceMarkColl _iface_mark_coll;
 };
 
 #endif //__LBDECISION_HH__

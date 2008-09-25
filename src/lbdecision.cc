@@ -71,7 +71,6 @@ LBDecision::LBDecision(bool debug) :
  **/
 LBDecision::~LBDecision()
 {
-  shutdown();
 }
 
 /**
@@ -90,7 +89,6 @@ LBDecision::init(LBData &lbdata)
    */
 
   char buf[20];
-  int ct = 1;
 
   /*
     do we need: 
@@ -125,6 +123,8 @@ if so then this stuff goes here!
   LBData::InterfaceHealthIter iter = lbdata._iface_health_coll.begin();
   while (iter != lbdata._iface_health_coll.end()) {
     string iface = iter->first;
+    
+    int ct = iter->second._interface_index;
 
     sprintf(buf,"%d",ct);
 
@@ -135,10 +135,11 @@ if so then this stuff goes here!
 
     //NOTE, WILL NEED A WAY TO CLEAN UP THIS RULE ON RESTART...
     execute(string("iptables -t mangle -A ISP_") + buf + " -j ACCEPT", stdout);
-
-    insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, ct);
-    _iface_mark_coll.insert(pair<string,int>(iface,ct));
     
+    //    insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, ct);
+    //need to force the entry on restart as the configuration may have changed.
+    execute(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, stdout);
+
     execute(string("ip rule delete table ") + buf, stdout);
 
     char hex_buf[40];
@@ -148,8 +149,6 @@ if so then this stuff goes here!
     if (lbdata._disable_source_nat == false) {
       execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + fetch_iface_addr(iface), stdout);
     }
-
-    ++ct;
     ++iter;
   }
   execute("ip route flush cache", stdout);
@@ -182,21 +181,14 @@ LBDecision::run(LBData &lb_data)
   //now reapply the routing tables.
   LBData::InterfaceHealthIter h_iter = lb_data._iface_health_coll.begin();
   while (h_iter != lb_data._iface_health_coll.end()) {
-    string route_str;
-    InterfaceMarkIter m_iter = _iface_mark_coll.find(h_iter->first);
-    if (m_iter != _iface_mark_coll.end()) {
-      route_str = m_iter->second;
-      
-      if (h_iter->second._is_active == true) {
-	char buf[40];
-	sprintf(buf,"%d",m_iter->second);
-	insert_default(string("ip route replace table ") + buf + " default dev " + h_iter->first + " via " + h_iter->second._nexthop, m_iter->second);
-      }
-      else {
-	//right now replace route, but don't delete until race condition is resolved
-
-	//	execute(string("ip route delete ") + route_str);
-      }
+    if (h_iter->second._is_active == true) {
+      char buf[40];
+      sprintf(buf,"%d",h_iter->second._interface_index);
+      insert_default(string("ip route replace table ") + buf + " default dev " + h_iter->first + " via " + h_iter->second._nexthop, h_iter->second._interface_index);
+    }
+    else {
+      //right now replace route, but don't delete until race condition is resolved
+      //	execute(string("ip route delete ") + route_str);
     }
     ++h_iter;
   }
@@ -220,29 +212,19 @@ LBDecision::run(LBData &lb_data)
     }
     else {
       map<int,float> weights = get_new_weights(lb_data,iter->second);
-      map<int,float>::iterator w_iter = weights.begin();
       
-      char fbuf[20],dbuf[20];
       if (weights.empty()) {
 	//no rules here!
       }
-      else if (weights.size() == 1) {
-	sprintf(dbuf,"%d",w_iter->first);
-	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
-	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
-      }
       else {
-	map<int,float>::iterator w_end = weights.end();
-	--w_end;
-	while (w_iter != w_end) {      
+	char fbuf[20],dbuf[20];
+	map<int,float>::iterator w_iter = weights.begin();
+	for (w_iter = weights.begin(); w_iter != (--weights.end()); w_iter++) {
 	  sprintf(fbuf,"%f",w_iter->second);
 	  sprintf(dbuf,"%d",w_iter->first);
 	  execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
-	  ++w_iter;
 	}
-	//last one is special case, the catch all rule
-	++w_iter;
-	sprintf(dbuf,"%d",w_iter->first);
+	sprintf(dbuf,"%d",(--weights.end())->first);
 	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
 	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
       }
@@ -257,7 +239,7 @@ LBDecision::run(LBData &lb_data)
  *
  **/
 void
-LBDecision::shutdown()
+LBDecision::shutdown(LBData &data)
 {
   string stdout;
 
@@ -270,16 +252,16 @@ LBDecision::shutdown()
 
 
   //remove the policy entries
-  InterfaceMarkIter iter = _iface_mark_coll.begin();
-  while (iter != _iface_mark_coll.end()) {
+  LBData::InterfaceHealthIter h_iter = data._iface_health_coll.begin();
+  while (h_iter != data._iface_health_coll.end()) {
     char buf[40];
-    sprintf(buf,"%d",iter->second);
+    sprintf(buf,"%d",h_iter->second._interface_index);
     
     execute(string("ip rule del table ") + buf, stdout);
 
     //need to delete ip rule here as well!
 
-    ++iter;
+    ++h_iter;
   }
 }
 
@@ -328,11 +310,16 @@ LBDecision::get_new_weights(LBData &data, LBRule &rule)
 {
   map<int,float> weights;
   int group = 0;
-  int ct = 1;
   LBRule::InterfaceDistIter iter = rule._iface_dist_coll.begin();
   while (iter != rule._iface_dist_coll.end()) {
     if (_debug) {
       cout << "LBDecision::get_new_weights(): " << iter->first << " is active: " << (data.is_active(iter->first) ? "true" : "false") << endl;
+    }
+
+    int ct = 0;
+    LBData::InterfaceHealthIter h_iter = data._iface_health_coll.find(iter->first);
+    if (h_iter != data._iface_health_coll.end()) {
+      ct = h_iter->second._interface_index;
     }
 
     if (rule._failover == true) { //add single entry if active
@@ -361,7 +348,6 @@ LBDecision::get_new_weights(LBData &data, LBRule &rule)
 	weights.insert(pair<int,float>(ct,0.));
       }
     }
-    ++ct;
     ++iter;
   }
 

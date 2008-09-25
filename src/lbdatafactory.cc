@@ -22,7 +22,9 @@ using namespace std;
 
 
 LBDataFactory::LBDataFactory(bool debug) :
-  _debug(debug)
+  _debug(debug),
+  _lb_health(0),
+  _interface_index(0)
 {
 }
 
@@ -169,7 +171,7 @@ LBDataFactory::process_health(const string &key, const string &value)
   if (value.empty() == false) {
     LBData::InterfaceHealthIter iter = _lb_data._iface_health_coll.find(key);
     if (iter == _lb_data._iface_health_coll.end()) {
-      _lb_data._iface_health_coll.insert(pair<string,LBHealth>(value,LBHealth()));
+      _lb_data._iface_health_coll.insert(pair<string,LBHealth>(value,LBHealth(++_interface_index)));
     }
     _health_iter = _lb_data._iface_health_coll.find(value);
   }
