@@ -1,12 +1,3 @@
 type: txt
 help: Set inbound interface name
-syntax:expression: exec " \
-        if [ -z \"`ip link | grep $VAR(@)`\" ]; then \
-          echo Invalid interface [$VAR(@)]; \
-          exit 1 ; \
-        fi ; "
-allowed: for dev in /sys/class/net/*; 
-         do if [[ ! $dev =~ "net/lo" ]]; then
-            echo -n ${dev##*/} " "
-            fi
-         done
+comp_help: Enter a network interface name, for example, "eth0"
