@@ -1,6 +1,6 @@
 help: Show Wide Area Network (WAN) load-balancing flow
 run:  if [ -f /var/load-balance/wlb.out ] ; then 
-         cat /proc/net/ip_conntrack | grep ' mark=[1-9]'
+         sudo cat /proc/net/ip_conntrack | grep ' mark=[1-9]'
       else
          echo WAN load balancing is not configured
       fi 
