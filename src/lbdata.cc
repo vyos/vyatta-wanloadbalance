@@ -7,6 +7,7 @@
  */
 #include <sys/time.h>
 #include <time.h>
+#include <syslog.h>
 #include <iostream>
 
 #include "lbdata.hh"
@@ -167,14 +168,17 @@ LBData::dump()
 bool
 LBData::state_changed()
 {
+  bool overall_state = false;
   LBData::InterfaceHealthIter h_iter = _iface_health_coll.begin();
   while (h_iter != _iface_health_coll.end()) {
     if (h_iter->second.state_changed()) {
-      return true;
+      string tmp = (h_iter->second._is_active ? string("ACTIVE") : string("FAILED"));      
+      syslog(LOG_WARNING, "Interface %s has changed state to %s",h_iter->first.c_str(),tmp.c_str());
+      overall_state = true;
     }
     ++h_iter;
   }
-  return false;
+  return overall_state;
 }
 
 /**
