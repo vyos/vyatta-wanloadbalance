@@ -13,6 +13,7 @@ sbin_SCRIPTS = scripts/vyatta-wanloadbalance.pl
 sbin_SCRIPTS += scripts/vyatta-wanloadbalance.init
 
 bin_sudo_users_SCRIPTS  = scripts/vyatta-wlb-status
+bin_sudo_users_SCRIPTS  += scripts/vyatta-wlb-connection
 
 curver_DATA = cfg-version/wanloadbalance@1
 
