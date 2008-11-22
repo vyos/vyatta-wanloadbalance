@@ -9,9 +9,9 @@
 # **** End License ****
 #
 use lib "/opt/vyatta/share/perl5/";
-use VyattaConfig;
-use VyattaMisc;
-use VyattaTypeChecker;
+use Vyatta::Config;
+use Vyatta::Misc;
+use Vyatta::TypeChecker;
 
 use warnings;
 use strict;
@@ -20,7 +20,7 @@ use File::Copy;
 
 sub write_health {
 #open conf
-    my $config = new VyattaConfig;
+    my $config = new Vyatta::Config;
 
     my $valid = "false";
 
@@ -78,7 +78,7 @@ sub write_health {
 }
 
 sub write_rules {
-    my $config = new VyattaConfig;
+    my $config = new Vyatta::Config;
 
     my $valid = "false";
 
@@ -117,7 +117,7 @@ sub write_rules {
 	print FILE_LCK "\tdestination {\n";
 	my $daddr = $config->returnValue("$rule destination address");
 	if (defined $daddr) {
-	    if (VyattaTypeChecker::validate_iptables4_addr($daddr) eq "1") {
+	    if (Vyatta::TypeChecker::validate_iptables4_addr($daddr) eq "1") {
 		print FILE_LCK "\t\taddress \"" . $daddr . "\"\n";
 	    }
 	    else {
@@ -135,7 +135,7 @@ sub write_rules {
 	    if ($protocol eq "tcp" || $protocol eq "udp") {
 		$can_use_port = "yes";
 	    }
-	    ($port_str, $port_err) = VyattaMisc::getPortRuleString($option, $can_use_port, "d", $protocol);
+	    ($port_str, $port_err) = Vyatta::Misc::getPortRuleString($option, $can_use_port, "d", $protocol);
 	    if (defined $port_str) {
 		print FILE_LCK "\t\tport-ipt \"" . $port_str . "\"\n";
 	    }
@@ -154,7 +154,7 @@ sub write_rules {
 	print FILE_LCK "\tsource {\n";
 	my $saddr = $config->returnValue("$rule source address");
 	if (defined $saddr) {
-	    if (VyattaTypeChecker::validate_iptables4_addr($saddr) eq "1") {
+	    if (Vyatta::TypeChecker::validate_iptables4_addr($saddr) eq "1") {
 		print FILE_LCK "\t\taddress \"" . $saddr . "\"\n";
 	    }
 	    else {
@@ -172,7 +172,7 @@ sub write_rules {
 	    if ($protocol eq "tcp" || $protocol eq "udp") {
 		$can_use_port = "yes";
 	    }
-	    ($port_str, $port_err) = VyattaMisc::getPortRuleString($option, $can_use_port, "d", $protocol);
+	    ($port_str, $port_err) = Vyatta::Misc::getPortRuleString($option, $can_use_port, "d", $protocol);
 	    if (defined $port_str) {
 		print FILE_LCK "\t\tport-ipt \"" . $port_str . "\"\n";
 	    }
