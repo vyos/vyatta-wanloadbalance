@@ -1,6 +1,6 @@
 help: Show Wide Area Network (WAN) load-balancing flow
 run:  if [ -f /var/load-balance/wlb.out ] ; then 
-      	 sudo ${vyatta_bindir}/sudo-users/vyatta-wlb-connection
+      	 sudo ${vyatta_bindir}/sudo-users/vyatta-wlb-connection.pl
       else
          echo WAN load balancing is not configured
       fi 
