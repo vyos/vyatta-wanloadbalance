@@ -25,11 +25,21 @@
 
 use lib "/opt/vyatta/share/perl5/";
 
-
-if (!open($FILE, "<", "/proc/net/ip_conntrack")) {
+#examine /var/load-balance/wlb.conf for disable-source-nat
+if (!open($CONFFILE, "<", "/var/load-balance/wlb.conf")) {
     return;
 }
-
+$_ = <$CONFFILE>;
+if (/disable-source-nat/) {
+    if (!open($FILE, "<", "/proc/net/ip_conntrack")) {
+	return;
+    }
+}
+else {
+    if (!open($FILE, "/usr/sbin/conntrack -L -n|")) {
+	return;
+    }
+}
 
 print "Type\tState\t\tSrc\t\t\tDst\t\t\tPackets\tBytes\n";
 
