@@ -1,3 +1,63 @@
+vyatta-wanloadbalance (0.13) unstable; urgency=low
+
+	  3.2.0
+  [ Mark O'Brien ]
+
+
+  [ slioch ]
+  * fix for bug 3608. add connnection comment to sudoers directory.
+  * fix for bug 3843. added warning level syslong messages on any
+    interface that changes state in wan lb.
+  * fix for bug 3817
+  * allow free form text field entry for inbound-interface. This allows
+    a wildcard (iptables style) interface to be set, allowing an
+  * missed this configuration node on checkin fix for bug 3332. Now
+    command is available.
+  * fix for bug 3710. also found and fixed another bug with restarting
+    of wlb after changing rule set. this simplifies the application of
+    the rules to
+
+  [ Mike Larson ]
+  * modified failover algorithm to provide deterministic control over
+    which interface is selected. The interface with the highest weight
+    will be preferred.
+  * add rule failover support. Failover mode can now be specified on a
+    specific rule. This rule will only direct traffic to a single active
+    interface, on failure of the ping target traffice will be directed
+    out an alternate interface.
+  * revised fix for dst-range bug to mirror fix for src.
+
+  [ slioch ]
+  * fix for bug 3621.
+
+  [ root ]
+  * fix for bug 3608.
+  * snat rules created by wanloadbanana are now applied before snat
+    rules created by nat. this shouldn't be a problem for nat, as the
+    wanloadbanana rules are filters on packets marked in the mangle
+    table.
+  * Partial fix for bug 3332. WLB can now be configured to run without
+    creating implicit source nat rules.
+  * fixed bug in parsing multiple rule sets
+  * fix for bug 3620. exclusion option is now provided and will create
+    an accept rule. For an exclusion the user does not need to configure
+    interfaces for that rule to balance across.
+  * fix for bug 3530. now nexthop and inbound-interface are required for
+    a successful commit.
+  * added new command that dumps the ip conntrack tables for connections
+    that have been marked by wan load balance. This addresses
+    enhancement request bug 3191.
+
+  [ Stephen Hemminger ]
+  * Handle quagga package name change
+
+  [ root ]
+  * fix for bug 3446. protocol assignment is now identical to firewall.
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@firebolt.vyatta.com>  Tue, 25 Nov 2008 19:11:06 -0800
+
 vyatta-wanloadbalance (0.12) unstable; urgency=low
 
 	  3.1.2
