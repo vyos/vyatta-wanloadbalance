@@ -40,8 +40,7 @@ class LoadBalance
 
   void output();
 
-  //temporary stand-in for now...
-  void sleep() {::sleep(5);}
+  void sleep();
 
  private:
   bool _debug;

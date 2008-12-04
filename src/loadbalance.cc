@@ -93,3 +93,14 @@ LoadBalance::output()
   _output.write(_lbdata);
 }
 
+
+/**
+ *
+ **/
+//temporary stand-in for now...
+void 
+LoadBalance::sleep() 
+{
+  ::sleep(5);
+}
+

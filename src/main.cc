@@ -41,13 +41,20 @@ static void sig_end(int signo)
   exit(0);
 }
 
-static void sig_user(int signo)
+static void sig_user1(int signo)
 {
   if (g_lb)
     delete g_lb;
   cerr << "User signal: " << signo << endl;
   syslog(LOG_ERR, "wan_lb, user exit signal caught, exiting..");
   exit(0);
+}
+
+static void sig_user2(int signo)
+{
+  //used to wake up the process
+  cerr << "User signal: " << signo << endl;
+  syslog(LOG_ERR, "wan_lb, user exit signal caught, exiting..");
 }
 
 
@@ -132,7 +139,8 @@ int main(int argc, char* argv[])
   //  sighup...
   signal(SIGINT, sig_end);
   signal(SIGTERM, sig_end);
-  signal(SIGUSR1, sig_user);
+  signal(SIGUSR1, sig_user1);
+  signal(SIGUSR2, sig_user2);
 
     //drop into event loop
   do {
