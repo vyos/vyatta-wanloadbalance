@@ -138,7 +138,13 @@ if so then this stuff goes here!
     
     //    insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, ct);
     //need to force the entry on restart as the configuration may have changed.
-    execute(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, stdout);
+    if (iter->second._nexthop == "dhcp") {
+      string nexthop = fetch_iface_nexthop(iface);
+      execute(string("ip route replace table ") + buf + " default dev " + iface + " via " + nexthop, stdout);
+    }
+    else {
+      execute(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, stdout);
+    }
 
     execute(string("ip rule delete table ") + buf, stdout);
 
@@ -147,13 +153,46 @@ if so then this stuff goes here!
     execute(string("ip rule add fwmark ") + hex_buf + " table " + buf, stdout);
 
     if (lbdata._disable_source_nat == false) {
-      execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + fetch_iface_addr(iface), stdout);
+      iter->second._address = fetch_iface_addr(iface);
+      execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._address, stdout);
     }
     ++iter;
   }
   execute("ip route flush cache", stdout);
 }
 
+/**
+ * Need to do two things here, check the interfaces for new nexthops and update the routing tables,
+ * and get a new address to update the source nat with.
+ *
+ **/
+void
+LBDecision::update_paths(LBData &lbdata)
+{
+  string stdout;
+  if (lbdata._disable_source_nat == false) {
+    //first let's remove the entry
+    LBData::InterfaceHealthIter iter = lbdata._iface_health_coll.begin();
+    while (iter != lbdata._iface_health_coll.end()) {
+      if (iter->second._nexthop == "dhcp") {
+	string iface = iter->first;
+	string new_addr = fetch_iface_addr(iface);
+	if (new_addr != iter->second._address) {
+	  char buf[20];
+	  sprintf(buf,"%d",iter->second._interface_index);
+	  execute(string("iptables -t nat -D WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._address, stdout);
+	  execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + new_addr, stdout);
+	  iter->second._address = new_addr;
+
+	  //now let's update the nexthop here in the route table
+	  string nexthop = fetch_iface_nexthop(iface);
+	  execute(string("ip route replace table ") + buf + " default dev " + iface + " via " + nexthop, stdout);
+	}
+      }
+      ++iter;
+    }
+  }
+}
 
 /**
  * only responsible for 
@@ -489,6 +528,24 @@ LBDecision::insert_default(string cmd, int table)
   }
 }
 
+/**
+ * currently only reads the nexthop as maintained by the dhcp client
+ **/
+string
+LBDecision::fetch_iface_nexthop(const string &iface)
+{
+  string file("/var/run/vyatta/dhclient/dhclient-script-router-"+iface);
+  FILE *fp = fopen(file.c_str(),"r");
+  if (fp) {
+    char str[1025];
+    int ct = 0;
+    if ((ct = fread(str, 1, 1024, fp)) > 0) {
+      return string(str);
+    }
+    fclose(fp);
+  }
+  return string("");
+}
 
 /**
  * Fetch interface configuration 

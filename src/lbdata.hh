@@ -101,6 +101,7 @@ class LBHealth {
   bool _is_active;
   bool _state_changed;
   int _interface_index;
+  string _address;
 };
 
 

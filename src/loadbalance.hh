@@ -34,6 +34,8 @@ class LoadBalance
 
   bool start_cycle();
 
+  void update_paths();
+
   void health_test();
 
   void apply_rules();

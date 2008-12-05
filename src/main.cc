@@ -15,20 +15,21 @@
 #include <iostream>
 #include "loadbalance.hh"
 
+bool g_check_path = false;
 LoadBalance *g_lb = NULL;
 pid_t pid_output (const char *path);
 
 
 static void usage()
 {
-  cout << "lb -ftidh" << endl;
-  cout << "-f [file] configuration file" << endl;
-  cout << "-t load configuration file only and exit" << endl;
-  cout << "-v print debug output" << endl;
-  cout << "-i specify location of pid directory" << endl;
-  cout << "-o specify location of output directory" << endl;
-  cout << "-d run as daemon" << endl;
-  cout << "-h help" << endl;
+  cout << "lb -ftviodh" << endl;
+  cout << "  -f [file] configuration file" << endl;
+  cout << "  -t load configuration file only and exit" << endl;
+  cout << "  -v print debug output" << endl;
+  cout << "  -i specify location of pid directory" << endl;
+  cout << "  -o specify location of output directory" << endl;
+  cout << "  -d run as daemon" << endl;
+  cout << "  -h help" << endl;
 
 }
 
@@ -52,9 +53,10 @@ static void sig_user1(int signo)
 
 static void sig_user2(int signo)
 {
-  //used to wake up the process
+  //used to wake up the process to check paths
+  g_check_path = true;
   cerr << "User signal: " << signo << endl;
-  syslog(LOG_ERR, "wan_lb, user exit signal caught, exiting..");
+  syslog(LOG_ERR, "wan_lb, rechecking interfaces..");
 }
 
 
@@ -146,6 +148,12 @@ int main(int argc, char* argv[])
   do {
     if (debug) {
       cout << "main.cc: starting new cycle" << endl;
+    }
+
+    //check interface address and nexthop
+    if (g_check_path == true) {
+      g_lb->update_paths();
+      g_check_path = false;
     }
 
     //health test

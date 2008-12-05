@@ -70,6 +70,15 @@ LoadBalance::start_cycle()
  *
  **/
 void
+LoadBalance::update_paths()
+{
+  _decision.update_paths(_lbdata);
+}
+
+/**
+ *
+ **/
+void
 LoadBalance::health_test()
 {
   _ph.start(_lbdata);

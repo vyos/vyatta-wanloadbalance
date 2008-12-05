@@ -24,6 +24,9 @@ public:
   init(LBData &lbdata);
 
   void
+  update_paths(LBData &lbdata);
+
+  void
   run(LBData &lbdata);
 
   void
@@ -44,6 +47,9 @@ private:
 
   string
   fetch_iface_addr(const string &iface);
+
+  string
+  fetch_iface_nexthop(const string &iface);
 
 private:
   bool _debug;
