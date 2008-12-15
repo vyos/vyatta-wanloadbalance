@@ -223,7 +223,13 @@ LBDecision::run(LBData &lb_data)
     if (h_iter->second._is_active == true) {
       char buf[40];
       sprintf(buf,"%d",h_iter->second._interface_index);
-      insert_default(string("ip route replace table ") + buf + " default dev " + h_iter->first + " via " + h_iter->second._nexthop, h_iter->second._interface_index);
+      if (h_iter->second._nexthop == "dhcp") {
+      string nexthop = fetch_iface_nexthop(h_iter->first);
+	insert_default(string("ip route replace table ") + buf + " default dev " + h_iter->first + " via " + nexthop, h_iter->second._interface_index);
+      }
+      else {
+	insert_default(string("ip route replace table ") + buf + " default dev " + h_iter->first + " via " + h_iter->second._nexthop, h_iter->second._interface_index);
+      }
     }
     else {
       //right now replace route, but don't delete until race condition is resolved
