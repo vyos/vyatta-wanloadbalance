@@ -1,0 +1,4 @@
+pid=/var/run/vyatta/wlb.pid
+if [ -f $pid ]
+	kill -s SIGUSR2 $( cat $pid ) 2>/dev/null
+fi

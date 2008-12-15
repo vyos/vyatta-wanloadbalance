@@ -1,2 +1,2 @@
-type: ipv4
+type: txt 
 help: Set interface nexthop
