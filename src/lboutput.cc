@@ -21,7 +21,6 @@ LBOutput::write(const LBData &lbdata)
   gettimeofday(&tv,NULL);
 
   string wlb_out = _output_path + "/wlb.out";
-  string wlb_app_out = _output_path + "/wlb_app.out";
 
   //open file
   FILE *fp = fopen(wlb_out.c_str(), "w");
@@ -33,28 +32,36 @@ LBOutput::write(const LBData &lbdata)
     return;
   }
 
-  //dump out the health data
-  LBData::InterfaceHealthConstIter iter = lbdata._iface_health_coll.begin();
-  while (iter != lbdata._iface_health_coll.end()) {
-    if (_debug) {
-      cout << iter->first << " "; //interface
-      cout << string(iter->second._is_active ? "true" : "false") << " "; //status
-      cout << tv.tv_sec - iter->second.last_success() << " "; //last success
-      cout << tv.tv_sec - iter->second.last_failure() << " "; //last failure
-      cout << endl;
+  if (_debug) {
+    //dump out the health data
+    LBData::InterfaceHealthConstIter iter = lbdata._iface_health_coll.begin();
+    while (iter != lbdata._iface_health_coll.end()) {
+      if (_debug) {
+	cout << iter->first << " "; //interface
+	cout << string(iter->second._is_active ? "true" : "false") << " "; //status
+	cout << tv.tv_sec - iter->second.last_success() << " "; //last success
+	cout << tv.tv_sec - iter->second.last_failure() << " "; //last failure
+	cout << endl;
+      }
+      ++iter;
     }
-    ++iter;
   }
 
-  string line("Interface\tStatus\tLast Success\tLast Failure\tNum Failure\n");
-  fputs(line.c_str(),fp);
-  iter = lbdata._iface_health_coll.begin();
-
+  string space("  ");
   timeval cur_t;
   gettimeofday(&cur_t,NULL);
-
+  LBData::InterfaceHealthConstIter iter = lbdata._iface_health_coll.begin();
   while (iter != lbdata._iface_health_coll.end()) {
-    line = string(iter->first) + "\t\t" + string(iter->second._is_active?"active":"failed") + "\t";
+    string line = string("Interface:  ") + iter->first + "\n";
+    line += space + string("Status:  ") + string(iter->second._is_active?"active":"failed") + "\n";
+
+    const time_t t = (time_t)(iter->second._last_time_state_changed);
+    char *tbuf = ctime(&t);
+
+    line += space + string("Last Status Change:  ") + string(tbuf);
+
+    line += space + string("Target:  Ping ") + iter->second._ping_target + "\n";
+
     char btmp[256];
     string time_buf;
     
@@ -93,15 +100,15 @@ LBOutput::write(const LBData &lbdata)
     sprintf(btmp,"%ld",secs);
     time_buf += string(btmp) + "s";
 
+    string success_time;
     if (iter->second.last_success() == 0) {
-      line += string("n/a") + string("\t\t");
+      success_time = string("n/a") + string("\t\t");
     }
     else {
-      line += time_buf + string("\t");
-      if (time_buf.size() < 6) {
-	line += string("\t");
-      }
+      success_time = time_buf + string("\t");
     }
+
+    line += space + space + string("Last Ping Success:  ") + success_time + "\n";
 
     time_buf = "";
 
@@ -137,21 +144,21 @@ LBOutput::write(const LBData &lbdata)
     sprintf(btmp,"%ld",secs);
     time_buf += string(btmp) + "s";
 
+    string failure_time;
     if (iter->second.last_failure() == 0) {
-      line += string("n/a") + string("\t\t");
+      failure_time = string("n/a") + string("\t\t");
     }
     else {
-      line += time_buf + string("\t");
-      if (time_buf.size() < 6) {
-	line += string("\t");
-      }
+      failure_time = time_buf + string("\t");
     }
+
+    line += space + space + string("Last Ping Failure:  ") + failure_time + "\n";
+
 
     //now failure count
     sprintf(btmp, "%ld", iter->second._hresults._failure_count);
-    line += string(btmp);
 
-    line += "\n";
+    line += space + space + string("# Ping Failure(s):  ") + string(btmp) + "\n\n";
 
     fputs(line.c_str(),fp);
     ++iter;
@@ -160,9 +167,9 @@ LBOutput::write(const LBData &lbdata)
 
 
   //dump out the application data
-  LBData::LBRuleConstIter r_iter = lbdata._lb_rule_coll.begin();
-  while (r_iter != lbdata._lb_rule_coll.end()) {
-    if (_debug) {
+  if (_debug) {
+    LBData::LBRuleConstIter r_iter = lbdata._lb_rule_coll.begin();
+    while (r_iter != lbdata._lb_rule_coll.end()) {
       cout << "squirt out results here." << endl;
     }
     ++r_iter;

@@ -75,6 +75,7 @@ class LBHealth {
     _hresults(10),
     _is_active(true),
     _state_changed(true),
+    _last_time_state_changed(0),
     _interface_index(interface_index)
       {}
 
@@ -100,6 +101,7 @@ class LBHealth {
   LBHealthHistory _hresults;
   bool _is_active;
   bool _state_changed;
+  unsigned long _last_time_state_changed;
   int _interface_index;
   string _address;
 };
