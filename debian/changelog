@@ -1,3 +1,37 @@
+vyatta-wanloadbalance (0.13.1) unstable; urgency=low
+
+  [ An-Cheng Huang ]
+  * add support for development build
+
+  [ Stephen Hemminger ]
+  * Convert to Vyatta::
+
+  [ slioch ]
+  * formatting part of 3191 fixed with this bug. moved from dumping
+    proc/net/ip_conntrack output to easier to digest formatted output.
+  * fix for 3191--now use conntrack binary to return relevant entries
+    that
+  * added sigusr2 to wake up process from sleep call. will be used to
+    wake up process when address changes via dhcp.
+  * added support for dhcp in daemon. On receiving SIGUSR2 daemon checks
+    and updates new address for snat, and nexthop for lb routing
+
+  [ An-Cheng Huang ]
+  * update maintainer information
+  * "files" file should be removed before package build
+
+  [ slioch ]
+  * completes work to support dhcp for wan lb.
+  * fixed bug with dhcp support--route was not be reinserted on link
+    down when configured for dhcp. need to retrieve actual nexthop in
+    this case.
+  * fix for bug 3968. enhanced show wan load balance according to
+    preferred design in bug listing. Also exposed time of last
+
+  [ An-Cheng Huang ]
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Thu, 08 Jan 2009 12:21:11 -0800
+
 vyatta-wanloadbalance (0.13) unstable; urgency=low
 
 	  3.2.0
