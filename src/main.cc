@@ -7,7 +7,7 @@
  */
 #include <sys/types.h>
 #include <sys/stat.h>
-//#include <sys/wait.h>
+#include <sys/wait.h>
 #include <signal.h>
 #include <syslog.h>
 #include <stdio.h>
@@ -106,10 +106,10 @@ int main(int argc, char* argv[])
     exit(0);
   }
  
+  int s = 0;
   if (daemon) {
     if (fork() != 0) {
-      //      int s;
-      //      wait(&s);
+      wait(&s);
       exit(0);
     }
   }
