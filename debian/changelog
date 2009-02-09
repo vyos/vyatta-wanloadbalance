@@ -1,3 +1,15 @@
+vyatta-wanloadbalance (0.13.2) unstable; urgency=low
+
+  [ Stephen Hemminger ]
+  * Fix buggy shell script
+
+  [ slioch ]
+  * fix for problem found in webgui on restarting process.
+
+  [ An-Cheng Huang ]
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Wed, 28 Jan 2009 18:28:46 -0800
+
 vyatta-wanloadbalance (0.13.1) unstable; urgency=low
 
   [ An-Cheng Huang ]
