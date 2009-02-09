@@ -246,6 +246,12 @@ LBDecision::run(LBData &lb_data)
   //then if we do, flush all
   execute("iptables -t mangle -F PREROUTING", stdout);
 
+  //new request, bug 4112. flush conntrack tables if configured
+  if (lb_data._flush_conntrack == true) {
+    execute("conntrack -F", stdout);
+    execute("conntrack -F expect", stdout);
+  }
+
   //and compute the new set and apply
   LBData::LBRuleIter iter = lb_data._lb_rule_coll.begin();
   while (iter != lb_data._lb_rule_coll.end()) {

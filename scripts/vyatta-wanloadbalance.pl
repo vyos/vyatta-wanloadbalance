@@ -29,6 +29,10 @@ sub write_health {
 	print FILE_LCK "disable-source-nat\n";
     }
 
+    if ($config->exists("load-balancing wan flush-connections")) {
+	print FILE_LCK "flush-conntrack\n";
+    }
+
     $config->setLevel("load-balancing wan interface-health");
     my @eths = $config->listNodes();
     

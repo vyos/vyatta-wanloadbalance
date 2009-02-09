@@ -123,6 +123,9 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
   if (path[0] == "disable-source-nat") {
     process_disablesourcenat(l_key,l_value);
   }
+  else if (path[0] == "flush-conntrack") {
+    process_flushconntrack(l_key,l_value);
+  }
   else if (path[0] == "health") {
     if (l_key == "interface") {
       process_health(l_key,l_value);
@@ -163,6 +166,12 @@ void
 LBDataFactory::process_disablesourcenat(const string &key, const string &value)
 {
   _lb_data._disable_source_nat = true;
+}
+
+void
+LBDataFactory::process_flushconntrack(const string &key, const string &value)
+{
+  _lb_data._flush_conntrack = true;
 }
 
 void
