@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.3) unstable; urgency=low
+
+  * added support for global level conntrack flushing on interface state
+    change. Default configuration is to disable this feature.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Sat, 14 Feb 2009 16:31:36 -0800
+
 vyatta-wanloadbalance (0.13.2) unstable; urgency=low
 
   [ Stephen Hemminger ]
