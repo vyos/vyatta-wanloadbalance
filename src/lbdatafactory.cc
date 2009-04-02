@@ -123,6 +123,9 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
   if (path[0] == "disable-source-nat") {
     process_disablesourcenat(l_key,l_value);
   }
+  else if (path[0] == "enable-source-based-routing") {
+    process_enablesourcebasedrouting(l_key,l_value);
+  }
   else if (path[0] == "flush-conntrack") {
     process_flushconntrack(l_key,l_value);
   }
@@ -173,6 +176,13 @@ LBDataFactory::process_flushconntrack(const string &key, const string &value)
 {
   _lb_data._flush_conntrack = true;
 }
+
+void
+LBDataFactory::process_enablesourcebasedrouting(const string &key, const string &value)
+{
+  _lb_data._enable_source_based_routing = true;
+}
+						
 
 void
 LBDataFactory::process_health(const string &key, const string &value) 

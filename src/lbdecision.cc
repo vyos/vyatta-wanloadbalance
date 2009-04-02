@@ -273,10 +273,20 @@ LBDecision::run(LBData &lb_data)
 	for (w_iter = weights.begin(); w_iter != (--weights.end()); w_iter++) {
 	  sprintf(fbuf,"%f",w_iter->second);
 	  sprintf(dbuf,"%d",w_iter->first);
-	  execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	  if (lb_data._enable_source_based_routing) {
+	    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	  }
+	  else {
+	    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	  }
 	}
 	sprintf(dbuf,"%d",(--weights.end())->first);
-	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	if (lb_data._enable_source_based_routing) {
+	  execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j ISP_" + dbuf, stdout);
+	}
+	else {
+	  execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	}
 	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
       }
     }
