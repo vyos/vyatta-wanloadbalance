@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.5) unstable; urgency=low
+
+  * need to convert commit tag on wlb to end tag.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Sat, 18 Apr 2009 20:15:20 -0700
+
 vyatta-wanloadbalance (0.13.4) unstable; urgency=low
 
   * added source based routing feature.
