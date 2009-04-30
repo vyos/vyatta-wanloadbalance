@@ -195,7 +195,10 @@ LBPathTest::send(const string &iface, const string &target_addr, int packet_id)
   }
 
   // bind a socket to a device name (might not work on all systems):
-  setsockopt(_send_sock, SOL_SOCKET, SO_BINDTODEVICE, iface.c_str(), iface.size());
+  if (setsockopt(_send_sock, SOL_SOCKET, SO_BINDTODEVICE, iface.c_str(), iface.size()) != 0) {
+    syslog(LOG_ERR, "wan_lb: failure to bind to interface: %s", iface.c_str());
+    return; //will allow the test to time out then
+  }
 
   //convert target_addr to ip addr
   struct hostent *h = gethostbyname(target_addr.c_str());
