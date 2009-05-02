@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.6) unstable; urgency=low
+
+  * On socket bind error return and do not attempt to send icmp packet
+
+ -- slioch <slioch@eng-140.vyatta.com>  Sat, 02 May 2009 00:00:18 -0700
+
 vyatta-wanloadbalance (0.13.5) unstable; urgency=low
 
   * need to convert commit tag on wlb to end tag.
