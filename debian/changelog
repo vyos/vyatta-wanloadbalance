@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.7) unstable; urgency=low
+
+  * missing configuration node required to configure sourced based
+    routing.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Fri, 15 May 2009 14:17:48 -0700
+
 vyatta-wanloadbalance (0.13.6) unstable; urgency=low
 
   * On socket bind error return and do not attempt to send icmp packet
