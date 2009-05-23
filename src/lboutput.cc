@@ -66,7 +66,8 @@ LBOutput::write(const LBData &lbdata)
     string time_buf;
     
     unsigned long diff_t;
-    if (iter->second.last_success() > 0) {
+    //the last condition is to handle a system time change...
+    if (iter->second.last_success() > 0 && (cur_t.tv_sec > iter->second.last_success())) {
       diff_t = cur_t.tv_sec - iter->second.last_success();
     }
     else {
