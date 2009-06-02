@@ -174,19 +174,26 @@ LBDecision::update_paths(LBData &lbdata)
     //first let's remove the entry
     LBData::InterfaceHealthIter iter = lbdata._iface_health_coll.begin();
     while (iter != lbdata._iface_health_coll.end()) {
-      if (iter->second._nexthop == "dhcp") {
+      if (iter->second._is_active == true) {
 	string iface = iter->first;
 	string new_addr = fetch_iface_addr(iface);
+	char buf[20];
+	sprintf(buf,"%d",iter->second._interface_index);
+
+	//now let's update the nexthop here in the route table
+	if (iter->second._nexthop == "dhcp") {
+	  string nexthop = fetch_iface_nexthop(iface);
+	  insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + nexthop, iter->second._interface_index);
+	}
+	else {
+	  insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, iter->second._interface_index);
+	}
+
 	if (new_addr != iter->second._address) {
-	  char buf[20];
-	  sprintf(buf,"%d",iter->second._interface_index);
 	  execute(string("iptables -t nat -D WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._address, stdout);
 	  execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + new_addr, stdout);
 	  iter->second._address = new_addr;
 
-	  //now let's update the nexthop here in the route table
-	  string nexthop = fetch_iface_nexthop(iface);
-	  execute(string("ip route replace table ") + buf + " default dev " + iface + " via " + nexthop, stdout);
 	}
       }
       ++iter;
@@ -217,26 +224,7 @@ LBDecision::run(LBData &lb_data)
     cout << "LBDecision::run(), state changed, applying new rule set" << endl;
   }
 
-  //now reapply the routing tables.
-  LBData::InterfaceHealthIter h_iter = lb_data._iface_health_coll.begin();
-  while (h_iter != lb_data._iface_health_coll.end()) {
-    if (h_iter->second._is_active == true) {
-      char buf[40];
-      sprintf(buf,"%d",h_iter->second._interface_index);
-      if (h_iter->second._nexthop == "dhcp") {
-      string nexthop = fetch_iface_nexthop(h_iter->first);
-	insert_default(string("ip route replace table ") + buf + " default dev " + h_iter->first + " via " + nexthop, h_iter->second._interface_index);
-      }
-      else {
-	insert_default(string("ip route replace table ") + buf + " default dev " + h_iter->first + " via " + h_iter->second._nexthop, h_iter->second._interface_index);
-      }
-    }
-    else {
-      //right now replace route, but don't delete until race condition is resolved
-      //	execute(string("ip route delete ") + route_str);
-    }
-    ++h_iter;
-  }
+  update_paths(lb_data);
 
   //first determine if we need to alter the rule set
   if (!lb_data.state_changed()) {
@@ -542,10 +530,7 @@ LBDecision::insert_default(string cmd, int table)
   showcmd += string(buf);
   execute(showcmd,stdout,true);
 
-  //  cout << "LBDecision::insert_default(stdout): '" << stdout << "'" << endl;
-
   if (stdout.empty() == true) {
-    //    cout << "LBDecision::insert_default(cmd): " << cmd << endl;
     execute(cmd,stdout);
   }
 }
