@@ -1,3 +1,15 @@
+vyatta-wanloadbalance (0.13.7+jenner2) unstable; urgency=low
+
+  [ slioch ]
+  * fix for bug 4352.
+  * fix for bug 4409. Additional dynamic support for dynamic policy
+    route and snat when wlb is configured and during runtime. also fix
+    for wlb when running in
+
+  [ root ]
+
+ -- root <root@eng-140.vyatta.com>  Tue, 02 Jun 2009 16:04:43 -0700
+
 vyatta-wanloadbalance (0.13.7+jenner1) unstable; urgency=low
 
   [ slioch ]
