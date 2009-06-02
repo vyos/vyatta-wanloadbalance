@@ -172,7 +172,7 @@ LBOutput::write(const LBData &lbdata)
     LBData::LBRuleConstIter r_iter = lbdata._lb_rule_coll.begin();
     while (r_iter != lbdata._lb_rule_coll.end()) {
       cout << "squirt out results here." << endl;
+      ++r_iter;
     }
-    ++r_iter;
   }
 }
