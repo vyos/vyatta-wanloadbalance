@@ -10,14 +10,12 @@ test -x $bb  || exit 0
 
 start ()
 {
-echo 'astart';
 #	/opt/vyatta/sbin/wan_lb -f /var/load-balance/wlb.conf -d -i $pid 1>/dev/null 
 	start-stop-daemon --background --start --quiet --oknodo --exec /opt/vyatta/sbin/wan_lb -- -f /var/load-balance/wlb.conf -d -i $pid
 }
 
 stop ()
 {
-echo 'stop';
     if [ -f $pid ]
     then
 	kill -s SIGTERM $( cat $pid ) 
@@ -32,4 +30,4 @@ case "$action" in
   *)	echo "Usage: $progname {start|stop|restart}"
 	exit 1
 esac
-echo 0
+

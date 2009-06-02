@@ -1,4 +1,6 @@
 help: Configure Wide Area Network (WAN) load-balancing
-end:expression: exec "sudo ${vyatta_sbindir}/vyatta-wanloadbalance.pl"
+end: if [ ${COMMIT_ACTION} != 'DELETE' ]; then
+       sudo ${vyatta_sbindir}/vyatta-wanloadbalance.pl; 
+     fi;
 delete:expression: exec "sudo /etc/init.d/vyatta-wanloadbalance stop;sudo rm -f /var/load-balance/wlb.out"
 
