@@ -1,3 +1,11 @@
+vyatta-wanloadbalance (0.13.7+jenner3) unstable; urgency=low
+
+  * fix for bug 4130. Requires additional configuration outside WLB to
+    support network reachability determination. All locally source
+    routes need an entry in table
+
+ -- slioch <slioch@eng-140.vyatta.com>  Mon, 08 Jun 2009 14:20:30 -0700
+
 vyatta-wanloadbalance (0.13.7+jenner2) unstable; urgency=low
 
   [ slioch ]
