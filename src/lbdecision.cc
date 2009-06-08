@@ -118,6 +118,8 @@ if so then this stuff goes here!
   execute(string("iptables -t raw -A NAT_CONNTRACK -j ACCEPT"), stdout);
   execute(string("iptables -t raw -D PREROUTING 1"), stdout);
   execute(string("iptables -t raw -I PREROUTING 1 -j NAT_CONNTRACK"), stdout);
+  execute(string("iptables -t raw -D OUTPUT 1"), stdout);
+  execute(string("iptables -t raw -I OUTPUT 1 -j NAT_CONNTRACK"), stdout);
 
 
   LBData::InterfaceHealthIter iter = lbdata._iface_health_coll.begin();
@@ -233,6 +235,7 @@ LBDecision::run(LBData &lb_data)
 
   //then if we do, flush all
   execute("iptables -t mangle -F PREROUTING", stdout);
+  execute("iptables -t mangle -F OUTPUT", stdout);
 
   //new request, bug 4112. flush conntrack tables if configured
   if (lb_data._flush_conntrack == true) {
@@ -248,6 +251,7 @@ LBDecision::run(LBData &lb_data)
 
     if (iter->second._exclude == true) {
       execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j ACCEPT", stdout);
+      execute(string("iptables -t mangle -A OUTPUT ") + app_cmd + " -j ACCEPT", stdout);
     }
     else {
       map<int,float> weights = get_new_weights(lb_data,iter->second);
@@ -263,19 +267,24 @@ LBDecision::run(LBData &lb_data)
 	  sprintf(dbuf,"%d",w_iter->first);
 	  if (lb_data._enable_source_based_routing) {
 	    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    execute(string("iptables -t mangle -A OUTPUT ") + app_cmd + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	  }
 	  else {
 	    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    execute(string("iptables -t mangle -A OUTPUT ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	  }
 	}
 	sprintf(dbuf,"%d",(--weights.end())->first);
 	if (lb_data._enable_source_based_routing) {
 	  execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j ISP_" + dbuf, stdout);
+	  execute(string("iptables -t mangle -A OUTPUT ") + app_cmd + " -j ISP_" + dbuf, stdout);
 	}
 	else {
 	  execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	  execute(string("iptables -t mangle -A OUTPUT ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
 	}
 	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
+	execute(string("iptables -t mangle -A OUTPUT ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
       }
     }
     ++iter;
@@ -294,6 +303,7 @@ LBDecision::shutdown(LBData &data)
 
   //then if we do, flush all
   execute("iptables -t mangle -F PREROUTING", stdout);
+  execute("iptables -t mangle -F OUTPUT", stdout);
 
   //clear out nat as well
   execute("iptables -t nat -F WANLOADBALANCE", stdout);
