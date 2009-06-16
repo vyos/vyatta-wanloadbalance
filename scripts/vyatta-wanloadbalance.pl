@@ -192,9 +192,9 @@ sub write_rules {
 	print FILE_LCK "\t}\n";
 
 	#inbound-interface
-	$option = $config->returnValue("$rule inbound-interface");
-	if (defined $option) {
-	    print FILE_LCK "\tinbound-interface " . $option . "\n"
+	my $inbound = $config->returnValue("$rule inbound-interface");
+	if (defined $inbound) {
+	    print FILE_LCK "\tinbound-interface " . $inbound . "\n"
 	}
 	else {
 	    print "inbound-interface must be specified\n";
@@ -206,6 +206,9 @@ sub write_rules {
 	my @eths = $config->listNodes();
 	
 	foreach my $ethNode (@eths) {
+	    if ($inbound eq $ethNode) {
+		print "WARNING: inbound interface is the same as the outbound interface\n";
+	    }
 
 	    $valid = "true";
 
