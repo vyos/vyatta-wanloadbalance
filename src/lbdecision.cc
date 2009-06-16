@@ -248,10 +248,11 @@ LBDecision::run(LBData &lb_data)
   while (iter != lb_data._lb_rule_coll.end()) {
     //NEED TO HANDLE APPLICATION SPECIFIC DETAILS
     string app_cmd = get_application_cmd(iter->second);
+    string app_cmd_local = get_application_cmd(iter->second,true);
 
     if (iter->second._exclude == true) {
       execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j ACCEPT", stdout);
-      execute(string("iptables -t mangle -A OUTPUT ") + app_cmd + " -j ACCEPT", stdout);
+      execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -j ACCEPT", stdout);
     }
     else {
       map<int,float> weights = get_new_weights(lb_data,iter->second);
@@ -267,24 +268,24 @@ LBDecision::run(LBData &lb_data)
 	  sprintf(dbuf,"%d",w_iter->first);
 	  if (lb_data._enable_source_based_routing) {
 	    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
-	    execute(string("iptables -t mangle -A OUTPUT ") + app_cmd + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	  }
 	  else {
 	    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
-	    execute(string("iptables -t mangle -A OUTPUT ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	  }
 	}
 	sprintf(dbuf,"%d",(--weights.end())->first);
 	if (lb_data._enable_source_based_routing) {
 	  execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j ISP_" + dbuf, stdout);
-	  execute(string("iptables -t mangle -A OUTPUT ") + app_cmd + " -j ISP_" + dbuf, stdout);
+	  execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -j ISP_" + dbuf, stdout);
 	}
 	else {
 	  execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
-	  execute(string("iptables -t mangle -A OUTPUT ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	  execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -m state --state NEW -j ISP_" + dbuf, stdout);
 	}
 	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
-	execute(string("iptables -t mangle -A OUTPUT ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
+	execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -j CONNMARK --restore-mark", stdout);
       }
     }
     ++iter;
@@ -438,11 +439,11 @@ LBDecision::get_new_weights(LBData &data, LBRule &rule)
  *
  **/
 string
-LBDecision::get_application_cmd(LBRule &rule)
+LBDecision::get_application_cmd(LBRule &rule, bool local)
 {
   string filter;
 
-  if (rule._in_iface.empty() == false) {
+  if (rule._in_iface.empty() == false && local == false) {
     filter += "-i " + rule._in_iface + " ";
   }
 
