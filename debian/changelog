@@ -1,3 +1,11 @@
+vyatta-wanloadbalance (0.13.7+jenner4) unstable; urgency=low
+
+  * fixed output mangle rule creation. need to suppress inbound
+    interface on rule creation for output rule entry as these are
+    locally sourced packets.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Tue, 16 Jun 2009 11:44:14 -0700
+
 vyatta-wanloadbalance (0.13.7+jenner3) unstable; urgency=low
 
   * fix for bug 4130. Requires additional configuration outside WLB to
