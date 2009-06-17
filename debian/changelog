@@ -1,3 +1,11 @@
+vyatta-wanloadbalance (0.13.7+jenner7) unstable; urgency=low
+
+  * ping target is now optional. nexthop will be used in place of ping
+    target if ping target is not specified. this is also true of dhcp
+    configurations.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Wed, 17 Jun 2009 15:11:43 -0700
+
 vyatta-wanloadbalance (0.13.7+jenner6) unstable; urgency=low
 
   * filter on output table for packets already marked in the prerouting
