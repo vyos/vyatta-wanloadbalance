@@ -54,7 +54,6 @@ sub write_health {
 	$option = $config->returnValue("$ethNode ping");
 	if (defined $option) {
 	    print FILE_LCK "\t\ttarget  " . $option . "\n";
-	    $valid = "true";
 	}
 	
 	$option = $config->returnValue("$ethNode resp-time");
@@ -70,6 +69,7 @@ sub write_health {
 	$option = $config->returnValue("$ethNode nexthop");
 	if (defined $option) {
 	    print FILE_LCK "\t\tnexthop  " . $option . "\n";
+	    $valid = "true";
 	}
 	else {
 	    print "nexthop must be specified\n";
@@ -80,7 +80,7 @@ sub write_health {
     print FILE_LCK "}\n\n";
 
     if ($valid eq "false") {
-	print "A valid WAN load-balance configuration requires an interface with a ping target\n";
+	print "A valid WAN load-balance configuration requires an interface with a nexthop\n";
     }
     return $valid;
 }
