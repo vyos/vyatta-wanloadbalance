@@ -60,7 +60,12 @@ LBOutput::write(const LBData &lbdata)
 
     line += space + string("Last Status Change:  ") + string(tbuf);
 
-    line += space + string("Target:  Ping ") + iter->second._ping_target + "\n";
+    string target = iter->second._ping_target;
+    if (target.empty()) {
+      target = iter->second._nexthop;
+    }
+
+    line += space + string("Target:  Ping ") + target + "\n";
 
     char btmp[256];
     string time_buf;

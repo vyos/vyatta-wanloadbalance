@@ -101,11 +101,16 @@ LBPathTest::start(LBData &lb_data)
   //iterate over packets and send
   LBData::InterfaceHealthIter iter = lb_data._iface_health_coll.begin();
   while (iter != lb_data._iface_health_coll.end()) {
+    string target = iter->second._ping_target;
+    if (target.empty()) {
+      target = iter->second._nexthop;
+    }
+
     if (_debug) {
-      cout << "LBPathTest::start(): sending ping test for: " << iter->first << " for " << iter->second._ping_target << endl;
+      cout << "LBPathTest::start(): sending ping test for: " << iter->first << " for " << target << endl;
     }
     _packet_id = ++_packet_id % 32767;
-    send(iter->first, iter->second._ping_target, _packet_id);
+    send(iter->first, target, _packet_id);
     results.insert(pair<int,PktData>(_packet_id,PktData(iter->first,-1)));
 
     ++ct;
