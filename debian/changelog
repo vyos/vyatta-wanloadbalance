@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.7+jenner8) unstable; urgency=low
+
+  * fix for bug 4624. source port configuration was incorrectly
+    configured.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Mon, 22 Jun 2009 09:04:10 -0700
+
 vyatta-wanloadbalance (0.13.7+jenner7) unstable; urgency=low
 
   * ping target is now optional. nexthop will be used in place of ping
