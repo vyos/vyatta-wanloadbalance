@@ -180,7 +180,7 @@ sub write_rules {
 	    if ($protocol eq "tcp" || $protocol eq "udp") {
 		$can_use_port = "yes";
 	    }
-	    ($port_str, $port_err) = Vyatta::Misc::getPortRuleString($option, $can_use_port, "d", $protocol);
+	    ($port_str, $port_err) = Vyatta::Misc::getPortRuleString($option, $can_use_port, "s", $protocol);
 	    if (defined $port_str) {
 		print FILE_LCK "\t\tport-ipt \"" . $port_str . "\"\n";
 	    }
