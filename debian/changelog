@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.7+jenner9) unstable; urgency=low
+
+  * fix for bug 4658. Move enable-source-based-routing to per rule basis
+    from global setting.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Tue, 30 Jun 2009 12:01:09 -0700
+
 vyatta-wanloadbalance (0.13.7+jenner8) unstable; urgency=low
 
   * fix for bug 4624. source port configuration was incorrectly
