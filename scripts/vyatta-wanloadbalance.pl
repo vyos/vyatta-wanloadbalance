@@ -29,10 +29,6 @@ sub write_health {
 	print FILE_LCK "disable-source-nat\n";
     }
 
-    if ($config->exists("load-balancing wan enable-source-based-routing")) {
-	print FILE_LCK "enable-source-based-routing\n";
-    }
-
     if ($config->exists("load-balancing wan flush-connections")) {
 	print FILE_LCK "flush-conntrack\n";
     }
@@ -106,6 +102,10 @@ sub write_rules {
 
 	if ($config->exists("$rule failover")) {
 	    print FILE_LCK "\tfailover\n";
+	}
+
+	if ($config->exists("$rule enable-source-based-routing")) {
+	    print FILE_LCK "\tenable-source-based-routing\n";
 	}
 
 	if ($config->exists("$rule failover") && $config->exists("$rule exclude")) {

@@ -47,9 +47,6 @@ private:
   process_flushconntrack(const string &key, const string &value);
 
   void
-  process_enablesourcebasedrouting(const string &key, const string &value);
-
-  void
   process_health(const string &key, const string &value);
 
   void
@@ -78,6 +75,9 @@ private:
 
   void
   process_rule_inbound_interface(const string &key, const string &value);
+
+  void
+  process_rule_enablesourcebasedrouting(const string &key, const string &value);
 
 private:
   bool _debug;

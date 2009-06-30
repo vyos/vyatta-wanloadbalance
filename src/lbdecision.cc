@@ -267,7 +267,7 @@ LBDecision::run(LBData &lb_data)
 	for (w_iter = weights.begin(); w_iter != (--weights.end()); w_iter++) {
 	  sprintf(fbuf,"%f",w_iter->second);
 	  sprintf(dbuf,"%d",w_iter->first);
-	  if (lb_data._enable_source_based_routing) {
+	  if (iter->second._enable_source_based_routing) {
 	    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	    execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	  }
@@ -277,7 +277,7 @@ LBDecision::run(LBData &lb_data)
 	  }
 	}
 	sprintf(dbuf,"%d",(--weights.end())->first);
-	if (lb_data._enable_source_based_routing) {
+	if (iter->second._enable_source_based_routing) {
 	  execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j ISP_" + dbuf, stdout);
 	  execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -j ISP_" + dbuf, stdout);
 	}
