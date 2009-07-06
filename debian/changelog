@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.7+jenner11) unstable; urgency=low
+
+  * fix for bug 4351. Move conntrack to feature specific chain for raw
+    table.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Mon, 06 Jul 2009 10:50:27 -0700
+
 vyatta-wanloadbalance (0.13.7+jenner10) unstable; urgency=low
 
   * fix for bug 4588.
