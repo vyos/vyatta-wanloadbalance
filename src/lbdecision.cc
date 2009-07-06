@@ -113,13 +113,13 @@ if so then this stuff goes here!
     execute(string("iptables -t nat -I VYATTA_PRE_SNAT_HOOK 1 -j WANLOADBALANCE"), stdout);
   }
   //set up the conntrack table
-  execute(string("iptables -t raw -N NAT_CONNTRACK"), stdout);
-  execute(string("iptables -t raw -F NAT_CONNTRACK"), stdout);
-  execute(string("iptables -t raw -A NAT_CONNTRACK -j ACCEPT"), stdout);
-  execute(string("iptables -t raw -D PREROUTING 1"), stdout);
-  execute(string("iptables -t raw -I PREROUTING 1 -j NAT_CONNTRACK"), stdout);
-  execute(string("iptables -t raw -D OUTPUT 1"), stdout);
-  execute(string("iptables -t raw -I OUTPUT 1 -j NAT_CONNTRACK"), stdout);
+  execute(string("iptables -t raw -N WLB_CONNTRACK"), stdout);
+  execute(string("iptables -t raw -F WLB_CONNTRACK"), stdout);
+  execute(string("iptables -t raw -A WLB_CONNTRACK -j ACCEPT"), stdout);
+  execute(string("iptables -t raw -D PREROUTING -j WLB_CONNTRACK"), stdout);
+  execute(string("iptables -t raw -I PREROUTING 1 -j WLB_CONNTRACK"), stdout);
+  execute(string("iptables -t raw -D OUTPUT -j WLB_CONNTRACK"), stdout);
+  execute(string("iptables -t raw -I OUTPUT 1 -j WLB_CONNTRACK"), stdout);
 
 
   LBData::InterfaceHealthIter iter = lbdata._iface_health_coll.begin();
@@ -311,6 +311,11 @@ LBDecision::shutdown(LBData &data)
   execute("iptables -t nat -F WANLOADBALANCE", stdout);
   execute("iptables -t nat -D VYATTA_PRE_SNAT_HOOK -j WANLOADBALANCE", stdout);
 
+  //clear out conntrack hooks
+  execute(string("iptables -t raw -D PREROUTING -j WLB_CONNTRACK"), stdout);
+  execute(string("iptables -t raw -D OUTPUT -j WLB_CONNTRACK"), stdout);
+  execute(string("iptables -t raw -F WLB_CONNTRACK"), stdout);
+  execute(string("iptables -t raw -X WLB_CONNTRACK"), stdout);
 
   //remove the policy entries
   LBData::InterfaceHealthIter h_iter = data._iface_health_coll.begin();
