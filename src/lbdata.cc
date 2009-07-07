@@ -165,10 +165,10 @@ LBData::dump()
  *
  *
  **/
-bool
+map<string,string>
 LBData::state_changed()
 {
-  bool overall_state = false;
+  map<string,string> coll;
   LBData::InterfaceHealthIter h_iter = _iface_health_coll.begin();
   while (h_iter != _iface_health_coll.end()) {
     if (h_iter->second.state_changed()) {
@@ -179,11 +179,12 @@ LBData::state_changed()
       h_iter->second._last_time_state_changed = (unsigned long)tv.tv_sec;
 
       syslog(LOG_WARNING, "Interface %s has changed state to %s",h_iter->first.c_str(),tmp.c_str());
-      overall_state = true;
+
+      coll.insert(pair<string,string>(h_iter->first,tmp));
     }
     ++h_iter;
   }
-  return overall_state;
+  return coll;
 }
 
 /**

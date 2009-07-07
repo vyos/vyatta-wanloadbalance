@@ -83,7 +83,7 @@ class LBHealth {
 
   void put(int rtt);
 
-  bool 
+  bool
   state_changed() const {return _state_changed;}
 
   unsigned long
@@ -126,7 +126,7 @@ class LBData {
   bool
   is_active(const string &iface);
 
-  bool
+  map<string,string>
   state_changed();
 
   void
@@ -143,6 +143,7 @@ class LBData {
 
   bool _disable_source_nat;
   bool _flush_conntrack;
+  string _hook;
 };
 
 #endif //__LBDATA_HH__

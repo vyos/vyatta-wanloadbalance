@@ -5,8 +5,8 @@
  * under the terms of the GNU General Public License version 2 as published
  * by the Free Software Foundation.
  */
-#ifndef __LBCONFLOADER_HH__
-#define __LBCONFLOADER_HH__
+#ifndef __LBDATALOADER_HH__
+#define __LBDATALOADER_HH__
 
 #include <string>
 #include <vector>
@@ -50,6 +50,9 @@ private:
   process_health(const string &key, const string &value);
 
   void
+  process_health_hook(const string &key, const string &value);
+
+  void
   process_health_interface(const string &key, const string &value);
 
   void
@@ -91,4 +94,4 @@ private:
   LBRule::InterfaceDistIter _rule_iface_iter;
 };
 
-#endif //__LBCONFLOADER_HH__
+#endif //__LBDATALOADER_HH__

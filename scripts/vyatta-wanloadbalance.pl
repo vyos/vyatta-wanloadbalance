@@ -33,11 +33,15 @@ sub write_health {
 	print FILE_LCK "flush-conntrack\n";
     }
 
-    $config->setLevel("load-balancing wan interface-health");
-    my @eths = $config->listNodes();
-    
     print FILE_LCK "health {\n";
 
+    my $hook = $config->returnValue("load-balancing wan hook");
+    if (defined $hook) {
+	print FILE_LCK "\thook \"" . $hook . "\"\n";
+    }
+
+    $config->setLevel("load-balancing wan interface-health");
+    my @eths = $config->listNodes();
     foreach my $ethNode (@eths) {
 	
 	print FILE_LCK "\tinterface " . $ethNode . " {\n";

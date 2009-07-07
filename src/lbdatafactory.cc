@@ -130,6 +130,9 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
     if (l_key == "interface") {
       process_health(l_key,l_value);
     }
+    else if (l_key == "hook") {
+      process_health_hook(l_key,l_value);
+    }
     else {
       process_health_interface(l_key,l_value);
     }
@@ -187,6 +190,14 @@ LBDataFactory::process_health(const string &key, const string &value)
       _lb_data._iface_health_coll.insert(pair<string,LBHealth>(value,LBHealth(++_interface_index)));
     }
     _health_iter = _lb_data._iface_health_coll.find(value);
+  }
+}
+
+void
+LBDataFactory::process_health_hook(const string &key, const string &value)
+{
+  if (value.empty() == false) {
+    _lb_data._hook = value;
   }
 }
 
