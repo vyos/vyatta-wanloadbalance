@@ -121,6 +121,18 @@ if so then this stuff goes here!
   execute(string("iptables -t raw -D OUTPUT -j WLB_CONNTRACK"), stdout);
   execute(string("iptables -t raw -I OUTPUT 1 -j WLB_CONNTRACK"), stdout);
 
+  //set up mangle table
+  execute(string("iptables -t mangle -N WANLOADBALANCE_PRE"), stdout);
+  execute(string("iptables -t mangle -F WANLOADBALANCE_PRE"), stdout);
+  execute(string("iptables -t mangle -A WANLOADBALANCE_PRE -j ACCEPT"), stdout);
+  execute(string("iptables -t mangle -N WANLOADBALANCE_OUT"), stdout);
+  execute(string("iptables -t mangle -F WANLOADBALANCE_OUT"), stdout);
+  execute(string("iptables -t mangle -A WANLOADBALANCE_OUT -j ACCEPT"), stdout);
+  execute(string("iptables -t mangle -D PREROUTING -j WANLOADBALANCE_PRE"), stdout);
+  execute(string("iptables -t mangle -I PREROUTING 1 -j WANLOADBALANCE_PRE"), stdout);
+  execute(string("iptables -t mangle -D OUTPUT -j WANLOADBALANCE_OUT"), stdout);
+  execute(string("iptables -t mangle -I OUTPUT 1 -j WANLOADBALANCE_OUT"), stdout);
+
 
   LBData::InterfaceHealthIter iter = lbdata._iface_health_coll.begin();
   while (iter != lbdata._iface_health_coll.end()) {
@@ -256,9 +268,9 @@ LBDecision::run(LBData &lb_data)
   }
 
   //then if we do, flush all
-  execute("iptables -t mangle -F PREROUTING", stdout);
-  execute("iptables -t mangle -F OUTPUT", stdout);
-  execute("iptables -t mangle -A OUTPUT -m mark ! --mark 0 -j ACCEPT", stdout); //avoid packets set in prerouting table
+  execute("iptables -t mangle -F WANLOADBALANCE_PRE", stdout);
+  execute("iptables -t mangle -F WANLOADBALANCE_OUT", stdout);
+  execute("iptables -t mangle -A WANLOADBALANCE_OUT -m mark ! --mark 0 -j ACCEPT", stdout); //avoid packets set in prerouting table
 
   //new request, bug 4112. flush conntrack tables if configured
   if (lb_data._flush_conntrack == true) {
@@ -274,8 +286,8 @@ LBDecision::run(LBData &lb_data)
     string app_cmd_local = get_application_cmd(iter->second,true);
 
     if (iter->second._exclude == true) {
-      execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j ACCEPT", stdout);
-      execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -j ACCEPT", stdout);
+      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j ACCEPT", stdout);
+      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j ACCEPT", stdout);
     }
     else {
       map<string,float> weights = get_new_weights(lb_data,iter->second);
@@ -290,25 +302,25 @@ LBDecision::run(LBData &lb_data)
 	  sprintf(fbuf,"%f",w_iter->second);
 	  sprintf(dbuf,"%s",w_iter->first.c_str());
 	  if (iter->second._enable_source_based_routing) {
-	    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
-	    execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	  }
 	  else {
-	    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
-	    execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	  }
 	}
 	sprintf(dbuf,"%s",(--weights.end())->first.c_str());
 	if (iter->second._enable_source_based_routing) {
-	  execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j ISP_" + dbuf, stdout);
-	  execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -j ISP_" + dbuf, stdout);
+	  execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j ISP_" + dbuf, stdout);
+	  execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j ISP_" + dbuf, stdout);
 	}
 	else {
-	  execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
-	  execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	  execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	  execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -m state --state NEW -j ISP_" + dbuf, stdout);
 	}
-	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
-	execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -j CONNMARK --restore-mark", stdout);
+	execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
+	execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j CONNMARK --restore-mark", stdout);
       }
     }
     ++iter;
@@ -326,8 +338,10 @@ LBDecision::shutdown(LBData &data)
   string stdout;
 
   //then if we do, flush all
-  execute("iptables -t mangle -F PREROUTING", stdout);
-  execute("iptables -t mangle -F OUTPUT", stdout);
+  execute("iptables -t mangle -F WANLOADBALANCE_PRE", stdout);
+  execute("iptables -t mangle -F WANLOADBALANCE_OUT", stdout);
+  execute("iptables -t mangle -D PREROUTING -j WANLOADBALANCE_PRE", stdout);
+  execute("iptables -t mangle -D OUTPUT -j WANLOADBALANCE_OUT", stdout);
 
   //clear out nat as well
   execute("iptables -t nat -F WANLOADBALANCE", stdout);
