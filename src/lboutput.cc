@@ -15,6 +15,13 @@
 #include "lboutput.hh"
 
 void
+LBOutput::shutdown()
+{
+  string wlb_out = _output_path + "/wlb.out";
+  unlink(wlb_out.c_str());
+}
+
+void
 LBOutput::write(const LBData &lbdata)
 {
   timeval tv;

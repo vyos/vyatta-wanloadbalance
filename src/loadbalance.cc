@@ -30,6 +30,7 @@ LoadBalance::LoadBalance(bool debug, string &output_path) :
 LoadBalance::~LoadBalance()
 {
   _decision.shutdown(_lbdata);
+  _output.shutdown();
 }
 
 /**

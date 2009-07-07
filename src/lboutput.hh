@@ -19,6 +19,9 @@ public:
   ~LBOutput() {}
 
   void
+  shutdown();
+
+  void
   write(const LBData &lbdata);
 
 private:
