@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.12) unstable; urgency=low
+
+  * fix for bug 4072.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Tue, 07 Jul 2009 13:20:50 -0700
+
 vyatta-wanloadbalance (0.13.11) unstable; urgency=low
 
   * fix for bug 4587. Remove output file on orderly shutdown.
