@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.14) unstable; urgency=low
+
+  * fix for bug 4649 and 4248. needs documentation.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Tue, 07 Jul 2009 16:24:55 -0700
+
 vyatta-wanloadbalance (0.13.13) unstable; urgency=low
 
   * added configuration hook to execute script on interface state
