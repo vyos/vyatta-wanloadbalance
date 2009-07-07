@@ -130,13 +130,13 @@ if so then this stuff goes here!
 
     sprintf(buf,"%d",ct);
 
-    execute(string("iptables -t mangle -N ISP_") + buf, stdout);
-    execute(string("iptables -t mangle -F ISP_") + buf, stdout);
-    execute(string("iptables -t mangle -A ISP_") + buf + " -j CONNMARK --set-mark " + buf, stdout);
-    execute(string("iptables -t mangle -A ISP_") + buf + " -j MARK --set-mark " + buf, stdout);
+    execute(string("iptables -t mangle -N ISP_") + iface, stdout);
+    execute(string("iptables -t mangle -F ISP_") + iface, stdout);
+    execute(string("iptables -t mangle -A ISP_") + iface + " -j CONNMARK --set-mark " + buf, stdout);
+    execute(string("iptables -t mangle -A ISP_") + iface + " -j MARK --set-mark " + buf, stdout);
 
     //NOTE, WILL NEED A WAY TO CLEAN UP THIS RULE ON RESTART...
-    execute(string("iptables -t mangle -A ISP_") + buf + " -j ACCEPT", stdout);
+    execute(string("iptables -t mangle -A ISP_") + iface + " -j ACCEPT", stdout);
     
     //    insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, ct);
     //need to force the entry on restart as the configuration may have changed.
@@ -236,7 +236,7 @@ LBDecision::run(LBData &lb_data)
   //then if we do, flush all
   execute("iptables -t mangle -F PREROUTING", stdout);
   execute("iptables -t mangle -F OUTPUT", stdout);
-  execute("iptables -t mangle -A OUTPUT -m connmark ! --mark 0 -j ACCEPT", stdout); //avoid packets set in prerouting table
+  execute("iptables -t mangle -A OUTPUT -m mark ! --mark 0 -j ACCEPT", stdout); //avoid packets set in prerouting table
 
   //new request, bug 4112. flush conntrack tables if configured
   if (lb_data._flush_conntrack == true) {
@@ -256,18 +256,18 @@ LBDecision::run(LBData &lb_data)
       execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -j ACCEPT", stdout);
     }
     else {
-      map<int,float> weights = get_new_weights(lb_data,iter->second);
+      map<string,float> weights = get_new_weights(lb_data,iter->second);
       
       if (weights.empty()) {
 	//no rules here!
       }
       else {
-	char fbuf[20],dbuf[20];
-	map<int,float>::iterator w_iter = weights.begin();
+	char fbuf[20],dbuf[80];
+	map<string,float>::iterator w_iter = weights.begin();
 	for (w_iter = weights.begin(); w_iter != (--weights.end()); w_iter++) {
 	  sprintf(fbuf,"%f",w_iter->second);
-	  sprintf(dbuf,"%d",w_iter->first);
-	  if (lb_data._enable_source_based_routing) {
+	  sprintf(dbuf,"%s",w_iter->first.c_str());
+	  if (iter->second._enable_source_based_routing) {
 	    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	    execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	  }
@@ -276,8 +276,8 @@ LBDecision::run(LBData &lb_data)
 	    execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	  }
 	}
-	sprintf(dbuf,"%d",(--weights.end())->first);
-	if (lb_data._enable_source_based_routing) {
+	sprintf(dbuf,"%s",(--weights.end())->first.c_str());
+	if (iter->second._enable_source_based_routing) {
 	  execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j ISP_" + dbuf, stdout);
 	  execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -j ISP_" + dbuf, stdout);
 	}
@@ -371,10 +371,10 @@ LBDecision::execute(std::string cmd, std::string &stdout, bool read)
 /**
  *
  **/
-map<int,float> 
+map<string,float> 
 LBDecision::get_new_weights(LBData &data, LBRule &rule)
 {
-  map<int,float> weights;
+  map<string,float> weights;
   int group = 0;
   LBRule::InterfaceDistIter iter = rule._iface_dist_coll.begin();
   while (iter != rule._iface_dist_coll.end()) {
@@ -392,26 +392,26 @@ LBDecision::get_new_weights(LBData &data, LBRule &rule)
       if (data.is_active(iter->first)) {
 	//select the active interface that has the highest weight
 	if (iter->second > group) {
-	  map<int,float>::iterator w_iter = weights.begin();
+	  map<string,float>::iterator w_iter = weights.begin();
 	  while (w_iter != weights.end()) {
 	    w_iter->second = 0.; //zero out previous weight
 	    ++w_iter;
 	  }
 	}
-	weights.insert(pair<int,float>(ct,iter->second));
+	weights.insert(pair<string,float>(iter->first,iter->second));
 	group = iter->second;
       }
       else {
-	weights.insert(pair<int,float>(ct,0.));	
+	weights.insert(pair<string,float>(iter->first,0.));	
       }
     }
     else {
       if (data.is_active(iter->first)) {
-	weights.insert(pair<int,float>(ct,iter->second));
+	weights.insert(pair<string,float>(iter->first,iter->second));
 	group += iter->second;
       }
       else {
-	weights.insert(pair<int,float>(ct,0.));
+	weights.insert(pair<string,float>(iter->first,0.));
       }
     }
     ++iter;
@@ -422,7 +422,7 @@ LBDecision::get_new_weights(LBData &data, LBRule &rule)
   }
   else {
     //now weight the overall distribution
-    map<int,float>::iterator w_iter = weights.begin();
+    map<string,float>::iterator w_iter = weights.begin();
     while (w_iter != weights.end()) {
       float w = 0.;
       if (w_iter->second > 0.) { //can only be an integer value here

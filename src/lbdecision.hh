@@ -39,7 +39,7 @@ private:
   void
   insert_default(string cmd, int table);
 
-  map<int,float> 
+  map<string,float> 
   get_new_weights(LBData &data, LBRule &rule);
 
   string
