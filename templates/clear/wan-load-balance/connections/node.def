@@ -1,0 +1,10 @@
+help: Flush connections
+run:  if [ -f /var/load-balance/wlb.out ] ; then 
+	 conntrack -F
+	 conntrack -F expect
+      else
+         echo WAN load balancing is not configured
+      fi 
+
+
+

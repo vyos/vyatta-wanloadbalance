@@ -14,4 +14,7 @@ touch ${LOADBALANCE_DIR}/wlb.conf
 rm -fr /opt/vyatta/share/vyatta-op/templates/show/wan-load-balance/*
 mv /opt/vyatta/share/vyatta-cfg/templates/show/wan-load-balance /opt/vyatta/share/vyatta-op/templates/show/. 2>/dev/null
 rm -fr /opt/vyatta/share/vyatta-cfg/templates/show
+rm -fr /opt/vyatta/share/vyatta-op/templates/clear/wan-load-balance/*
+mv /opt/vyatta/share/vyatta-cfg/templates/clear/wan-load-balance /opt/vyatta/share/vyatta-op/templates/clear/. 2>/dev/null
+rm -fr /opt/vyatta/share/vyatta-cfg/templates/clear
 exit 0
