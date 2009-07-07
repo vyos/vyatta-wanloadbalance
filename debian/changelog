@@ -1,3 +1,14 @@
+vyatta-wanloadbalance (0.13.13) unstable; urgency=low
+
+  * added configuration hook to execute script on interface state
+    change. configurable via conf mode. environment variables identify
+    interface and new state.
+  * fix for bug 3704. move primary call to wlb mangle tables out of
+    prerouting and output table scope. now tables are not flushed on
+    removal.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Tue, 07 Jul 2009 15:38:05 -0700
+
 vyatta-wanloadbalance (0.13.12) unstable; urgency=low
 
   * fix for bug 4072.
