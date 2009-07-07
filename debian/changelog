@@ -1,3 +1,32 @@
+vyatta-wanloadbalance (0.13.9) unstable; urgency=low
+
+  * fix for bug 4409. Additional dynamic support for dynamic policy
+    route and snat when wlb is configured and during runtime. also fix
+    for wlb when running in
+  * fix for bug 4352.
+  * fix for bug 4130. Requires additional configuration outside WLB to
+    support network reachability determination. All locally source
+    routes need an entry in table
+  * fixed output mangle rule creation. need to suppress inbound
+    interface on rule creation for output rule entry as these are
+    locally sourced packets.
+  * fix for bug 4578. Added warning message when the user configures
+    inbound and outbound on same rule, but will allow configuration with
+    warning.
+  * filter on output table for packets already marked in the prerouting
+    table
+  * ping target is now optional. nexthop will be used in place of ping
+    target if ping target is not specified. this is also true of dhcp
+    configurations.
+  * fix for bug 4624. source port configuration was incorrectly
+    configured.
+  * fix for bug 4351. Move conntrack to feature specific chain for raw
+    table.
+  * fix for bug  4083. Names in mangle table now reference outbound
+    interface as per comments in bug.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Tue, 07 Jul 2009 12:37:07 -0700
+
 vyatta-wanloadbalance (0.13.8) unstable; urgency=low
 
   [ slioch ]
