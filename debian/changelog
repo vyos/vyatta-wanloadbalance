@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.11) unstable; urgency=low
+
+  * fix for bug 4587. Remove output file on orderly shutdown.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Tue, 07 Jul 2009 13:03:23 -0700
+
 vyatta-wanloadbalance (0.13.10) unstable; urgency=low
 
   * fix for bug 4658. Move enable-source-based-routing to per rule basis
