@@ -12,6 +12,7 @@ use lib "/opt/vyatta/share/perl5/";
 use Vyatta::Config;
 use Vyatta::Misc;
 use Vyatta::TypeChecker;
+use Getopt::Long;
 
 use warnings;
 use strict;
@@ -235,11 +236,27 @@ sub write_rules {
     return $valid;
 }
 
+my $nexthop;
 
+sub usage {
+    exit 1;
+}
+
+GetOptions("valid-nexthop=s" => \$nexthop,
+    ) or usage();
 
 ####main
 my $conf_file = '/var/load-balance/wlb.conf';
 my $conf_lck_file = '/var/load-balance/wlb.conf.lck';
+
+####are we just validating?
+if (defined $nexthop) {
+    my $rc = Vyatta::TypeChecker::validateType('ipv4', $nexthop, 1);
+    if (!$rc && $nexthop ne "dhcp") {
+	exit 1;
+    }
+    exit 0;
+}
 
 #open file
 open(FILE, "<$conf_file") or die "Can't open wlb config file"; 
