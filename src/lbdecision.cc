@@ -168,8 +168,11 @@ if so then this stuff goes here!
     execute(string("ip rule add fwmark ") + hex_buf + " table " + buf, stdout);
 
     if (lbdata._disable_source_nat == false) {
-      iter->second._address = fetch_iface_addr(iface);
-      execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._address, stdout);
+      string new_addr = fetch_iface_addr(iface);
+      int err = execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + new_addr, stdout);
+      if (err == 0) {
+	iter->second._address = new_addr;
+      }
     }
     ++iter;
   }
@@ -206,10 +209,11 @@ LBDecision::update_paths(LBData &lbdata)
 	}
 
 	if (new_addr != iter->second._address) {
-	  execute(string("iptables -t nat -D WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._address, stdout);
-	  execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + new_addr, stdout);
-	  iter->second._address = new_addr;
-
+	  int err = execute(string("iptables -t nat -D WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._address, stdout);
+	  err |= execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + new_addr, stdout);
+	  if (err == 0) { //only set if both are 0
+	    iter->second._address = new_addr;
+	  }
 	}
       }
       ++iter;
