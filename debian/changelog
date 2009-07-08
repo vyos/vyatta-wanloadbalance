@@ -1,3 +1,12 @@
+vyatta-wanloadbalance (0.13.16) unstable; urgency=low
+
+  * fix for bug 4698
+  * fix for bug 4699. Note that dhcp nexthop detection was also broken
+    due to changes in the location of the dhcp client information. this
+    was also
+
+ -- slioch <slioch@eng-140.vyatta.com>  Wed, 08 Jul 2009 11:21:45 -0700
+
 vyatta-wanloadbalance (0.13.15) unstable; urgency=low
 
   * need dummy node.def on op side of things for cmds to show up.
