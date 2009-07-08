@@ -63,6 +63,9 @@ bool
 LoadBalance::start_cycle()
 {
   _lbdata.reset_state_changed();
+  
+  _lbdata.update_dhcp_nexthop();
+  
   return true;
 }
 

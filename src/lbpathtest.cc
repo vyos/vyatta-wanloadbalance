@@ -103,9 +103,18 @@ LBPathTest::start(LBData &lb_data)
   while (iter != lb_data._iface_health_coll.end()) {
     string target = iter->second._ping_target;
     if (target.empty()) {
-      target = iter->second._nexthop;
+      if (iter->second._nexthop == "dhcp") {
+	target = iter->second._dhcp_nexthop;
+      }
+      else {
+	target = iter->second._nexthop;
+      }
     }
 
+    //don't have target yet...
+    if (target.empty()) {
+      return;
+    }
     if (_debug) {
       cout << "LBPathTest::start(): sending ping test for: " << iter->first << " for " << target << endl;
     }

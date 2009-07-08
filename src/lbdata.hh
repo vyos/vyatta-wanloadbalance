@@ -100,6 +100,7 @@ class LBHealth {
   string _ping_target;
   int _ping_resp_time;
   string _nexthop;
+  string _dhcp_nexthop;
   LBHealthHistory _hresults;
   bool _is_active;
   bool _state_changed;
@@ -131,6 +132,9 @@ class LBData {
 
   void
   reset_state_changed();
+
+  void
+  update_dhcp_nexthop();
 
   void
   dump();
