@@ -69,7 +69,12 @@ LBOutput::write(const LBData &lbdata)
 
     string target = iter->second._ping_target;
     if (target.empty()) {
-      target = iter->second._nexthop;
+      if (iter->second._nexthop == "dhcp") {
+	target = iter->second._dhcp_nexthop;
+      }
+      else {
+	target = iter->second._nexthop;
+      }
     }
 
     line += space + string("Target:  Ping ") + target + "\n";

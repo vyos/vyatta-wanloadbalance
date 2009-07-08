@@ -153,8 +153,9 @@ if so then this stuff goes here!
     //    insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, ct);
     //need to force the entry on restart as the configuration may have changed.
     if (iter->second._nexthop == "dhcp") {
-      string nexthop = fetch_iface_nexthop(iface);
-      execute(string("ip route replace table ") + buf + " default dev " + iface + " via " + nexthop, stdout);
+      if (iter->second._dhcp_nexthop.empty() == false) {
+	execute(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._dhcp_nexthop, stdout);
+      }
     }
     else {
       execute(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, stdout);
@@ -196,8 +197,9 @@ LBDecision::update_paths(LBData &lbdata)
 
 	//now let's update the nexthop here in the route table
 	if (iter->second._nexthop == "dhcp") {
-	  string nexthop = fetch_iface_nexthop(iface);
-	  insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + nexthop, iter->second._interface_index);
+	  if (iter->second._dhcp_nexthop.empty() == false) {
+	    insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._dhcp_nexthop, iter->second._interface_index);
+	  }
 	}
 	else {
 	  insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, iter->second._interface_index);
@@ -586,25 +588,6 @@ LBDecision::insert_default(string cmd, int table)
   if (stdout.empty() == true) {
     execute(cmd,stdout);
   }
-}
-
-/**
- * currently only reads the nexthop as maintained by the dhcp client
- **/
-string
-LBDecision::fetch_iface_nexthop(const string &iface)
-{
-  string file("/var/run/vyatta/dhclient/dhclient-script-router-"+iface);
-  FILE *fp = fopen(file.c_str(),"r");
-  if (fp) {
-    char str[1025];
-    int ct = 0;
-    if ((ct = fread(str, 1, 1024, fp)) > 0) {
-      return string(str);
-    }
-    fclose(fp);
-  }
-  return string("");
 }
 
 /**

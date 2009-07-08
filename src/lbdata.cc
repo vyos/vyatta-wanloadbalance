@@ -10,6 +10,7 @@
 #include <syslog.h>
 #include <iostream>
 
+#include "rl_str_proc.hh"
 #include "lbdata.hh"
 
 int LBHealthHistory::_buffer_size = 10;
@@ -197,6 +198,45 @@ LBData::reset_state_changed()
   LBData::InterfaceHealthIter h_iter = _iface_health_coll.begin();
   while (h_iter != _iface_health_coll.end()) {
     h_iter->second._state_changed = false;
+    ++h_iter;
+  }
+}
+
+/**
+ *
+ *
+ **/
+void
+LBData::update_dhcp_nexthop()
+{
+  /**
+   * currently only reads the nexthop as maintained by the dhcp client
+   **/
+  LBData::InterfaceHealthIter h_iter = _iface_health_coll.begin();
+  while (h_iter != _iface_health_coll.end()) {
+    if (h_iter->second._nexthop == "dhcp") {
+      string file("/var/lib/dhcp3/dhclient_"+h_iter->first+"_lease");
+      FILE *fp = fopen(file.c_str(),"r");
+      if (fp) {
+	char str[1025];
+	while (fgets(str, 1024, fp)) {
+	  StrProc tokens(str, "=");
+	  if (tokens.get(0) == "new_routers") {
+	    string tmp = tokens.get(1);
+	    
+	    //need to watch out for the case where there are mult routers...
+	    StrProc tokens2(tmp," ");
+	    tmp = tokens2.get(0);
+
+	    long len = tmp.length()-2;
+
+	    h_iter->second._dhcp_nexthop = tmp.substr(1,len);
+	    break;
+	  }
+	}
+	fclose(fp);
+      }
+    }
     ++h_iter;
   }
 }
