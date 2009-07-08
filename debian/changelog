@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.7+jenner12) unstable; urgency=low
+
+  * fix for bug 4698
+
+ -- slioch <slioch@eng-140.vyatta.com>  Wed, 08 Jul 2009 09:25:16 -0700
+
 vyatta-wanloadbalance (0.13.7+jenner11) unstable; urgency=low
 
   * fix for bug 4351. Move conntrack to feature specific chain for raw
