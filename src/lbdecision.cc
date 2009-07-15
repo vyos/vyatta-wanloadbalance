@@ -173,26 +173,26 @@ void
 LBDecision::update_paths(LBData &lbdata)
 {
   string stdout;
-  if (lbdata._disable_source_nat == false) {
-    //first let's remove the entry
-    LBData::InterfaceHealthIter iter = lbdata._iface_health_coll.begin();
-    while (iter != lbdata._iface_health_coll.end()) {
-      if (iter->second._is_active == true) {
-	string iface = iter->first;
-	string new_addr = fetch_iface_addr(iface);
-	char buf[20];
-	sprintf(buf,"%d",iter->second._interface_index);
-
-	//now let's update the nexthop here in the route table
-	if (iter->second._nexthop == "dhcp") {
-	  if (iter->second._dhcp_nexthop.empty() == false) {
-	    insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._dhcp_nexthop, iter->second._interface_index);
-	  }
+  //first let's remove the entry
+  LBData::InterfaceHealthIter iter = lbdata._iface_health_coll.begin();
+  while (iter != lbdata._iface_health_coll.end()) {
+    if (iter->second._is_active == true) {
+      string iface = iter->first;
+      string new_addr = fetch_iface_addr(iface);
+      char buf[20];
+      sprintf(buf,"%d",iter->second._interface_index);
+      
+      //now let's update the nexthop here in the route table
+      if (iter->second._nexthop == "dhcp") {
+	if (iter->second._dhcp_nexthop.empty() == false) {
+	  insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._dhcp_nexthop, iter->second._interface_index);
 	}
-	else {
-	  insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, iter->second._interface_index);
-	}
-
+      }
+      else {
+	insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, iter->second._interface_index);
+      }
+      
+      if (lbdata._disable_source_nat == false) {
 	if (new_addr != iter->second._address) {
 	  execute(string("iptables -t nat -D WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._address, stdout);
 	  execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + new_addr, stdout);
@@ -200,8 +200,8 @@ LBDecision::update_paths(LBData &lbdata)
 
 	}
       }
-      ++iter;
     }
+    ++iter;
   }
 }
 
