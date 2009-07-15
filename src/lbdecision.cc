@@ -173,6 +173,7 @@ if so then this stuff goes here!
       if (err == 0) {
 	iter->second._address = new_addr;
       }
+      sleep(1); //when creating the first entry it appears that snat will kill an existing connection if multiple commands are issues too quickly
     }
     ++iter;
   }
