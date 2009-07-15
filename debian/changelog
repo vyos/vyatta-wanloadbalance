@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.7+jenner15) unstable; urgency=low
+
+  * fix for bug 4675. Throttle back the initial setting of nat rules
+    during startup of wlb.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Wed, 15 Jul 2009 16:48:12 -0700
+
 vyatta-wanloadbalance (0.13.7+jenner14) unstable; urgency=low
 
   * fix for  bug 4730
