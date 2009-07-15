@@ -158,6 +158,7 @@ if so then this stuff goes here!
     if (lbdata._disable_source_nat == false) {
       iter->second._address = fetch_iface_addr(iface);
       execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._address, stdout);
+      sleep(1); //when creating the first entry it appears that snat will kill an existing connection if multiple commands are issues too quickly
     }
     ++iter;
   }
