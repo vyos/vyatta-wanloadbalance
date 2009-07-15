@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.7+jenner14) unstable; urgency=low
+
+  * fix for  bug 4730
+
+ -- slioch <slioch@eng-140.vyatta.com>  Wed, 15 Jul 2009 15:35:13 -0700
+
 vyatta-wanloadbalance (0.13.7+jenner13) unstable; urgency=low
 
   * fix for bug 4699. Note that dhcp nexthop detection was also broken
