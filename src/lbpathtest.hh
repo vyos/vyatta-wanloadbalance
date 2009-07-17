@@ -16,14 +16,6 @@
 
 using namespace std;
 
-class PktData
-{
-public:
-  PktData(string iface, int rtt) : _iface(iface),_rtt(rtt) {}
-  string _iface;
-  int _rtt;
-};
-
 class LBPathTest
 {
 public:
@@ -34,20 +26,7 @@ public:
   start(LBData &lb_data);
 
 private:
-  void
-  send(const string &iface, const string &target_addr, int packet_id);
-
-  int
-  receive();
-
-  unsigned short
-  in_checksum(const unsigned short *buf, int lenght) const;
-
-private:
   bool _debug;
-  int _send_sock;
-  int _recv_sock;
-  int _packet_id;
 };
 
 

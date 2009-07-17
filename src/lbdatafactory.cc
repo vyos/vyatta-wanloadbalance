@@ -16,6 +16,7 @@
 #include <iostream>
 #include "rl_str_proc.hh"
 #include "lbdata.hh"
+#include "lbtest_icmp.hh"
 #include "lbdatafactory.hh"
 
 using namespace std;
@@ -23,8 +24,9 @@ using namespace std;
 
 LBDataFactory::LBDataFactory(bool debug) :
   _debug(debug),
-  _lb_health(0),
-  _interface_index(0)
+  _lb_health(),
+  _interface_index(0),
+  _current_test_rule_number(0)
 {
 }
 
@@ -120,21 +122,37 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
   std::transform(value.begin(), value.end(), std::back_inserter(l_value),
 		 static_cast < int(*)(int) > (std::tolower));
 
+  if (_debug) {
+    cout << "LBDataFactory::process(" << depth << "): " << key << ":" << value << endl;
+  }
+
   if (path[0] == "disable-source-nat") {
     process_disablesourcenat(l_key,l_value);
   }
   else if (path[0] == "flush-conntrack") {
     process_flushconntrack(l_key,l_value);
   }
+  else if (path[0] == "hook") {
+    process_hook(l_key,l_value);
+  }
   else if (path[0] == "health") {
-    if (l_key == "interface") {
+    if (depth == 2 && key == "interface") {
       process_health(l_key,l_value);
     }
-    else if (l_key == "hook") {
-      process_health_hook(l_key,l_value);
-    }
-    else {
+    else if (depth == 2) {
       process_health_interface(l_key,l_value);
+    }
+    else if (depth == 3) {
+      process_health_interface_rule(l_key,l_value);
+    }
+    else if (depth == 4 && key == "type") {
+      process_health_interface_rule_type(l_key,l_value);
+    }
+    else if (depth == 4 && key == "target") {
+      process_health_interface_rule_type_target(l_key,l_value);
+    }
+    else if (depth == 4 && key == "resp-time") {
+      process_health_interface_rule_type_resptime(l_key,l_value);
     }
   }
   else if (path[0] == "rule") {
@@ -180,6 +198,13 @@ LBDataFactory::process_flushconntrack(const string &key, const string &value)
   _lb_data._flush_conntrack = true;
 }
 
+void
+LBDataFactory::process_hook(const string &key, const string &value)
+{
+  if (value.empty() == false) {
+    _lb_data._hook = value;
+  }
+}
 
 void
 LBDataFactory::process_health(const string &key, const string &value) 
@@ -187,28 +212,16 @@ LBDataFactory::process_health(const string &key, const string &value)
   if (value.empty() == false) {
     LBData::InterfaceHealthIter iter = _lb_data._iface_health_coll.find(key);
     if (iter == _lb_data._iface_health_coll.end()) {
-      _lb_data._iface_health_coll.insert(pair<string,LBHealth>(value,LBHealth(++_interface_index)));
+      _lb_data._iface_health_coll.insert(pair<string,LBHealth>(value,LBHealth(++_interface_index,const_cast<string&>(value))));
     }
     _health_iter = _lb_data._iface_health_coll.find(value);
   }
 }
 
 void
-LBDataFactory::process_health_hook(const string &key, const string &value)
-{
-  if (value.empty() == false) {
-    _lb_data._hook = value;
-  }
-}
-
-
-void
 LBDataFactory::process_health_interface(const string &key, const string &value) 
 {
-  if (key == "target") {
-    _health_iter->second._ping_target = value;
-  }
-  else if (key == "success-ct") {
+  if (key == "success-ct") {
     int num = strtoul(value.c_str(), NULL, 10);
     if (num > 0) {
       _health_iter->second._success_ct = num;
@@ -232,18 +245,6 @@ LBDataFactory::process_health_interface(const string &key, const string &value)
       syslog(LOG_ERR, "wan_lb: illegal failure-ct specified in configuration file: %s", value.c_str());
     }
   }
-  else if (key == "ping-resp") {
-    int num = strtoul(value.c_str(), NULL, 10);
-    if (num > 0) {
-      _health_iter->second._ping_resp_time = num;
-    }
-    else {
-      if (_debug) {
-	cerr << "illegal ping-resp specified: " << value << endl;
-      }
-      syslog(LOG_ERR, "wan_lb: illegal ping-resp specified in configuration file: %s", value.c_str());
-    }
-  }
   else if (key == "nexthop") {
     _health_iter->second._nexthop = value;
   }
@@ -257,6 +258,50 @@ LBDataFactory::process_health_interface(const string &key, const string &value)
     //nothing
   }
 
+}
+
+void
+LBDataFactory::process_health_interface_rule_type_target(const string &key, const string &value)
+{
+  _test_iter->second->_target = value;
+}
+
+void
+LBDataFactory::process_health_interface_rule_type_resptime(const string &key, const string &value)
+{
+  _test_iter->second->_resp_time = strtoul(value.c_str(), NULL, 10);
+}
+
+void
+LBDataFactory::process_health_interface_rule_type_ttl(const string &key, const string &value)
+{
+  //nothing yet
+}
+
+void
+LBDataFactory::process_health_interface_rule_type(const string &key, const string &value)
+{
+  if (value == "icmp") {
+    if (_debug) {
+      cout << "LBDataFactory::process_health_interface_rule_type(): setting up icmp test" << endl;
+    }
+    LBTestICMP *test = new LBTestICMP(_debug);
+    _health_iter->second._test_coll.insert(pair<int,LBTest*>(_current_test_rule_number,test));
+  }
+  else if (value == "udp") {
+    /*
+    LBTestUDP test = new LBTestUDP();
+    _health_iter->second._test_coll.insert(pair<int,LBTest>(_current_test_rule_number,test));
+    */
+  }
+  _test_iter = _health_iter->second._test_coll.find(_current_test_rule_number);
+}
+
+
+void
+LBDataFactory::process_health_interface_rule(const string &key, const string &value) 
+{
+  _current_test_rule_number = strtoul(value.c_str(), NULL, 10);
 }
 
 void

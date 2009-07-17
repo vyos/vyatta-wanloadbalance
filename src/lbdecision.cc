@@ -260,16 +260,18 @@ LBDecision::run(LBData &lb_data)
     while (iter != state_changed_coll.end()) {
       //set state
       //set interface
-      setenv("WLB_INTERFACE_NAME",iter->first.c_str(),1);
-      setenv("WLB_INTERFACE_STATE",iter->second.c_str(),1);
-
-      syslog(LOG_WARNING, "executing script: %s",lb_data._hook.c_str());
-
-      execute(lb_data._hook, stdout);
-      //unset state
-      //unset interface
-      unsetenv("WLB_INTERFACE_NAME");
-      unsetenv("WLB_INTERFACE_STATE");
+      if (lb_data._hook.empty() == false) {
+	setenv("WLB_INTERFACE_NAME",iter->first.c_str(),1);
+	setenv("WLB_INTERFACE_STATE",iter->second.c_str(),1);
+	
+	syslog(LOG_WARNING, "executing script: %s",lb_data._hook.c_str());
+	
+	execute(lb_data._hook, stdout);
+	//unset state
+	//unset interface
+	unsetenv("WLB_INTERFACE_NAME");
+	unsetenv("WLB_INTERFACE_STATE");
+      }
       ++iter;
     }
   }

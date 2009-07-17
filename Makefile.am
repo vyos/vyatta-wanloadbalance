@@ -8,7 +8,7 @@ etcdir           = /etc
 
 AM_CPPFLAGS = -I src -Wall -DDEBUG
 
-CLEANFILES = src/main.o src/lbdata.o src/lbdatafactory.o src/loadbalance.o src/rl_str_proc.o src/lbpathtest.o src/lboutput.o
+CLEANFILES = src/main.o src/lbdata.o src/lbdatafactory.o src/loadbalance.o src/rl_str_proc.o src/lbpathtest.o src/lbtest_icmp.o src/lboutput.o
 
 sbin_SCRIPTS = scripts/vyatta-wanloadbalance.pl
 sbin_SCRIPTS += scripts/vyatta-wanloadbalance.init
@@ -26,6 +26,7 @@ src_wan_lb_SOURCES += src/lbdatafactory.cc
 src_wan_lb_SOURCES += src/loadbalance.cc
 src_wan_lb_SOURCES += src/rl_str_proc.cc
 src_wan_lb_SOURCES += src/lbpathtest.cc
+src_wan_lb_SOURCES += src/lbtest_icmp.cc
 src_wan_lb_SOURCES += src/lbdecision.cc
 src_wan_lb_SOURCES += src/lboutput.cc
 

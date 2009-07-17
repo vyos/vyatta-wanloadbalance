@@ -25,7 +25,6 @@ sub write_health {
 
     my $valid = "false";
 
-
     if ($config->exists("load-balancing wan disable-source-nat")) {
 	print FILE_LCK "disable-source-nat\n";
     }
@@ -44,6 +43,7 @@ sub write_health {
     $config->setLevel("load-balancing wan interface-health");
     my @eths = $config->listNodes();
     foreach my $ethNode (@eths) {
+	$config->setLevel("load-balancing wan interface-health");
 	
 	print FILE_LCK "\tinterface " . $ethNode . " {\n";
 	
@@ -51,17 +51,7 @@ sub write_health {
 	if (defined $option) {
 	    print FILE_LCK "\t\tfailure-ct  " . $option . "\n";
 	}
-	
-	$option = $config->returnValue("$ethNode ping");
-	if (defined $option) {
-	    print FILE_LCK "\t\ttarget  " . $option . "\n";
-	}
-	
-	$option = $config->returnValue("$ethNode resp-time");
-	if (defined $option) {
-	    print FILE_LCK "\t\tping-resp  " . $option*1000 . "\n";
-	}
-	
+
 	$option = $config->returnValue("$ethNode success-count");
 	if (defined $option) {
 	    print FILE_LCK "\t\tsuccess-ct  " . $option . "\n";
@@ -69,13 +59,49 @@ sub write_health {
 
 	$option = $config->returnValue("$ethNode nexthop");
 	if (defined $option) {
-	    print FILE_LCK "\t\tnexthop  " . $option . "\n";
+	    print FILE_LCK "\t\tnexthop " . $option . "\n";
 	    $valid = "true";
 	}
 	else {
 	    print "nexthop must be specified\n";
 	    exit 1;
 	}
+
+	$config->setLevel("load-balancing wan interface-health $ethNode rule");
+	my @rules = $config->listNodes();
+	foreach my $rule (@rules) {
+	    print FILE_LCK "\t\trule " . $rule . " {\n";
+
+#	    my $icmp = $config->returnValue("$rule icmp");
+#	    if (defined $icmp) {
+		print FILE_LCK "\t\t\ttype icmp {\n";
+#	    }
+
+#	    my $ttl = $config->returnValue("$rule ttl");
+#	    if (defined $ttl) {
+#		print FILE_LCK "\t\t\ttype udp {\n";
+#		print FILE_LCK "\t\t\t\tttl " . $ttl . "\n";
+#	    }
+
+#	    if (defined $icmp && defined $ttl) {
+#		print "Only a single test type can be defined (ttl or icmp)\n";
+#		exit 1;
+#	    }
+
+	    $option = $config->returnValue("$rule target");
+	    if (defined $option) {
+		print FILE_LCK "\t\t\t\ttarget  " . $option . "\n";
+	    }
+	    
+	    $option = $config->returnValue("$rule resp-time");
+	    if (defined $option) {
+		print FILE_LCK "\t\t\t\tresp-time  " . $option*1000 . "\n";
+	    }
+	    print FILE_LCK "\t\t\t}\n";
+
+	    print FILE_LCK "\t\t}\n";
+	}
+	
 	print FILE_LCK "\t}\n";
     }
     print FILE_LCK "}\n\n";

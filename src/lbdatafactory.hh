@@ -50,10 +50,25 @@ private:
   process_health(const string &key, const string &value);
 
   void
-  process_health_hook(const string &key, const string &value);
+  process_hook(const string &key, const string &value);
 
   void
   process_health_interface(const string &key, const string &value);
+
+  void
+  process_health_interface_rule(const string &key, const string &value);
+
+  void
+  process_health_interface_rule_type(const string &key, const string &value);
+
+  void
+  process_health_interface_rule_type_target(const string &key, const string &value);
+
+  void
+  process_health_interface_rule_type_resptime(const string &key, const string &value);
+
+  void
+  process_health_interface_rule_type_ttl(const string &key, const string &value);
 
   void
   process_rule(const string &key, const string &value);
@@ -88,10 +103,12 @@ private:
   LBRule _lb_rule;
   LBData _lb_data;
   int _interface_index;
+  int _current_test_rule_number;
 
   LBData::LBRuleIter _rule_iter;
   LBData::InterfaceHealthIter _health_iter;
   LBRule::InterfaceDistIter _rule_iface_iter;
+  LBHealth::TestIter _test_iter;
 };
 
 #endif //__LBDATALOADER_HH__

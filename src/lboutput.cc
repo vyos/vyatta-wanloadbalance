@@ -67,17 +67,22 @@ LBOutput::write(const LBData &lbdata)
 
     line += space + string("Last Status Change:  ") + string(tbuf);
 
-    string target = iter->second._ping_target;
-    if (target.empty()) {
-      if (iter->second._nexthop == "dhcp") {
-	target = iter->second._dhcp_nexthop;
+    LBHealth::TestConstIter titer = iter->second._test_coll.begin();
+    while (titer != iter->second._test_coll.end()) {
+      string target = titer->second->_target;
+      if (target.empty()) {
+	if (iter->second._nexthop == "dhcp") {
+	  target = iter->second._dhcp_nexthop;
+	}
+	else {
+	  target = iter->second._nexthop;
+	}
       }
-      else {
-	target = iter->second._nexthop;
-      }
-    }
+      
+      line += space + string("Target:  Ping ") + target + "\n";
 
-    line += space + string("Target:  Ping ") + target + "\n";
+      ++titer;
+    }
 
     char btmp[256];
     string time_buf;

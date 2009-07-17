@@ -42,6 +42,57 @@ LBHealth::put(int rtt)
   }
 }
 
+
+/**
+ *
+ *
+ **/
+void
+LBHealth::start_new_test_cycle()
+{
+  _test_iter = _test_coll.begin();
+  if (_test_iter != _test_coll.end()) {
+    _test_iter->second->init();
+  }
+  _test_success = false;
+}
+
+/**
+ *
+ *
+ **/
+void
+LBHealth::send_test()
+{
+  if (_test_success == true || _test_iter == _test_coll.end()) {
+    return; //means we are done
+  }
+  _test_iter->second->send(*this);
+}
+
+/**
+ *
+ *
+ **/
+bool
+LBHealth::recv_test()
+{
+  if (_test_success == true || _test_iter == _test_coll.end()) {
+    return false;
+  }
+  int rtt = _test_iter->second->recv(*this);
+  if (rtt != -1) {
+    put(rtt); //push test result
+    _test_success = true;
+    return true; //means we have successfully completed the test
+  }
+  if (++_test_iter == _test_coll.end()) {
+    put(-1);
+    return true; //end of tests
+  }
+  return false;
+}
+
 /**
  *
  *
@@ -129,18 +180,24 @@ void
 LBData::dump()
 {
 
-  cout << "health" << endl;
+  cout << "health:" << endl;
   LBData::InterfaceHealthIter h_iter = _iface_health_coll.begin();
   while (h_iter != _iface_health_coll.end()) {
-    cout << "  " << h_iter->first << endl;
-    cout << "    " << h_iter->second._success_ct << endl;
-    cout << "    " << h_iter->second._failure_ct << endl;
-    cout << "    " << h_iter->second._ping_target << endl;
-    cout << "    " << h_iter->second._ping_resp_time << endl;
+    cout << "  interface: " << h_iter->first << endl;
+    cout << "    nexthop: " << h_iter->second._nexthop << endl;
+    cout << "    success ct: " << h_iter->second._success_ct << endl;
+    cout << "    failure ct: " << h_iter->second._failure_ct << endl;
+    LBHealth::TestIter t_iter = h_iter->second._test_coll.begin();
+    while (t_iter != h_iter->second._test_coll.end()) {
+      cout << "    test: " << t_iter->first << endl;
+      cout << "      target: " << t_iter->second->_target << endl;
+      cout << "      resp time:" << t_iter->second->_resp_time << endl;
+	++t_iter;
+    }
     ++h_iter;
   }
 
-  cout << endl << "wan" << endl;
+  cout << endl << "wan:" << endl;
   LBData::LBRuleIter r_iter = _lb_rule_coll.begin();
   while (r_iter != _lb_rule_coll.end()) {
     cout << "  rule: " << r_iter->first << endl;

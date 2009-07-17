@@ -8,6 +8,7 @@
 #ifndef __LBDATA_HH__
 #define __LBDATA_HH__
 
+#include <assert.h>
 #include <map>
 #include <set>
 #include <vector>
@@ -15,6 +16,12 @@
 
 using namespace std;
 
+class LBHealth;
+
+/**
+ *
+ *
+ **/
 class LBRule {
  public:
   typedef map<string, int> InterfaceDistColl;
@@ -48,13 +55,16 @@ class LBRule {
 };
 
 
+/**
+ *
+ *
+ **/
 class LBHealthHistory {
 public:
   LBHealthHistory(int buffer_size);
 
   //push in the ping response for this...
   int push(int rtt);
-
 
 public:
   //results of health testing
@@ -68,16 +78,59 @@ public:
   int _index;
 };
 
+/**
+ *
+ *
+ **/
+class LBTest {
+public:
+  LBTest(bool debug) : _debug(debug) {}
+  virtual ~LBTest() {}
+
+  virtual void
+  init() = 0;
+  
+  virtual void
+  send(LBHealth &health) = 0;
+
+  virtual int
+  recv(LBHealth &health) = 0;
+
+public:
+  bool _debug;
+  string _target;
+  int    _resp_time;
+};
+
+/**
+ *
+ *
+ **/
 class LBHealth {
- public:
-  LBHealth(int interface_index) :
+public:
+  typedef map<int,LBTest*> TestColl;
+  typedef map<int,LBTest*>::iterator TestIter;
+  typedef map<int,LBTest*>::const_iterator TestConstIter;
+
+public:
+  LBHealth() :
     _success_ct(0),
     _failure_ct(0),
-    _ping_resp_time(0),
     _hresults(10),
     _is_active(true),
     _state_changed(true),
     _last_time_state_changed(0),
+    _interface_index(0)
+      {}
+
+  LBHealth(int interface_index, string &interface) :
+    _success_ct(0),
+    _failure_ct(0),
+    _hresults(10),
+    _is_active(true),
+    _state_changed(true),
+    _last_time_state_changed(0),
+    _interface(interface),
     _interface_index(interface_index)
       {}
 
@@ -95,21 +148,39 @@ class LBHealth {
   unsigned long
   failure_count() const {return _failure_ct;}
 
+  //test interfaces
+  void
+  start_new_test_cycle();
+
+  void
+  send_test();
+
+  bool
+  recv_test();
+
+public: //variables
   int _success_ct;
   int _failure_ct;
-  string _ping_target;
-  int _ping_resp_time;
   string _nexthop;
   string _dhcp_nexthop;
   LBHealthHistory _hresults;
   bool _is_active;
   bool _state_changed;
   unsigned long _last_time_state_changed;
+  string _interface;
   int _interface_index;
   string _address;
+
+  TestColl _test_coll;
+private: //variables
+  TestIter _test_iter;
+  bool _test_success;
 };
 
-
+/**
+ *
+ *
+ **/
 class LBData {
  public:
   typedef map<int,LBRule> LBRuleColl;
