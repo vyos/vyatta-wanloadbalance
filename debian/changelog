@@ -1,3 +1,23 @@
+vyatta-wanloadbalance (0.13.17) unstable; urgency=low
+
+  [ root ]
+  * fix for case where iptables command fails on setting snat rules
+    after receiving new address. in this case the new address is not
+    recorded and we'll try creating the rule on the next processing
+    cycle until successful.
+
+  [ slioch ]
+  * fix for  bug 4730
+  * fix for bug 4675. Throttle back the initial setting of nat rules
+    during startup of wlb.
+  * reworked target code to support multiple targets and different
+    target types.
+  * added udp ttl limited test type to health check. modified
+    configuration layout. modified op mode command to
+  * additional files needed
+
+ -- slioch <slioch@eng-140.vyatta.com>  Tue, 21 Jul 2009 13:13:32 -0700
+
 vyatta-wanloadbalance (0.13.16) unstable; urgency=low
 
   * fix for bug 4698
