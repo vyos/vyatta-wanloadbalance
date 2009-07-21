@@ -17,6 +17,7 @@
 #include "rl_str_proc.hh"
 #include "lbdata.hh"
 #include "lbtest_icmp.hh"
+#include "lbtest_ttl.hh"
 #include "lbdatafactory.hh"
 
 using namespace std;
@@ -154,6 +155,9 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
     else if (depth == 4 && key == "resp-time") {
       process_health_interface_rule_type_resptime(l_key,l_value);
     }
+    else if (depth == 4 && key == "ttl") {
+      process_health_interface_rule_type_udp(l_key,l_value);
+    }
   }
   else if (path[0] == "rule") {
     if (depth > 0 && path[1] == "source") {
@@ -263,25 +267,38 @@ LBDataFactory::process_health_interface(const string &key, const string &value)
 void
 LBDataFactory::process_health_interface_rule_type_target(const string &key, const string &value)
 {
-  _test_iter->second->_target = value;
+  if (_test_iter != _health_iter->second._test_coll.end()) {
+    _test_iter->second->_target = value;
+  }
 }
 
 void
 LBDataFactory::process_health_interface_rule_type_resptime(const string &key, const string &value)
 {
-  _test_iter->second->_resp_time = strtoul(value.c_str(), NULL, 10);
+  if (_test_iter != _health_iter->second._test_coll.end()) {
+    _test_iter->second->_resp_time = strtoul(value.c_str(), NULL, 10);
+  }
 }
 
 void
-LBDataFactory::process_health_interface_rule_type_ttl(const string &key, const string &value)
+LBDataFactory::process_health_interface_rule_type_udp(const string &key, const string &value)
 {
-  //nothing yet
+  if (_test_iter != _health_iter->second._test_coll.end()) {
+    if (key == "ttl") {
+      unsigned short val = (unsigned short)strtol(value.c_str(),NULL,10);
+      ((LBTestTTL*)_test_iter->second)->set_ttl(val);
+    }
+    else if (key == "port") {
+      unsigned short val = (unsigned short)strtol(value.c_str(),NULL,10);
+      ((LBTestTTL*)_test_iter->second)->set_port(val);
+    }
+  }
 }
 
 void
 LBDataFactory::process_health_interface_rule_type(const string &key, const string &value)
 {
-  if (value == "icmp") {
+  if (value == "ping") {
     if (_debug) {
       cout << "LBDataFactory::process_health_interface_rule_type(): setting up icmp test" << endl;
     }
@@ -289,10 +306,8 @@ LBDataFactory::process_health_interface_rule_type(const string &key, const strin
     _health_iter->second._test_coll.insert(pair<int,LBTest*>(_current_test_rule_number,test));
   }
   else if (value == "udp") {
-    /*
-    LBTestUDP test = new LBTestUDP();
-    _health_iter->second._test_coll.insert(pair<int,LBTest>(_current_test_rule_number,test));
-    */
+    LBTestTTL *test = new LBTestTTL(_debug);
+    _health_iter->second._test_coll.insert(pair<int,LBTest*>(_current_test_rule_number,test));
   }
   _test_iter = _health_iter->second._test_coll.find(_current_test_rule_number);
 }

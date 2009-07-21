@@ -84,11 +84,16 @@ public:
  **/
 class LBTest {
 public:
-  LBTest(bool debug) : _debug(debug) {}
+  typedef enum {K_NONE,K_SUCCESS,K_FAILURE} TestState;
+public:
+  LBTest(bool debug) : 
+    _debug(debug),
+    _state(K_NONE)
+  {}
   virtual ~LBTest() {}
 
   virtual void
-  init() = 0;
+  init();
   
   virtual void
   send(LBHealth &health) = 0;
@@ -96,10 +101,18 @@ public:
   virtual int
   recv(LBHealth &health) = 0;
 
+  virtual string
+  dump() = 0;
+
 public:
   bool _debug;
   string _target;
   int    _resp_time;
+  int _state;
+  static int _recv_icmp_sock;
+  static int _send_raw_sock;
+  static int _send_icmp_sock;
+  static bool _initialized;
 };
 
 /**

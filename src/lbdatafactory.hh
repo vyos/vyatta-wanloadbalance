@@ -68,7 +68,7 @@ private:
   process_health_interface_rule_type_resptime(const string &key, const string &value);
 
   void
-  process_health_interface_rule_type_ttl(const string &key, const string &value);
+  process_health_interface_rule_type_udp(const string &key, const string &value);
 
   void
   process_rule(const string &key, const string &value);

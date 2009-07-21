@@ -67,26 +67,26 @@ sub write_health {
 	    exit 1;
 	}
 
-	$config->setLevel("load-balancing wan interface-health $ethNode rule");
+	$config->setLevel("load-balancing wan interface-health $ethNode test");
 	my @rules = $config->listNodes();
 	foreach my $rule (@rules) {
 	    print FILE_LCK "\t\trule " . $rule . " {\n";
 
-#	    my $icmp = $config->returnValue("$rule icmp");
-#	    if (defined $icmp) {
-		print FILE_LCK "\t\t\ttype icmp {\n";
-#	    }
-
-#	    my $ttl = $config->returnValue("$rule ttl");
-#	    if (defined $ttl) {
-#		print FILE_LCK "\t\t\ttype udp {\n";
-#		print FILE_LCK "\t\t\t\tttl " . $ttl . "\n";
-#	    }
-
-#	    if (defined $icmp && defined $ttl) {
-#		print "Only a single test type can be defined (ttl or icmp)\n";
-#		exit 1;
-#	    }
+	    my $icmp = $config->exists("$rule ping");
+	    if (defined $icmp) {
+		print FILE_LCK "\t\t\ttype ping {\n";
+	    }
+	    
+	    my $udp = $config->returnValue("$rule ttl");
+	    if (defined $udp) {
+		print FILE_LCK "\t\t\ttype udp {\n";
+		print FILE_LCK "\t\t\t\tttl $udp\n";
+	    }
+	    
+	    if (defined $icmp && defined $udp) {
+		print "Only a single test type can be defined (ttl or icmp)\n";
+		exit 1;
+	    }
 
 	    $option = $config->returnValue("$rule target");
 	    if (defined $option) {

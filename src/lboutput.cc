@@ -79,7 +79,15 @@ LBOutput::write(const LBData &lbdata)
 	}
       }
       
-      line += space + string("Target:  Ping ") + target + "\n";
+      if (titer->second->_state == LBTest::K_NONE) {
+	line += space + string("*Target:  ") + target + "\n";
+      }
+      else if (titer->second->_state == LBTest::K_FAILURE) {
+	line += space + string("-Target:  ") + target + "\n";
+      }
+      else if (titer->second->_state == LBTest::K_SUCCESS) {
+	line += space + string("+Target:  ") + target + "\n";
+      }
 
       ++titer;
     }

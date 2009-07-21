@@ -41,8 +41,6 @@ public:
   ICMPEngine() : 
     _debug(true),
     _initialized(false),
-    _send_sock(0),
-    _recv_sock(0),
     _packet_id(0) 
   {}
 
@@ -57,10 +55,10 @@ public:
 
 private:
   void
-  send(const string &iface, const string &target_addr, int packet_id);
+  send(int sock, const string &iface, const string &target_addr, int packet_id);
 
   int
-  receive();
+  receive(int sock);
 
   unsigned short
   in_checksum(const unsigned short *buf, int lenght) const;
@@ -68,8 +66,6 @@ private:
 private:
   bool _debug;
   bool _initialized;
-  int _send_sock;
-  int _recv_sock;
   int _packet_id;
   map<int,PktData> _results;
 };
@@ -85,13 +81,16 @@ public:
   ~LBTestICMP() {}
 
   void
-  init() {_engine.init();}
+  init() {_engine.init();this->LBTest::init();}
 
   void
   send(LBHealth &health) {_engine.process(health,this);}
 
   int
   recv(LBHealth &health) {return _engine.recv(health,this);}
+
+  string
+  dump();
 
 private:
   static ICMPEngine _engine; //singleton

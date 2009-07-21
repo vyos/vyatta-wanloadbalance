@@ -6,6 +6,19 @@
  * by the Free Software Foundation.
  */
 #include <sys/time.h>
+#include <syslog.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/sysinfo.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <netinet/udp.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <netinet/ip_icmp.h>
+#include <errno.h>
+#include <string.h>
 #include <time.h>
 #include <syslog.h>
 #include <iostream>
@@ -14,6 +27,11 @@
 #include "lbdata.hh"
 
 int LBHealthHistory::_buffer_size = 10;
+
+int LBTest::_send_icmp_sock = 0;
+int LBTest::_send_raw_sock = 0;
+int LBTest::_recv_icmp_sock = 0;
+bool LBTest::_initialized = false;
 
 /**
  *
@@ -190,9 +208,9 @@ LBData::dump()
     LBHealth::TestIter t_iter = h_iter->second._test_coll.begin();
     while (t_iter != h_iter->second._test_coll.end()) {
       cout << "    test: " << t_iter->first << endl;
-      cout << "      target: " << t_iter->second->_target << endl;
-      cout << "      resp time:" << t_iter->second->_resp_time << endl;
-	++t_iter;
+      string foo = t_iter->second->dump();
+      cout << "      " << foo << endl;
+      ++t_iter;
     }
     ++h_iter;
   }
@@ -295,5 +313,70 @@ LBData::update_dhcp_nexthop()
       }
     }
     ++h_iter;
+  }
+}
+
+/**
+ *
+ *
+ **/
+void
+LBTest::init()
+{
+  if (_initialized == true) {
+    return;
+  }
+  _initialized = true;
+
+  struct protoent *ppe = getprotobyname("icmp");
+  _send_icmp_sock = socket(PF_INET, SOCK_RAW, ppe->p_proto);
+  if (_send_icmp_sock < 0){
+    if (_debug) {
+      cerr << "LBTestICMP::LBTestICMP(): no send sock: " << _send_icmp_sock << endl;
+    }
+    syslog(LOG_ERR, "wan_lb: failed to acquired socket");
+    _send_icmp_sock = 0;
+    return;
+  }
+
+  //set options for broadcasting.
+  int val = 1;
+  //  setsockopt(_send_icmp_sock, SOL_SOCKET, SO_BROADCAST, &val, 4);
+  setsockopt(_send_icmp_sock, SOL_SOCKET, SO_REUSEADDR, &val, 4);
+
+  _send_raw_sock = socket(PF_INET, SOCK_RAW, IPPROTO_RAW);
+  if (_send_raw_sock < 0){
+    if (_debug) {
+      cerr << "LBTestICMP::LBTestICMP(): no send sock: " << _send_raw_sock << endl;
+    }
+    syslog(LOG_ERR, "wan_lb: failed to acquired socket");
+    _send_raw_sock = 0;
+    return;
+  }
+
+  //set options for broadcasting.
+  //  setsockopt(_send_raw_sock, SOL_SOCKET, SO_BROADCAST, &val, 4);
+  setsockopt(_send_raw_sock, SOL_SOCKET, SO_REUSEADDR, &val, 4);
+
+  struct sockaddr_in addr;
+  memset( &addr, 0, sizeof( struct sockaddr_in ));
+  addr.sin_family = AF_INET;
+  addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  addr.sin_port = 0;
+
+  _recv_icmp_sock = socket(PF_INET, SOCK_RAW, ppe->p_proto);
+  if (_recv_icmp_sock < 0) {
+    if (_debug) {
+      cerr << "LBTestICMP::LBTestICMP(): no recv sock: " << _recv_icmp_sock << endl;
+    }
+    syslog(LOG_ERR, "wan_lb: failed to acquired socket");
+    _recv_icmp_sock = 0;
+    return;
+  }
+  if (bind(_recv_icmp_sock, (struct sockaddr*)&addr, sizeof(addr))==-1) {
+    if (_debug) {
+      cerr << "failed on bind" << endl;
+    }
+    syslog(LOG_ERR, "wan_lb: failed to bind recv sock");
   }
 }
