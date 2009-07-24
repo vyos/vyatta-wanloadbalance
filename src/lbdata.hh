@@ -28,12 +28,19 @@ class LBRule {
   typedef map<string, int>::iterator InterfaceDistIter;
 
   typedef enum {ALL,ICMP,UDP,TCP} Protocol;
+  typedef enum {K_SECOND,K_MINUTE,K_HOUR} LimitPeriod;
 
   LBRule() :
     _proto("all"),
     _exclude(false),
     _failover(false),
-    _enable_source_based_routing(false)      {}
+    _enable_source_based_routing(false),
+    _limit(false),
+    _limit_burst("5"),
+    _limit_rate("1"),
+    _limit_mode(false),
+    _limit_period(K_HOUR)
+  {}
 
  public:
   string _proto;
@@ -49,6 +56,12 @@ class LBRule {
   bool _failover;
 
   bool _enable_source_based_routing;
+
+  bool _limit;
+  string _limit_burst;
+  string _limit_rate;
+  bool _limit_mode; //true above, false below
+  LimitPeriod _limit_period;
 
   string _in_iface;
   InterfaceDistColl _iface_dist_coll;

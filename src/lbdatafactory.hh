@@ -97,6 +97,9 @@ private:
   void
   process_rule_enablesourcebasedrouting(const string &key, const string &value);
 
+  void
+  process_rule_limit(const string &key, const string &value);
+
 private:
   bool _debug;
   LBHealth _lb_health;

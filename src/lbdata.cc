@@ -69,9 +69,6 @@ void
 LBHealth::start_new_test_cycle()
 {
   _test_iter = _test_coll.begin();
-  if (_test_iter != _test_coll.end()) {
-    _test_iter->second->init();
-  }
   _test_success = false;
 }
 
@@ -85,6 +82,7 @@ LBHealth::send_test()
   if (_test_success == true || _test_iter == _test_coll.end()) {
     return; //means we are done
   }
+  _test_iter->second->init();
   _test_iter->second->send(*this);
 }
 
@@ -226,6 +224,26 @@ LBData::dump()
     cout << "    " << r_iter->second._d_addr << endl;
     cout << "    " << r_iter->second._d_port << endl;
     
+    if (r_iter->second._limit) {
+      cout << "     limit:" << endl;
+      cout << "       burst: " << r_iter->second._limit_burst << endl;
+      cout << "       rate: " << r_iter->second._limit_burst << endl;
+      if (r_iter->second._limit_mode) {
+	cout << "       thresh: above" << endl;
+      }
+      else { 
+	cout << "       thresh: below" << endl;
+      }
+      if (r_iter->second._limit_period == LBRule::K_SECOND) {
+	cout << "       period: second" << endl;
+      }
+      else if (r_iter->second._limit_period == LBRule::K_MINUTE) {
+	cout << "       period: minute" << endl;
+      }
+      else if (r_iter->second._limit_period == LBRule::K_HOUR) {
+	cout << "       period: hour" << endl;
+      }
+    }
     LBRule::InterfaceDistIter ri_iter = r_iter->second._iface_dist_coll.begin();
     while (ri_iter != r_iter->second._iface_dist_coll.end()) {
       cout << "      interface: " << ri_iter->first << endl;

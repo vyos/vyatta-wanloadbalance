@@ -41,6 +41,7 @@ public:
   ICMPEngine() : 
     _debug(true),
     _initialized(false),
+    _received(false),
     _packet_id(0) 
   {}
 
@@ -66,6 +67,7 @@ private:
 private:
   bool _debug;
   bool _initialized;
+  bool _received;
   int _packet_id;
   map<int,PktData> _results;
 };

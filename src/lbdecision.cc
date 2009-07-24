@@ -305,35 +305,79 @@ LBDecision::run(LBData &lb_data)
 	//no rules here!
       }
       else {
+	char rule_str[20];
+	sprintf(rule_str,"%d",iter->first);
+
+	if (iter->second._limit) {
+	  string limit_cmd = get_limit_cmd(iter->second);
+	  execute(string("iptables -t mangle -N WANLOADBALANCE_PRE_LIMIT_") + rule_str, stdout);
+	  execute(string("iptables -t mangle -F WANLOADBALANCE_PRE_LIMIT_") + rule_str, stdout);
+	  execute(string("iptables -t mangle -N WANLOADBALANCE_OUT_LIMIT_") + rule_str, stdout);
+	  execute(string("iptables -t mangle -F WANLOADBALANCE_OUT_LIMIT_") + rule_str, stdout);
+	  
+	  execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " " + limit_cmd + " -j WANLOADBALANCE_PRE_LIMIT_" + rule_str, stdout);
+	  execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " " + limit_cmd + " -j WANLOADBALANCE_OUT_LIMIT_" + rule_str, stdout);
+	}
+
 	char fbuf[20],dbuf[80];
 	map<string,float>::iterator w_iter = weights.begin();
 	for (w_iter = weights.begin(); w_iter != (--weights.end()); w_iter++) {
 	  sprintf(fbuf,"%f",w_iter->second);
 	  sprintf(dbuf,"%s",w_iter->first.c_str());
 	  if (iter->second._enable_source_based_routing) {
-	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
-	    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    if (iter->second._limit) {
+	      //fill in limit statement here
+	      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    }
+	    else {
+	      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    }
 	  }
 	  else {
-	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
-	    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    if (iter->second._limit) {
+	      //fill in limit statement here
+	      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    }
+	    else {
+	      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    }
 	  }
 	}
 	sprintf(dbuf,"%s",(--weights.end())->first.c_str());
 	if (iter->second._enable_source_based_routing) {
-	  execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j ISP_" + dbuf, stdout);
-	  execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j ISP_" + dbuf, stdout);
+	  if (iter->second._limit) {
+	    //fill in limit statement here
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -j ISP_" + dbuf, stdout);
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -j ISP_" + dbuf, stdout);
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -j ACCEPT", stdout);
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -j ACCEPT", stdout);
+	  }
+	  else {
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j ISP_" + dbuf, stdout);
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j ISP_" + dbuf, stdout);
+	  }
+	  
 	}
 	else {
-	  execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
-	  execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	  if (iter->second._limit) {
+	    //fill in limit statement here
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -j ISP_" + dbuf, stdout);
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -j ISP_" + dbuf, stdout);
+	  }
+	  else {
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	  }
 	}
 	execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
 	execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j CONNMARK --restore-mark", stdout);
       }
     }
     ++iter;
-    continue;
   }
 }
 
@@ -351,6 +395,18 @@ LBDecision::shutdown(LBData &data)
   execute("iptables -t mangle -F WANLOADBALANCE_OUT", stdout);
   execute("iptables -t mangle -D PREROUTING -j WANLOADBALANCE_PRE", stdout);
   execute("iptables -t mangle -D OUTPUT -j WANLOADBALANCE_OUT", stdout);
+
+  LBData::LBRuleIter iter = data._lb_rule_coll.begin();
+  while (iter != data._lb_rule_coll.end()) {
+    if (iter->second._limit) {
+      char rule_str[20];
+      sprintf(rule_str,"%d",iter->first);
+      execute(string("iptables -t mangle -D PREROUTING -j WANLOADBALANCE_PRE_LIMIT_") + rule_str,stdout);
+      execute(string("iptables -t mangle -D PREROUTING -j WANLOADBALANCE_OUT_LIMIT_") + rule_str,stdout);
+    }
+    ++iter;
+  }
+
 
   //clear out nat as well
   execute("iptables -t nat -F WANLOADBALANCE", stdout);
@@ -631,4 +687,33 @@ LBDecision::fetch_iface_addr(const string &iface)
   return string("");
 }
 
-
+/**
+ * Builds out the limit matching criteria
+ **/
+string
+LBDecision::get_limit_cmd(LBRule &rule)
+{
+  string cmd;
+  if (!rule._limit) {
+    return cmd;
+  }
+  //needs to be of the form:
+  //-m limit [!] --limit 1/second --limit-burst 5 
+  cmd = "-m limit ";
+  if (rule._limit_mode) {
+    cmd += "! ";
+  }
+  cmd += string("--limit ") + rule._limit_rate + "/";
+  if (rule._limit_period == LBRule::K_SECOND) {
+    cmd += "second ";
+  }
+  else if (rule._limit_period == LBRule::K_MINUTE) {
+    cmd += "minute ";
+  }
+  else {
+    cmd += "hour ";
+  }
+  
+  cmd += string("--limit-burst ") + rule._limit_burst;
+  return cmd;
+}

@@ -63,11 +63,11 @@ LBPathTest::start(LBData &lb_data)
 
   set<LBHealth*> coll;
 
+  //iterate over the health interfaces
   LBData::InterfaceHealthIter iter = lb_data._iface_health_coll.begin();
   while (iter != lb_data._iface_health_coll.end()) {
     iter->second.start_new_test_cycle();
     coll.insert(&(iter->second));
-
     ++iter;
   }
   

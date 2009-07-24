@@ -44,7 +44,11 @@ TTLEngine::init()
   if (_debug) {
     cout << "LBTestICMP::init(): initializing test system" << endl;
   }
-  _results.erase(_results.begin(),_results.end());
+  if (_initialized == false) {
+    _results.erase(_results.begin(),_results.end());
+  }
+  _initialized = true;
+  _received = false;
 }
 
 /**
@@ -88,65 +92,82 @@ TTLEngine::process(LBHealth &health,LBTestTTL *data)
 int
 TTLEngine::recv(LBHealth &health,LBTestTTL *data) 
 {
-  if (_results.empty() == true) {
-    return -1;
-  }
+  _initialized = false;
+  if (_received == false) {
   
-  if (_debug) {
-    cout << "TTLEngine::recv()" << endl;
-  }
-  struct timeval send_time;
-  gettimeofday(&send_time,NULL);
-  
-  //use gettimeofday to calculate time to millisecond
-  //then iterate over recv socket and receive and record
-  //use sysinfo to make sure we don't get stuck in a loop with timechange
-  struct sysinfo si;
-  sysinfo(&si);
-  //for now hardcode to 5 second overall timeout
-  unsigned long timeout = si.uptime + 5; //seconds
-  unsigned long cur_time = si.uptime;
-  while (cur_time < timeout) {
-    int id = receive(data->_recv_icmp_sock);
-    if (_debug) {
-      cout << "TTLEngine::recv(): " << id << endl;
-    }
-    //update current time for comparison
+    //use gettimeofday to calculate time to millisecond
+    //then iterate over recv socket and receive and record
+    //use sysinfo to make sure we don't get stuck in a loop with timechange
+    struct timeval send_time;
+    gettimeofday(&send_time,NULL);
     struct sysinfo si;
     sysinfo(&si);
-    timeval recv_time;
-    gettimeofday(&recv_time,NULL);
-    cur_time = si.uptime;
-    map<int,PktData>::iterator r_iter = _results.find(id);
-    if (r_iter != _results.end()) {
-      
-      //calculate time in milliseconds
-      int secs = 0;
-      int msecs = recv_time.tv_usec - send_time.tv_usec;
-      if (msecs < 0) {
-	secs = recv_time.tv_sec - send_time.tv_sec - 1;
+    //for now hardcode to 5 second overall timeout
+    unsigned long timeout = si.uptime + 5; //seconds
+    unsigned long cur_time = si.uptime;
+
+    int pending_result_ct = _results.size();
+    while (cur_time < timeout) {
+      int id = receive(data->_recv_icmp_sock);
+      if (_debug) {
+	cout << "TTLEngine::recv(): " << id << endl;
       }
-      else {
-	secs = recv_time.tv_sec - send_time.tv_sec;
+      //update current time for comparison
+      struct sysinfo si;
+      sysinfo(&si);
+      timeval recv_time;
+      gettimeofday(&recv_time,NULL);
+      cur_time = si.uptime;
+      map<int,PktData>::iterator r_iter = _results.find(id);
+      if (r_iter != _results.end()) {
+	//calculate time in milliseconds
+	int secs = 0;
+	int msecs = recv_time.tv_usec - send_time.tv_usec;
+	if (msecs < 0) {
+	  secs = recv_time.tv_sec - send_time.tv_sec - 1;
+	}
+	else {
+	  secs = recv_time.tv_sec - send_time.tv_sec;
+	}
+	//time in milliseconds below
+	r_iter->second._rtt = abs(msecs) / 1000 + 1000 * secs;
+	--pending_result_ct;
       }
-      //time in milliseconds below
-      int rtt = abs(msecs) / 1000 + 1000 * secs;
-      if (rtt < data->_resp_time) {
+    }
+    if (_debug) {
+      cout << "TTLEngine::recv(): finished heath test" << endl;
+    }
+    _received = true;
+  }
+  //now let's just look the packet up since we are through with the receive option
+  map<int,PktData>::iterator r_iter = _results.begin();
+  data->_state = LBTest::K_FAILURE;
+  while (r_iter != _results.end()) {
+
+    if (r_iter->second._iface == health._interface) {
+      if (r_iter->second._rtt < data->_resp_time) {
 	data->_state = LBTest::K_SUCCESS;
+	if (_debug) {
+	  cout << "TTLEngine::recv(): success for " << r_iter->second._iface << " : " << r_iter->second._rtt << endl;
+	}
+	int rtt = r_iter->second._rtt;
+	_results.erase(r_iter);
 	return rtt;
       }
       else {
-	data->_state = LBTest::K_FAILURE;
+	if (_debug) {
+	  cout << "TTLEngine::recv(): failure for " << r_iter->second._iface << " : " << r_iter->second._rtt << endl;
+	}
+	_results.erase(r_iter);
 	return -1;
       }
-      _results.erase(r_iter);
     }
+    ++r_iter;
   }
   
   if (_debug) {
-    cout << "TTLEngine::recv(): finished heath test" << endl;
+    cout << "EngineTTL::recv(): failure for " << health._interface << " : unable to find interface" << endl;
   }
-  data->_state = LBTest::K_FAILURE;
   return -1;
 }
 

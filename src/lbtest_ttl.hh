@@ -36,6 +36,7 @@ public:
   TTLEngine() : 
     _debug(true),
     _initialized(false),
+    _received(false),
     _packet_id(32767),
     _min_port_id(32767),
     _max_port_id(55000)
@@ -69,6 +70,7 @@ private:
 private:
   bool _debug;
   bool _initialized;
+  bool _received;
   unsigned short _packet_id;
   unsigned short _min_port_id;
   unsigned long _max_port_id;

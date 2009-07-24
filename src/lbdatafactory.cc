@@ -107,6 +107,17 @@ LBDataFactory::load(const string &conf_file)
     return false;
   }
 
+  //insert default test if empty
+  LBData::InterfaceHealthIter iter = _lb_data._iface_health_coll.begin();
+  while (iter != _lb_data._iface_health_coll.end()) {
+    if (iter->second._test_coll.empty()) {
+      LBTestICMP *test = new LBTestICMP(_debug);
+      iter->second._test_coll.insert(pair<int,LBTest*>(1,test));
+      //add default ping test...
+    }
+    ++iter;
+  }
+
   if (_debug) {
     _lb_data.dump();
   }
@@ -183,6 +194,9 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
     }
     else if (depth > 0 && path[1] == "enable-source-based-routing") {
       process_rule_enablesourcebasedrouting(l_key,l_value);
+    }
+    else if (depth > 1 && path[1] == "limit") {
+      process_rule_limit(l_key,l_value);
     }
     else {
       process_rule(l_key,l_value);
@@ -345,6 +359,9 @@ LBDataFactory::process_rule(const string &key, const string &value)
 void
 LBDataFactory::process_rule_protocol(const string &key, const string &value)
 {
+  if (_rule_iter == _lb_data._lb_rule_coll.end()) {
+    return;
+  }
   if (key == "protocol") {
     if (strcasecmp(value.c_str(),"ALL") == 0) {
       _rule_iter->second._proto = "all";
@@ -370,24 +387,36 @@ LBDataFactory::process_rule_protocol(const string &key, const string &value)
 void
 LBDataFactory::process_rule_exclude(const string &key, const string &value)
 {
+  if (_rule_iter == _lb_data._lb_rule_coll.end()) {
+    return;
+  }
   _rule_iter->second._exclude = true;
 }
 
 void
 LBDataFactory::process_rule_failover(const string &key, const string &value)
 {
+  if (_rule_iter == _lb_data._lb_rule_coll.end()) {
+    return;
+  }
   _rule_iter->second._failover = true;
 }
 
 void
 LBDataFactory::process_rule_enablesourcebasedrouting(const string &key, const string &value)
 {
+  if (_rule_iter == _lb_data._lb_rule_coll.end()) {
+    return;
+  }
   _rule_iter->second._enable_source_based_routing = true;
 }
 
 void
 LBDataFactory::process_rule_source(const string &key, const string &value)
 {
+  if (_rule_iter == _lb_data._lb_rule_coll.end()) {
+    return;
+  }
   if (key == "address") {
     _rule_iter->second._s_addr = value;
   }
@@ -402,6 +431,9 @@ LBDataFactory::process_rule_source(const string &key, const string &value)
 void
 LBDataFactory::process_rule_destination(const string &key, const string &value)
 {
+  if (_rule_iter == _lb_data._lb_rule_coll.end()) {
+    return;
+  }
   if (key == "address") {
     _rule_iter->second._d_addr = value;
   }
@@ -416,6 +448,9 @@ LBDataFactory::process_rule_destination(const string &key, const string &value)
 void
 LBDataFactory::process_rule_inbound_interface(const string &key, const string &value)
 {
+  if (_rule_iter == _lb_data._lb_rule_coll.end()) {
+    return;
+  }
   if (_debug) {
     cout << "LBDataFactory::process_rule_inbound_interface(): " << key << ", " << value << endl;
   }
@@ -460,7 +495,41 @@ LBDataFactory::process_rule_interface(const string &key, const string &value)
   }
 }
 
-
+void
+LBDataFactory::process_rule_limit(const string &key, const string &value)
+{
+  if (_rule_iter == _lb_data._lb_rule_coll.end()) {
+    return;
+  }
+  
+  _rule_iter->second._limit = true;
+  
+  if (key == "burst") {
+    _rule_iter->second._limit_burst = value;
+  }
+  else if (key == "rate") {    
+    _rule_iter->second._limit_rate = value;
+  }
+  else if (key == "period") {
+    if (key == "second") {
+      _rule_iter->second._limit_period = LBRule::K_SECOND;
+    }
+    else if (key == "minute") {
+      _rule_iter->second._limit_period = LBRule::K_MINUTE;
+    }
+    else if (key == "hour") {
+      _rule_iter->second._limit_period = LBRule::K_HOUR;
+    }
+  }
+  else if (key == "threshold") {
+    if (value == "true") {
+      _rule_iter->second._limit_mode = true;
+    }
+    else {
+      _rule_iter->second._limit_mode = false;
+    }
+  }
+}
 
 LBData
 LBDataFactory::get()

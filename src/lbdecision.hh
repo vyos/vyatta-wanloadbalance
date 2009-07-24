@@ -51,6 +51,9 @@ private:
   string
   fetch_iface_nexthop(const string &iface);
 
+  string
+  get_limit_cmd(LBRule &rule);
+
 private:
   bool _debug;
 };

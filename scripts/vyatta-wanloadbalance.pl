@@ -101,7 +101,6 @@ sub write_health {
 
 	    print FILE_LCK "\t\t}\n";
 	}
-	
 	print FILE_LCK "\t}\n";
     }
     print FILE_LCK "}\n\n";
@@ -144,9 +143,38 @@ sub write_rules {
 	    exit 1;
 	}
 
+	if ($config->exists("$rule limit") && $config->exists("$rule exclude")) {
+	    print "limit cannot be used with exclude\n";
+	    exit 1;
+	}
+
+	if ($config->exists("$rule limit")) {
+	    print FILE_LCK "\tlimit {\n";
+	    my $limit_burst = $config->returnValue("$rule limit burst");
+	    if (defined $limit_burst) {
+		print FILE_LCK "\t\tburst " . $limit_burst . "\n";
+	    }
+	    
+	    my $limit_rate = $config->returnValue("$rule limit rate");
+	    if (defined $limit_rate) {
+		print FILE_LCK "\t\trate " . $limit_rate . "\n";
+	    }
+	    
+	    my $limit_period = $config->returnValue("$rule limit period");
+	    if (defined $limit_period) {
+		print FILE_LCK "\t\tperiod " . $limit_period . "\n";
+	    }
+	    
+	    my $limit_thresh = $config->returnValue("$rule limit threshold");
+	    if (defined $limit_thresh) {
+		print FILE_LCK "\t\tthresh " . $limit_thresh . "\n";
+	    }
+	    print FILE_LCK "\t}\n";
+	}	    
+
 	my $protocol = $config->returnValue("$rule protocol");
 	if (defined $protocol) {
-	    print FILE_LCK "\tprotocol " . $protocol . "\n"
+	    print FILE_LCK "\tprotocol " . $protocol . "\n";
 	}
 	else {
 	    $protocol = "";
