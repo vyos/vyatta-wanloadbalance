@@ -398,3 +398,22 @@ LBTest::init()
     syslog(LOG_ERR, "wan_lb: failed to bind recv sock");
   }
 }
+
+LBTest::~LBTest()
+{
+  if (_recv_icmp_sock != 0) {
+    close(_recv_icmp_sock);
+    _recv_icmp_sock = 0;
+  }
+
+  if (_send_raw_sock != 0) {
+    close(_send_raw_sock);
+    _send_raw_sock = 0;
+  }
+
+  if (_send_icmp_sock != 0) {
+    close(_send_icmp_sock);
+    _send_icmp_sock = 0;
+  }
+
+}

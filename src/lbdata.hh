@@ -103,7 +103,7 @@ public:
     _debug(debug),
     _state(K_NONE)
   {}
-  virtual ~LBTest() {}
+  virtual ~LBTest();
 
   virtual void
   init();
