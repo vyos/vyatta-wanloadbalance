@@ -41,11 +41,11 @@ using namespace std;
 void
 TTLEngine::init() 
 {
-  if (_debug) {
-    cout << "LBTestICMP::init(): initializing test system" << endl;
-  }
   if (_initialized == false) {
     _results.erase(_results.begin(),_results.end());
+  }
+  if (_debug) {
+    cout << "TTLEngine::init(): initializing test system" << endl;
   }
   _initialized = true;
   _received = false;
@@ -107,7 +107,7 @@ TTLEngine::recv(LBHealth &health,LBTestTTL *data)
     unsigned long cur_time = si.uptime;
 
     int pending_result_ct = _results.size();
-    while (cur_time < timeout) {
+    while (cur_time < timeout && pending_result_ct != 0) {
       int id = receive(data->_recv_icmp_sock);
       if (_debug) {
 	cout << "TTLEngine::recv(): " << id << endl;
@@ -306,9 +306,9 @@ int
 TTLEngine::receive(int recv_sock)
 {
   timeval wait_time;
-  int ret;
   int icmp_pktsize = 40;
   char resp_buf[icmp_pktsize];
+  icmphdr *icmp_hdr;
   struct sockaddr_in dest_addr;
   unsigned int addr_len;
   fd_set readfs;
@@ -327,16 +327,24 @@ TTLEngine::receive(int recv_sock)
   //NEW-OLD STUFF HERE
    
   while (select(recv_sock+1, &readfs, NULL, NULL, &wait_time) != 0) {
-    int bytes_recv = recvfrom(recv_sock, &resp_buf, 56, 0, (struct sockaddr*)&dest_addr, &addr_len);
-    if (_debug) {
-      cout << "TTLEngine::receive() received: " << bytes_recv << endl;
-    }
+    int bytes_recv = ::recv(recv_sock, &resp_buf, 56, 0);
     if (bytes_recv != -1) {
-      //process packet data
-      char* datap;
-      datap = (char*)(&resp_buf) + 49;
-      memcpy(&packet_id, datap, sizeof(unsigned short));
-      return packet_id;
+      if (_debug) {
+	cout << "TTLEngine::receive() received: " << bytes_recv << endl;
+      }
+      icmp_hdr = (struct icmphdr *)(resp_buf + sizeof(iphdr));
+
+      //      if (icmp_hdr->type == ICMP_ECHOREPLY) {
+	//process packet data
+	char* data;
+	int id = 0; 
+	data = (char*)(&resp_buf) + 49;
+	memcpy(&id, data, sizeof(unsigned short));
+	if (_debug) {
+	  cout << "TTLEngine::receive(): " << id << endl;
+	}
+	return id;
+	//      }
     }
     else {
       cerr << "TTLEngine::receive(): error from recvfrom" << endl;

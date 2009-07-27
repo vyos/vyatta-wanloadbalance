@@ -40,11 +40,11 @@ using namespace std;
 void
 ICMPEngine::init() 
 {
-  if (_debug) {
-    cout << "LBTestICMP::init(): initializing test system" << endl;
-  }
   if (_initialized == false) {
     _results.erase(_results.begin(),_results.end());
+  }
+  if (_debug) {
+    cout << "ICMPEngine::init(): initializing test system" << endl;
   }
   _initialized = true;
   _received = false;
@@ -74,7 +74,7 @@ ICMPEngine::process(LBHealth &health,LBTestICMP *data)
   }
   _packet_id = ++_packet_id % 32767;
   if (_debug) {
-    cout << "LBTestICMP::start(): sending ping test for: " << health._interface << " for " << target << " id: " << _packet_id << endl;
+    cout << "ICMPEngine::start(): sending ping test for: " << health._interface << " for " << target << " id: " << _packet_id << endl;
   }
   send(data->_send_icmp_sock, health._interface, target, _packet_id);
   _results.insert(pair<int,PktData>(_packet_id,PktData(health._interface,-1)));
@@ -105,7 +105,7 @@ ICMPEngine::recv(LBHealth &health,LBTestICMP *data)
     while (cur_time < timeout && pending_result_ct != 0) {
       int id = receive(data->_recv_icmp_sock);
       if (_debug) {
-	cout << "LBTestICMP::recv(): " << id << endl;
+	cout << "ICMPEngine::recv(): " << id << endl;
       }
       
       //update current time for comparison
@@ -131,7 +131,7 @@ ICMPEngine::recv(LBHealth &health,LBTestICMP *data)
       }
     }
     if (_debug) {
-      cout << "LBTestICMP::recv(): finished heath test" << endl;
+      cout << "ICMPEngine::recv(): finished heath test" << endl;
     }
     _received = true;
   }
@@ -145,7 +145,7 @@ ICMPEngine::recv(LBHealth &health,LBTestICMP *data)
       if (r_iter->second._rtt < data->_resp_time) {
 	data->_state = LBTest::K_SUCCESS;
 	if (_debug) {
-	  cout << "LBTestICMP::recv(): success for " << r_iter->second._iface << " : " << r_iter->second._rtt << endl;
+	  cout << "ICMPEngine::recv(): success for " << r_iter->second._iface << " : " << r_iter->second._rtt << endl;
 	}
 	int rtt = r_iter->second._rtt;
 	_results.erase(r_iter);
@@ -153,7 +153,7 @@ ICMPEngine::recv(LBHealth &health,LBTestICMP *data)
       }
       else {
 	if (_debug) {
-	  cout << "LBTestICMP::recv(): failure for " << r_iter->second._iface << " : " << r_iter->second._rtt << endl;
+	  cout << "ICMPEngine::recv(): failure for " << r_iter->second._iface << " : " << r_iter->second._rtt << endl;
 	}
 	_results.erase(r_iter);
 	return -1;
@@ -163,7 +163,7 @@ ICMPEngine::recv(LBHealth &health,LBTestICMP *data)
   }
   
   if (_debug) {
-    cout << "LBTestICMP::recv(): failure for " << health._interface << " : unable to find interface" << endl;
+    cout << "ICMPEngine::recv(): failure for " << health._interface << " : unable to find interface" << endl;
   }
   return -1;
 }
@@ -190,7 +190,7 @@ ICMPEngine::send(int send_sock, const string &iface, const string &target_addr, 
   struct hostent *h = gethostbyname(target_addr.c_str());
   if (h == NULL) {
     if (_debug) {
-      cerr << "LBTestICMP::send() Error in resolving hostname" << endl;
+      cerr << "ICMPEngine::send() Error in resolving hostname" << endl;
     }
     syslog(LOG_ERR, "wan_lb: error in resolving configured hostname: %s", target_addr.c_str());
     return;
@@ -238,7 +238,7 @@ ICMPEngine::send(int send_sock, const string &iface, const string &target_addr, 
   //need to direct this packet out a specific interface!!!!!!!!!!!!!
   err = sendto(send_sock, buffer, icmp_pktsize, 0, (struct sockaddr*)&taddr, sizeof(taddr));
   if (_debug) {
-    cout << "LBTestICMP::send(): sendto: " << err << ", packet id: " << packet_id << endl;
+    cout << "ICMPEngine::send(): sendto: " << err << ", packet id: " << packet_id << endl;
   }
   if(err < 0) {
     if (_debug) {
@@ -294,17 +294,15 @@ ICMPEngine::receive(int recv_sock)
   wait_time.tv_sec = 3; //3 second timeout
 
   if (_debug) {
-    cout << "LBTestICMP::receive(): start" << endl;
+    cout << "ICMPEngine::receive(): start" << endl;
   }
 
-  while (select(recv_sock+1, &readfs, NULL, NULL, &wait_time) != 0)
-  {
+  while (select(recv_sock+1, &readfs, NULL, NULL, &wait_time) != 0) {
     ret = ::recv(recv_sock, &resp_buf, icmp_pktsize, 0);
     if (ret != -1) {
       if (_debug) {
-	cout << "LBTestICMP::receive(): recv: " << ret << endl;
+	cout << "ICMPEngine::receive(): recv: " << ret << endl;
       }
-      
       icmp_hdr = (struct icmphdr *)(resp_buf + sizeof(iphdr));
       if (icmp_hdr->type == ICMP_ECHOREPLY) {
 	//process packet data
@@ -313,7 +311,7 @@ ICMPEngine::receive(int recv_sock)
 	data = (char*)(&resp_buf) + 36;
 	memcpy(&id, data, sizeof(unsigned short));
 	if (_debug) {
-	  cout << "LBTestICMP::receive(): " << id << endl;
+	  cout << "ICMPEngine::receive(): " << id << endl;
 	}
 	return id;
       }

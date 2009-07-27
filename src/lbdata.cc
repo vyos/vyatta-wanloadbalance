@@ -346,6 +346,10 @@ LBTest::init()
   }
   _initialized = true;
 
+  if (_debug) {
+    cout << "LBTest::init()" << endl;
+  }
+
   struct protoent *ppe = getprotobyname("icmp");
   _send_icmp_sock = socket(PF_INET, SOCK_RAW, ppe->p_proto);
   if (_send_icmp_sock < 0){
@@ -399,6 +403,10 @@ LBTest::init()
   }
 }
 
+/**
+ *
+ *
+ **/
 LBTest::~LBTest()
 {
   if (_recv_icmp_sock != 0) {
