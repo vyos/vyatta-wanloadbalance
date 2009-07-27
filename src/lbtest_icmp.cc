@@ -297,23 +297,27 @@ ICMPEngine::receive(int recv_sock)
     cout << "ICMPEngine::receive(): start" << endl;
   }
 
-  while (select(recv_sock+1, &readfs, NULL, NULL, &wait_time) != 0) {
-    ret = ::recv(recv_sock, &resp_buf, icmp_pktsize, 0);
+  if (select(recv_sock+1, &readfs, NULL, NULL, &wait_time) != 0) {
+    ret = ::recv(recv_sock, &resp_buf, icmp_pktsize, MSG_PEEK);
     if (ret != -1) {
       if (_debug) {
 	cout << "ICMPEngine::receive(): recv: " << ret << endl;
       }
       icmp_hdr = (struct icmphdr *)(resp_buf + sizeof(iphdr));
       if (icmp_hdr->type == ICMP_ECHOREPLY) {
-	//process packet data
-	char* data;
-	int id = 0; 
-	data = (char*)(&resp_buf) + 36;
-	memcpy(&id, data, sizeof(unsigned short));
-	if (_debug) {
-	  cout << "ICMPEngine::receive(): " << id << endl;
+	//then let's pull the packet off, it's ours
+	ret = ::recv(recv_sock, &resp_buf, icmp_pktsize, 0);
+	if (ret != -1) {
+	  //process packet data
+	  char* data;
+	  int id = 0; 
+	  data = (char*)(&resp_buf) + 36;
+	  memcpy(&id, data, sizeof(unsigned short));
+	  if (_debug) {
+	    cout << "ICMPEngine::receive(): " << id << endl;
+	  }
+	  return id;
 	}
-	return id;
       }
     }
   }

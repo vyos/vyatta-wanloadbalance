@@ -326,25 +326,27 @@ TTLEngine::receive(int recv_sock)
 
   //NEW-OLD STUFF HERE
    
-  while (select(recv_sock+1, &readfs, NULL, NULL, &wait_time) != 0) {
-    int bytes_recv = ::recv(recv_sock, &resp_buf, 56, 0);
+  if (select(recv_sock+1, &readfs, NULL, NULL, &wait_time) != 0) {
+    int bytes_recv = ::recv(recv_sock, &resp_buf, 56, MSG_PEEK);
     if (bytes_recv != -1) {
       if (_debug) {
 	cout << "TTLEngine::receive() received: " << bytes_recv << endl;
       }
       icmp_hdr = (struct icmphdr *)(resp_buf + sizeof(iphdr));
-
-      //      if (icmp_hdr->type == ICMP_ECHOREPLY) {
+      if (icmp_hdr->type == ICMP_TIME_EXCEEDED) {
 	//process packet data
-	char* data;
-	int id = 0; 
-	data = (char*)(&resp_buf) + 49;
-	memcpy(&id, data, sizeof(unsigned short));
-	if (_debug) {
-	  cout << "TTLEngine::receive(): " << id << endl;
+	int ret = ::recv(recv_sock, &resp_buf, icmp_pktsize, 0);
+	if (ret != -1) {
+	  char* data;
+	  int id = 0; 
+	  data = (char*)(&resp_buf) + 49;
+	  memcpy(&id, data, sizeof(unsigned short));
+	  if (_debug) {
+	    cout << "TTLEngine::receive(): " << id << endl;
+	  }
+	  return id;
 	}
-	return id;
-	//      }
+      }
     }
     else {
       cerr << "TTLEngine::receive(): error from recvfrom" << endl;
