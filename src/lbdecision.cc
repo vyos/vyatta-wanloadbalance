@@ -338,8 +338,8 @@ LBDecision::run(LBData &lb_data)
 	  else {
 	    if (iter->second._limit) {
 	      //fill in limit statement here
-	      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
-	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	    }
 	    else {
 	      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
@@ -365,8 +365,8 @@ LBDecision::run(LBData &lb_data)
 	else {
 	  if (iter->second._limit) {
 	    //fill in limit statement here
-	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -j ISP_" + dbuf, stdout);
-	    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -j ISP_" + dbuf, stdout);
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -m state --state NEW -j ISP_" + dbuf, stdout);
 	  }
 	  else {
 	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
