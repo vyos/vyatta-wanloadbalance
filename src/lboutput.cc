@@ -11,6 +11,7 @@
 
 #include <iostream>
 
+#include "lbtest.hh"
 #include "lbdata.hh"
 #include "lboutput.hh"
 
@@ -80,13 +81,13 @@ LBOutput::write(const LBData &lbdata)
       }
       
       if (titer->second->_state == LBTest::K_NONE) {
-	line += space + string("*Target:  ") + target + "\n";
+	line += space + "*Test:  " + titer->second->name() + "\t" + string("Target:  ") + target + "\n";
       }
       else if (titer->second->_state == LBTest::K_FAILURE) {
-	line += space + string("-Target:  ") + target + "\n";
+	line += space + "-Test:  " + titer->second->name() + "\t" + string("Target:  ") + target + "\n";
       }
       else if (titer->second->_state == LBTest::K_SUCCESS) {
-	line += space + string("+Target:  ") + target + "\n";
+	line += space + "+Test:  " + titer->second->name() + "\t" + string("Target:  ") + target + "\n";
       }
 
       ++titer;
@@ -139,7 +140,7 @@ LBOutput::write(const LBData &lbdata)
       success_time = time_buf + string("\t");
     }
 
-    line += space + space + string("Last Ping Success:  ") + success_time + "\n";
+    line += space + space + string("Last Interface Success:  ") + success_time + "\n";
 
     time_buf = "";
 
@@ -183,13 +184,13 @@ LBOutput::write(const LBData &lbdata)
       failure_time = time_buf + string("\t");
     }
 
-    line += space + space + string("Last Ping Failure:  ") + failure_time + "\n";
+    line += space + space + string("Last Interface Failure:  ") + failure_time + "\n";
 
 
     //now failure count
     sprintf(btmp, "%ld", iter->second._hresults._failure_count);
 
-    line += space + space + string("# Ping Failure(s):  ") + string(btmp) + "\n\n";
+    line += space + space + string("# Interface Failure(s):  ") + string(btmp) + "\n\n";
 
     fputs(line.c_str(),fp);
     ++iter;

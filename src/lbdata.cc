@@ -24,14 +24,11 @@
 #include <iostream>
 
 #include "rl_str_proc.hh"
+#include "lbtest.hh"
 #include "lbdata.hh"
 
 int LBHealthHistory::_buffer_size = 10;
 
-int LBTest::_send_icmp_sock = 0;
-int LBTest::_send_raw_sock = 0;
-int LBTest::_recv_icmp_sock = 0;
-bool LBTest::_initialized = false;
 
 /**
  *
@@ -69,8 +66,20 @@ void
 LBHealth::start_new_test_cycle()
 {
   _test_iter = _test_coll.begin();
-  _test_success = false;
-  _new_test = true;
+  //  _test_iter->second->start();
+}
+
+/**
+ *
+ *
+ **/
+void
+LBHealth::start_new_test()
+{
+  if (_test_iter == _test_coll.end()) {
+    return;
+  }
+  _test_iter->second->start();
 }
 
 /**
@@ -80,18 +89,10 @@ LBHealth::start_new_test_cycle()
 void
 LBHealth::send_test()
 {
-  if (_test_success == true || _test_iter == _test_coll.end()) {
+  if (_test_iter == _test_coll.end()) {
     return; //means we are done
   }
-  if (_new_test == true) {
-    _test_iter->second->init();
-    _test_iter->second->send(*this);
-  
-    struct sysinfo si;
-    sysinfo(&si);
-    _time_start = si.uptime;
-    _new_test = false;
-  }
+  _test_iter->second->send(*this);
 }
 
 /**
@@ -101,37 +102,17 @@ LBHealth::send_test()
 int
 LBHealth::recv_test()
 {
-  if (_test_success == true) {
-    //shouldn't  call this again....
-    return 0; //means stop iteration
-  }
-
   if (_test_iter == _test_coll.end()) {
     put(-1);
-    return 0; //means stop iteration
+    return 0; //means stop iteration, no more tests...
   }
-
-  int rtt = _test_iter->second->recv(*this);
-  if (rtt > -1) {
-    _test_success = true;
+  int rtt =  _test_iter->second->recv(*this);
+  ++_test_iter;
+  if (rtt >= 0) {
     put(rtt);
-    return rtt; //means stop iterator
+    return 0; //means success, testing is done
   }
-  
-  struct sysinfo si;
-  sysinfo(&si);
-  unsigned long cur_time = si.uptime;
-  if (cur_time > _time_start + _timeout) {
-    //move to next test
-    _new_test = true;
-    ++_test_iter; 
-  }
-
-  if (_test_iter == _test_coll.end()) {
-    put(-1);
-    return 0; //means stop iteration
-  }
-  return -1; //means keep going
+  return -1; //means testing is not done for this interface
 }
 
 /**
@@ -151,7 +132,18 @@ LBHealthHistory::LBHealthHistory(int buffer_size) :
   }
 }
 
-
+/**
+ *
+ *
+ **/
+int
+LBHealthHistory::get_last_resp()
+{
+  if (_resp_data.size() == 0) {
+    return -1;
+  }
+  return (_resp_data[0]);
+}
 
 /**
  *
@@ -359,94 +351,3 @@ LBData::update_dhcp_nexthop()
   }
 }
 
-/**
- *
- *
- **/
-void
-LBTest::init()
-{
-  if (_initialized == true) {
-    return;
-  }
-  _initialized = true;
-
-  if (_debug) {
-    cout << "LBTest::init()" << endl;
-  }
-
-  struct protoent *ppe = getprotobyname("icmp");
-  _send_icmp_sock = socket(PF_INET, SOCK_RAW, ppe->p_proto);
-  if (_send_icmp_sock < 0){
-    if (_debug) {
-      cerr << "LBTest::init(): no send sock: " << _send_icmp_sock << endl;
-    }
-    syslog(LOG_ERR, "wan_lb: failed to acquired socket");
-    _send_icmp_sock = 0;
-    return;
-  }
-
-  //set options for broadcasting.
-  int val = 1;
-  //  setsockopt(_send_icmp_sock, SOL_SOCKET, SO_BROADCAST, &val, 4);
-  setsockopt(_send_icmp_sock, SOL_SOCKET, SO_REUSEADDR, &val, 4);
-
-  _send_raw_sock = socket(PF_INET, SOCK_RAW, IPPROTO_RAW);
-  if (_send_raw_sock < 0){
-    if (_debug) {
-      cerr << "LBTest::init(): no send sock: " << _send_raw_sock << endl;
-    }
-    syslog(LOG_ERR, "wan_lb: failed to acquired socket");
-    _send_raw_sock = 0;
-    return;
-  }
-
-  //set options for broadcasting.
-  //  setsockopt(_send_raw_sock, SOL_SOCKET, SO_BROADCAST, &val, 4);
-  setsockopt(_send_raw_sock, SOL_SOCKET, SO_REUSEADDR, &val, 4);
-
-  struct sockaddr_in addr;
-  memset( &addr, 0, sizeof( struct sockaddr_in ));
-  addr.sin_family = AF_INET;
-  addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  addr.sin_port = 0;
-
-  _recv_icmp_sock = socket(PF_INET, SOCK_RAW, ppe->p_proto);
-  if (_recv_icmp_sock < 0) {
-    if (_debug) {
-      cerr << "LBTest::init(): no recv sock: " << _recv_icmp_sock << endl;
-    }
-    syslog(LOG_ERR, "wan_lb: failed to acquired socket");
-    _recv_icmp_sock = 0;
-    return;
-  }
-  if (bind(_recv_icmp_sock, (struct sockaddr*)&addr, sizeof(addr))==-1) {
-    if (_debug) {
-      cerr << "failed on bind" << endl;
-    }
-    syslog(LOG_ERR, "wan_lb: failed to bind recv sock");
-  }
-}
-
-/**
- *
- *
- **/
-LBTest::~LBTest()
-{
-  if (_recv_icmp_sock != 0) {
-    close(_recv_icmp_sock);
-    _recv_icmp_sock = 0;
-  }
-
-  if (_send_raw_sock != 0) {
-    close(_send_raw_sock);
-    _send_raw_sock = 0;
-  }
-
-  if (_send_icmp_sock != 0) {
-    close(_send_icmp_sock);
-    _send_icmp_sock = 0;
-  }
-
-}

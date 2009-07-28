@@ -17,6 +17,7 @@
 using namespace std;
 
 class LBHealth;
+class LBTest;
 
 /**
  *
@@ -77,7 +78,11 @@ public:
   LBHealthHistory(int buffer_size);
 
   //push in the ping response for this...
-  int push(int rtt);
+  int 
+  push(int rtt);
+
+  int
+  get_last_resp();
 
 public:
   //results of health testing
@@ -89,43 +94,6 @@ public:
   static int _buffer_size;
   vector<int> _resp_data;
   int _index;
-};
-
-/**
- *
- *
- **/
-class LBTest {
-public:
-  typedef enum {K_NONE,K_SUCCESS,K_FAILURE} TestState;
-public:
-  LBTest(bool debug) : 
-    _debug(debug),
-    _state(K_NONE)
-  {}
-  virtual ~LBTest();
-
-  virtual void
-  init();
-  
-  virtual void
-  send(LBHealth &health) = 0;
-
-  virtual int
-  recv(LBHealth &health) = 0;
-
-  virtual string
-  dump() = 0;
-
-public:
-  bool _debug;
-  string _target;
-  int    _resp_time;
-  int _state;
-  static int _recv_icmp_sock;
-  static int _send_raw_sock;
-  static int _send_icmp_sock;
-  static bool _initialized;
 };
 
 /**
@@ -183,6 +151,9 @@ public:
   //test interfaces
   void
   start_new_test_cycle();
+
+  void
+  start_new_test();
 
   void
   send_test();

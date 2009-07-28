@@ -12,71 +12,9 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <iostream>
-#include "lbdata.hh"
+#include "lbtest.hh"
 
 using namespace std;
-
-class LBTestTTL;
-
-/**
- *
- *
- **/
-class TTLEngine
-{
-  class PktData
-  {
-  public:
-    PktData(string iface, int rtt) : _iface(iface),_rtt(rtt) {}
-    string _iface;
-    int _rtt;
-  };
-
-public:
-  TTLEngine() : 
-    _debug(true),
-    _initialized(false),
-    _received(false),
-    _packet_id(32767),
-    _min_port_id(32767),
-    _max_port_id(55000)
-  {}
-
-  void
-  init();
-
-  int
-  process(LBHealth &health,LBTestTTL *data);
-
-  int
-  recv(LBHealth &health,LBTestTTL *data);
-
-private:
-  void
-  send(int sock, const string &iface, const string &target_addr, unsigned short packet_id, string address, int ttl, unsigned short port);
-
-  int
-  receive(int sock);
-
-  unsigned short
-  udp_checksum(unsigned char ucProto, char *pPacket, int iLength, unsigned long ulSourceAddress, unsigned long ulDestAddress);
-
-  unsigned short
-  in_checksum(unsigned short *pAddr, int iLen);
-
-  unsigned short
-  get_new_packet_id();
-
-private:
-  bool _debug;
-  bool _initialized;
-  bool _received;
-  unsigned short _packet_id;
-  unsigned short _min_port_id;
-  unsigned long _max_port_id;
-
-  map<int,PktData> _results;
-};
 
 /**
  *
@@ -88,23 +26,24 @@ public:
   LBTestTTL(bool debug) : 
     LBTest(debug),
     _ttl(0),
-    _port(0)
+    _port(0),
+    _min_port_id(32767),
+    _max_port_id(55000)
   {}
   LBTestTTL(bool debug, unsigned short ttl, unsigned short port) : 
     LBTest(debug),
     _ttl(ttl),
-    _port(port)
+    _port(port),
+    _min_port_id(32767),
+    _max_port_id(55000)
   {}
   ~LBTestTTL() {}
 
   void
-  init() {_engine.init();this->LBTest::init();}
+  init();
 
   void
-  send(LBHealth &health) {_engine.process(health,this);}
-
-  int
-  recv(LBHealth &health) {return _engine.recv(health,this);}
+  send(LBHealth &health);
 
   unsigned short
   get_ttl() const {return _ttl;}
@@ -121,11 +60,30 @@ public:
   string
   dump();
 
+  string
+  name() {return string("ttl");}
+
 private:
-  static TTLEngine _engine; //singleton
+  unsigned short
+  udp_checksum(unsigned char ucProto, char *pPacket, int iLength, unsigned long ulSourceAddress, unsigned long ulDestAddress);
+
+  unsigned short
+  in_checksum(unsigned short *pAddr, int iLen);
+
+  void
+  send(int sock, const string &iface, const string &target_addr, unsigned short packet_id, string address, int ttl, unsigned short port);
+
+  unsigned short
+  get_new_packet_id();
+
+
+
+private:
   bool _debug;
   unsigned short _ttl;
   unsigned short _port;
+  unsigned short _min_port_id;
+  unsigned long _max_port_id;
 };
 
 #endif //__LBTEST_TTL_HH__

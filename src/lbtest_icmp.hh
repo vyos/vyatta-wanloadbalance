@@ -12,65 +12,9 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <iostream>
-#include "lbdata.hh"
+#include "lbtest.hh"
 
 using namespace std;
-
-class LBTestICMP;
-
-/**
- *
- *
- **/
-class PktData
-{
-public:
-  PktData(string iface, int rtt) : _iface(iface),_rtt(rtt) {}
-  string _iface;
-  int _rtt;
-};
-
-
-/**
- *
- *
- **/
-class ICMPEngine
-{
-public:
-  ICMPEngine() : 
-    _debug(true),
-    _initialized(false),
-    _received(false),
-    _packet_id(0) 
-  {}
-
-  void
-  init();
-
-  int
-  process(LBHealth &health,LBTestICMP *data);
-
-  int
-  recv(LBHealth &health,LBTestICMP *data);
-
-private:
-  void
-  send(int sock, const string &iface, const string &target_addr, int packet_id);
-
-  int
-  receive(int sock);
-
-  unsigned short
-  in_checksum(const unsigned short *buf, int lenght) const;
-
-private:
-  bool _debug;
-  bool _initialized;
-  bool _received;
-  int _packet_id;
-  map<int,PktData> _results;
-};
 
 /**
  *
@@ -83,19 +27,25 @@ public:
   ~LBTestICMP() {}
 
   void
-  init() {_engine.init();this->LBTest::init();}
+  init() {}
 
   void
-  send(LBHealth &health) {_engine.process(health,this);}
-
-  int
-  recv(LBHealth &health) {return _engine.recv(health,this);}
+  send(LBHealth &health);
 
   string
   dump();
 
+  string
+  name() {return string("ping");}
+
 private:
-  static ICMPEngine _engine; //singleton
+  void
+  send(int sock, const string &iface, const string &target_addr, int packet_id);
+
+  unsigned short
+  in_checksum(const unsigned short *buf, int lenght) const;
+
+private:
   bool _debug;
 };
 

@@ -63,20 +63,27 @@ LBPathTest::start(LBData &lb_data)
 
   set<LBHealth*> coll;
 
-  //iterate over the health interfaces
+  //iterate over the health interfaces, until success or test cases exhausted per interface
   LBData::InterfaceHealthIter iter = lb_data._iface_health_coll.begin();
   while (iter != lb_data._iface_health_coll.end()) {
-    iter->second.start_new_test_cycle();
     coll.insert(&(iter->second));
+      iter->second.start_new_test_cycle();
     ++iter;
   }
   
   while (!coll.empty()) {
+      cout << "AA:" << coll.size() << endl;
+    set<LBHealth*>::iterator i = coll.begin();
+    while (i != coll.end()) {
+      (*i)->start_new_test();
+      ++i;
+    }
+    
     if (_debug) {
       cout << "LBPathTest::start(): sending " << coll.size() << " tests" << endl;
     }
     //send all interface tests together
-    set<LBHealth*>::iterator i = coll.begin();
+    i = coll.begin();
     while (i != coll.end()) {
       (*i)->send_test();
       ++i;
@@ -88,12 +95,19 @@ LBPathTest::start(LBData &lb_data)
     //wait on responses
     i = coll.begin();
     while (i != coll.end()) {
-      if ((*i)->recv_test() > -1) {
-	coll.erase(i++);
+      int resp = (*i)->recv_test();
+      if (_debug) {
+	cout << "LBPathTest::start() interface: " << (*i)->_interface << " response value: " << (*i)->_hresults.get_last_resp() << endl;
+      }
+      cout << "A:" << resp << ", " << coll.size() << endl;
+      if (resp == 0) { //means this interface has either exhausted its test cases or success
+      cout << "B:" << resp << ", " << coll.size() << endl;
+	coll.erase(i++); 
       }
       else {
 	++i;
       }
+      cout << "C:" << coll.size() << endl;
     }
   }
 }

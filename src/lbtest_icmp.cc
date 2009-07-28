@@ -29,8 +29,6 @@
 #include "lbdata.hh"
 #include "lbtest_icmp.hh"
 
-ICMPEngine LBTestICMP::_engine;
-
 using namespace std;
 
 /**
@@ -38,27 +36,10 @@ using namespace std;
  *
  **/
 void
-ICMPEngine::init() 
-{
-  if (_initialized == false) {
-    _results.erase(_results.begin(),_results.end());
-  }
-  if (_debug) {
-    cout << "ICMPEngine::init(): initializing test system" << endl;
-  }
-  _initialized = true;
-  _received = false;
-}
-
-/**
- *
- *
- **/
-int
-ICMPEngine::process(LBHealth &health,LBTestICMP *data)
+LBTestICMP::send(LBHealth &health)
 {
   //iterate over packets and send
-  string target = data->_target;
+  string target = _target;
   if (target.empty()) {
     if (health._nexthop == "dhcp") {
       target = health._dhcp_nexthop;
@@ -70,102 +51,15 @@ ICMPEngine::process(LBHealth &health,LBTestICMP *data)
   
   //don't have target yet...
   if (target.empty()) {
-    return -1;
+    return;
   }
   _packet_id = ++_packet_id % 32767;
   if (_debug) {
     cout << "ICMPEngine::start(): sending ping test for: " << health._interface << " for " << target << " id: " << _packet_id << endl;
   }
-  send(data->_send_icmp_sock, health._interface, target, _packet_id);
+  send(_send_icmp_sock, health._interface, target, _packet_id);
   _results.insert(pair<int,PktData>(_packet_id,PktData(health._interface,-1)));
-  return 0;
-}
-
-/**
- *
- *
- **/
-int
-ICMPEngine::recv(LBHealth &health,LBTestICMP *data) 
-{
-  _initialized = false;
-  if (_received == false) {
-    //use gettimeofday to calculate time to millisecond
-    //then iterate over recv socket and receive and record
-    //use sysinfo to make sure we don't get stuck in a loop with timechange
-    struct timeval send_time;
-    gettimeofday(&send_time,NULL);
-    struct sysinfo si;
-    sysinfo(&si);
-    //for now hardcode to 5 second overall timeout
-    unsigned long timeout = si.uptime + 5; //seconds
-    unsigned long cur_time = si.uptime;
-    
-    int pending_result_ct = _results.size();
-    //let's pull off all of the results...
-    while (cur_time < timeout && pending_result_ct != 0) {
-      int id = receive(data->_recv_icmp_sock);
-      if (_debug) {
-	cout << "ICMPEngine::recv(): " << id << endl;
-      }
-      
-      //update current time for comparison
-      struct sysinfo si;
-      sysinfo(&si);
-      timeval recv_time;
-      gettimeofday(&recv_time,NULL);
-      cur_time = si.uptime;
-      map<int,PktData>::iterator r_iter = _results.find(id);
-      if (r_iter != _results.end()) {
-	//calculate time in milliseconds
-	int secs = 0;
-	int msecs = recv_time.tv_usec - send_time.tv_usec;
-	if (msecs < 0) {
-	  secs = recv_time.tv_sec - send_time.tv_sec - 1;
-	}
-	else {
-	  secs = recv_time.tv_sec - send_time.tv_sec;
-	}
-	//time in milliseconds below
-	r_iter->second._rtt = abs(msecs) / 1000 + 1000 * secs;
-	--pending_result_ct;
-      }
-    }
-    if (_debug) {
-      cout << "ICMPEngine::recv(): finished heath test" << endl;
-    }
-    _received = true;
-  }
-
-  //now let's just look the packet up since we are through with the receive option
-  map<int,PktData>::iterator r_iter = _results.begin();
-  data->_state = LBTest::K_FAILURE;
-  while (r_iter != _results.end()) {
-    if (r_iter->second._iface == health._interface) {
-      if (r_iter->second._rtt < data->_resp_time) {
-	data->_state = LBTest::K_SUCCESS;
-	if (_debug) {
-	  cout << "ICMPEngine::recv(): success for " << r_iter->second._iface << " : " << r_iter->second._rtt << endl;
-	}
-	int rtt = r_iter->second._rtt;
-	_results.erase(r_iter);
-	return rtt;
-      }
-      else {
-	if (_debug) {
-	  cout << "ICMPEngine::recv(): failure for " << r_iter->second._iface << " : " << r_iter->second._rtt << endl;
-	}
-	_results.erase(r_iter);
-	return -1;
-      }
-    }
-    ++r_iter;
-  }
-  
-  if (_debug) {
-    cout << "ICMPEngine::recv(): failure for " << health._interface << " : unable to find interface" << endl;
-  }
-  return -1;
+  return;
 }
 
 /**
@@ -173,7 +67,7 @@ ICMPEngine::recv(LBHealth &health,LBTestICMP *data)
  *
  **/
 void
-ICMPEngine::send(int send_sock, const string &iface, const string &target_addr, int packet_id)
+LBTestICMP::send(int send_sock, const string &iface, const string &target_addr, int packet_id)
 {
   int err;
   sockaddr_in taddr;
@@ -273,63 +167,13 @@ ICMPEngine::send(int send_sock, const string &iface, const string &target_addr, 
   }
 }
 
-/**
- *
- *
- **/
-int
-ICMPEngine::receive(int recv_sock)
-{
-  int icmp_pktsize = 40;
-  char resp_buf[icmp_pktsize];
-  icmphdr *icmp_hdr;
-  timeval wait_time;
-  fd_set readfs;
-  int ret;
-
-  FD_ZERO(&readfs);
-  FD_SET(recv_sock, &readfs);
-
-  wait_time.tv_usec = 0;
-  wait_time.tv_sec = 3; //3 second timeout
-
-  if (_debug) {
-    cout << "ICMPEngine::receive(): start" << endl;
-  }
-
-  if (select(recv_sock+1, &readfs, NULL, NULL, &wait_time) != 0) {
-    ret = ::recv(recv_sock, &resp_buf, icmp_pktsize, MSG_PEEK);
-    if (ret != -1) {
-      if (_debug) {
-	cout << "ICMPEngine::receive(): recv: " << ret << endl;
-      }
-      icmp_hdr = (struct icmphdr *)(resp_buf + sizeof(iphdr));
-      if (icmp_hdr->type == ICMP_ECHOREPLY) {
-	//then let's pull the packet off, it's ours
-	ret = ::recv(recv_sock, &resp_buf, icmp_pktsize, 0);
-	if (ret != -1) {
-	  //process packet data
-	  char* data;
-	  int id = 0; 
-	  data = (char*)(&resp_buf) + 36;
-	  memcpy(&id, data, sizeof(unsigned short));
-	  if (_debug) {
-	    cout << "ICMPEngine::receive(): " << id << endl;
-	  }
-	  return id;
-	}
-      }
-    }
-  }
-  return -1;
-}
 
 /**
  *
  *
  **/
 unsigned short
-ICMPEngine::in_checksum(const unsigned short *buffer, int length) const
+LBTestICMP::in_checksum(const unsigned short *buffer, int length) const
 {
   unsigned long sum;
   for (sum=0; length>0; length--) {
