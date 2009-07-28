@@ -70,6 +70,7 @@ LBHealth::start_new_test_cycle()
 {
   _test_iter = _test_coll.begin();
   _test_success = false;
+  _new_test = true;
 }
 
 /**
@@ -82,12 +83,15 @@ LBHealth::send_test()
   if (_test_success == true || _test_iter == _test_coll.end()) {
     return; //means we are done
   }
-  _test_iter->second->init();
-  _test_iter->second->send(*this);
-
-  struct sysinfo si;
-  sysinfo(&si);
-  _time_start = si.uptime;
+  if (_new_test == true) {
+    _test_iter->second->init();
+    _test_iter->second->send(*this);
+  
+    struct sysinfo si;
+    sysinfo(&si);
+    _time_start = si.uptime;
+    _new_test = false;
+  }
 }
 
 /**
@@ -99,6 +103,11 @@ LBHealth::recv_test()
 {
   if (_test_success == true) {
     //shouldn't  call this again....
+    return 0; //means stop iteration
+  }
+
+  if (_test_iter == _test_coll.end()) {
+    put(-1);
     return 0; //means stop iteration
   }
 
@@ -114,6 +123,7 @@ LBHealth::recv_test()
   unsigned long cur_time = si.uptime;
   if (cur_time > _time_start + _timeout) {
     //move to next test
+    _new_test = true;
     ++_test_iter; 
   }
 

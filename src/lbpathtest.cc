@@ -88,7 +88,7 @@ LBPathTest::start(LBData &lb_data)
     //wait on responses
     i = coll.begin();
     while (i != coll.end()) {
-      if ((*i)->recv_test() != -1) {
+      if ((*i)->recv_test() > -1) {
 	coll.erase(i++);
       }
       else {
