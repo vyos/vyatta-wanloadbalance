@@ -72,7 +72,6 @@ LBPathTest::start(LBData &lb_data)
   }
   
   while (!coll.empty()) {
-      cout << "AA:" << coll.size() << endl;
     set<LBHealth*>::iterator i = coll.begin();
     while (i != coll.end()) {
       (*i)->start_new_test();
@@ -99,15 +98,12 @@ LBPathTest::start(LBData &lb_data)
       if (_debug) {
 	cout << "LBPathTest::start() interface: " << (*i)->_interface << " response value: " << (*i)->_hresults.get_last_resp() << endl;
       }
-      cout << "A:" << resp << ", " << coll.size() << endl;
       if (resp == 0) { //means this interface has either exhausted its test cases or success
-      cout << "B:" << resp << ", " << coll.size() << endl;
 	coll.erase(i++); 
       }
       else {
 	++i;
       }
-      cout << "C:" << coll.size() << endl;
     }
   }
 }
