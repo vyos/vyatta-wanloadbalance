@@ -391,22 +391,25 @@ LBDecision::shutdown(LBData &data)
   string stdout;
 
   //then if we do, flush all
-  execute("iptables -t mangle -F WANLOADBALANCE_PRE", stdout);
-  execute("iptables -t mangle -F WANLOADBALANCE_OUT", stdout);
   execute("iptables -t mangle -D PREROUTING -j WANLOADBALANCE_PRE", stdout);
   execute("iptables -t mangle -D OUTPUT -j WANLOADBALANCE_OUT", stdout);
+  execute("iptables -t mangle -F WANLOADBALANCE_PRE", stdout);
+  execute("iptables -t mangle -F WANLOADBALANCE_OUT", stdout);
+  execute("iptables -t mangle -X WANLOADBALANCE_PRE", stdout);
+  execute("iptables -t mangle -X WANLOADBALANCE_OUT", stdout);
 
   LBData::LBRuleIter iter = data._lb_rule_coll.begin();
   while (iter != data._lb_rule_coll.end()) {
     if (iter->second._limit) {
       char rule_str[20];
       sprintf(rule_str,"%d",iter->first);
-      execute(string("iptables -t mangle -D PREROUTING -j WANLOADBALANCE_PRE_LIMIT_") + rule_str,stdout);
-      execute(string("iptables -t mangle -D PREROUTING -j WANLOADBALANCE_OUT_LIMIT_") + rule_str,stdout);
+      execute(string("iptables -t mangle -F WANLOADBALANCE_PRE_LIMIT_") + rule_str,stdout);
+      execute(string("iptables -t mangle -F WANLOADBALANCE_OUT_LIMIT_") + rule_str,stdout);
+      execute(string("iptables -t mangle -X WANLOADBALANCE_PRE_LIMIT_") + rule_str,stdout);
+      execute(string("iptables -t mangle -X WANLOADBALANCE_OUT_LIMIT_") + rule_str,stdout);
     }
     ++iter;
   }
-
 
   //clear out nat as well
   execute("iptables -t nat -F WANLOADBALANCE", stdout);
@@ -427,6 +430,10 @@ LBDecision::shutdown(LBData &data)
     execute(string("ip rule del table ") + buf, stdout);
 
     //need to delete ip rule here as well!
+
+    //clean up mangle final entries here
+    execute(string("iptables -t mangle -F ISP_") + h_iter->first,stdout);
+    execute(string("iptables -t mangle -X ISP_") + h_iter->first,stdout);
 
     ++h_iter;
   }

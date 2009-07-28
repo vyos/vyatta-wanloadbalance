@@ -84,29 +84,44 @@ LBHealth::send_test()
   }
   _test_iter->second->init();
   _test_iter->second->send(*this);
+
+  struct sysinfo si;
+  sysinfo(&si);
+  _time_start = si.uptime;
 }
 
 /**
  *
  *
  **/
-bool
+int
 LBHealth::recv_test()
 {
-  if (_test_success == true || _test_iter == _test_coll.end()) {
-    return false;
+  if (_test_success == true) {
+    //shouldn't  call this again....
+    return 0; //means stop iteration
   }
+
   int rtt = _test_iter->second->recv(*this);
-  if (rtt != -1) {
-    put(rtt); //push test result
+  if (rtt > -1) {
     _test_success = true;
-    return true; //means we have successfully completed the test
+    put(rtt);
+    return rtt; //means stop iterator
   }
-  if (++_test_iter == _test_coll.end()) {
+  
+  struct sysinfo si;
+  sysinfo(&si);
+  unsigned long cur_time = si.uptime;
+  if (cur_time > _time_start + _timeout) {
+    //move to next test
+    ++_test_iter; 
+  }
+
+  if (_test_iter == _test_coll.end()) {
     put(-1);
-    return true; //end of tests
+    return 0; //means stop iteration
   }
-  return false;
+  return -1; //means keep going
 }
 
 /**
@@ -354,7 +369,7 @@ LBTest::init()
   _send_icmp_sock = socket(PF_INET, SOCK_RAW, ppe->p_proto);
   if (_send_icmp_sock < 0){
     if (_debug) {
-      cerr << "LBTestICMP::LBTestICMP(): no send sock: " << _send_icmp_sock << endl;
+      cerr << "LBTest::init(): no send sock: " << _send_icmp_sock << endl;
     }
     syslog(LOG_ERR, "wan_lb: failed to acquired socket");
     _send_icmp_sock = 0;
@@ -369,7 +384,7 @@ LBTest::init()
   _send_raw_sock = socket(PF_INET, SOCK_RAW, IPPROTO_RAW);
   if (_send_raw_sock < 0){
     if (_debug) {
-      cerr << "LBTestICMP::LBTestICMP(): no send sock: " << _send_raw_sock << endl;
+      cerr << "LBTest::init(): no send sock: " << _send_raw_sock << endl;
     }
     syslog(LOG_ERR, "wan_lb: failed to acquired socket");
     _send_raw_sock = 0;
@@ -389,7 +404,7 @@ LBTest::init()
   _recv_icmp_sock = socket(PF_INET, SOCK_RAW, ppe->p_proto);
   if (_recv_icmp_sock < 0) {
     if (_debug) {
-      cerr << "LBTestICMP::LBTestICMP(): no recv sock: " << _recv_icmp_sock << endl;
+      cerr << "LBTest::init(): no recv sock: " << _recv_icmp_sock << endl;
     }
     syslog(LOG_ERR, "wan_lb: failed to acquired socket");
     _recv_icmp_sock = 0;

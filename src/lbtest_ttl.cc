@@ -1,5 +1,5 @@
 /*
- * Module: lbpathtest.cc
+ * Module: lbtest_ttl.cc
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -83,6 +83,7 @@ TTLEngine::process(LBHealth &health,LBTestTTL *data)
     
   send(data->_send_raw_sock, health._interface,target,_packet_id,health._address,data->get_ttl(),data->get_port());
   _results.insert(pair<int,PktData>(_packet_id,PktData(health._interface,-1)));
+  return 0;
 }
 
 /**
@@ -94,7 +95,6 @@ TTLEngine::recv(LBHealth &health,LBTestTTL *data)
 {
   _initialized = false;
   if (_received == false) {
-  
     //use gettimeofday to calculate time to millisecond
     //then iterate over recv socket and receive and record
     //use sysinfo to make sure we don't get stuck in a loop with timechange
@@ -115,9 +115,9 @@ TTLEngine::recv(LBHealth &health,LBTestTTL *data)
       //update current time for comparison
       struct sysinfo si;
       sysinfo(&si);
+      cur_time = si.uptime;
       timeval recv_time;
       gettimeofday(&recv_time,NULL);
-      cur_time = si.uptime;
       map<int,PktData>::iterator r_iter = _results.find(id);
       if (r_iter != _results.end()) {
 	//calculate time in milliseconds
@@ -133,6 +133,9 @@ TTLEngine::recv(LBHealth &health,LBTestTTL *data)
 	r_iter->second._rtt = abs(msecs) / 1000 + 1000 * secs;
 	--pending_result_ct;
       }
+      else {
+	return -1;
+      }
     }
     if (_debug) {
       cout << "TTLEngine::recv(): finished heath test" << endl;
@@ -143,7 +146,6 @@ TTLEngine::recv(LBHealth &health,LBTestTTL *data)
   map<int,PktData>::iterator r_iter = _results.begin();
   data->_state = LBTest::K_FAILURE;
   while (r_iter != _results.end()) {
-
     if (r_iter->second._iface == health._interface) {
       if (r_iter->second._rtt < data->_resp_time) {
 	data->_state = LBTest::K_SUCCESS;
@@ -200,7 +202,6 @@ TTLEngine::send(int send_sock, const string &iface, const string &target_addr, u
 
   int err;
   sockaddr_in taddr;
-  timeval send_time;
   char buffer[42];
   struct iphdr *ip;
   struct udphdr *udp;
@@ -309,10 +310,7 @@ TTLEngine::receive(int recv_sock)
   int icmp_pktsize = 40;
   char resp_buf[icmp_pktsize];
   icmphdr *icmp_hdr;
-  struct sockaddr_in dest_addr;
-  unsigned int addr_len;
   fd_set readfs;
-  unsigned short packet_id = 0;
 
   FD_ZERO(&readfs);
   FD_SET(recv_sock, &readfs);
@@ -364,27 +362,27 @@ TTLEngine::receive(int recv_sock)
  *
  **/
 unsigned short
-TTLEngine::in_checksum(unsigned short *pAddr, int iLen)
+TTLEngine::in_checksum(unsigned short *addr, int len)
 {
-  int iSum = 0;
-  unsigned short usAnswer = 0;
-  unsigned short *pW = pAddr;
-  int iRemain = iLen;
+  int sum = 0;
+  unsigned short answer = 0;
+  unsigned short *w = addr;
+  int remain = len;
 
-  while(iRemain > 1)
+  while(remain > 1)
     {
-      iSum += *pW++;
-      iRemain -= sizeof(unsigned short);
+      sum += *w++;
+      remain -= sizeof(unsigned short);
     }
-  if(iRemain==1)
+  if(remain==1)
     {
-      *(u_char *)(&usAnswer)=*(u_char*)pW;
-      iSum += usAnswer;
+      *(u_char *)(&answer)=*(u_char*)w;
+      sum += answer;
     }
-  iSum = (iSum>>16) + (iSum&0xffff);
-  iSum += (iSum>>16);
-  usAnswer = ~iSum;
-  return(usAnswer);
+  sum = (sum>>16) + (sum&0xffff);
+  sum += (sum>>16);
+  answer = ~sum;
+  return(answer);
 }
 
 
@@ -394,42 +392,40 @@ TTLEngine::in_checksum(unsigned short *pAddr, int iLen)
  *
  **/
 unsigned short
-TTLEngine::udp_checksum(unsigned char ucProto, char *pPacket, int iLength, unsigned long ulSourceAddress, unsigned long ulDestAddress)
+TTLEngine::udp_checksum(unsigned char proto, char *packet, int length, unsigned long source_address, unsigned long dest_address)
 {
-   struct PsuedoHdr
+   struct PseudoHdr
    {
-     struct in_addr sourceAddr;
-     struct in_addr destAddr;
-     unsigned char ucPlaceHolder;
-     unsigned char ucProtocol;
-     unsigned short usLength;
-   } PsuedoHdr;
+     struct in_addr source_addr;
+     struct in_addr dest_addr;
+     unsigned char place_holder;
+     unsigned char protocol;
+     unsigned short length;
+   } PseudoHdr;
    
-   struct PsuedoHdr psuedoHdr;
-   char *pTempPacket;
-   unsigned short usAnswer;
-   psuedoHdr.ucProtocol = ucProto;
-   psuedoHdr.usLength = htons(iLength);
-   psuedoHdr.ucPlaceHolder = 0;
-   psuedoHdr.sourceAddr.s_addr = ulSourceAddress;
-   psuedoHdr.destAddr.s_addr = ulDestAddress;
+   struct PseudoHdr pseudoHdr;
+   char *temp_packet;
+   unsigned short answer;
+   pseudoHdr.protocol = proto;
+   pseudoHdr.length = htons(length);
+   pseudoHdr.place_holder = 0;
+   pseudoHdr.source_addr.s_addr = source_address;
+   pseudoHdr.dest_addr.s_addr = dest_address;
    
-   if((pTempPacket = (char*)malloc(sizeof(PsuedoHdr) + iLength)) == NULL)
+   if((temp_packet = (char*)malloc(sizeof(PseudoHdr) + length)) == NULL)
      {
        cerr << "ActionDropConn::UDPChecksum(), error in malloc" << endl;
        //throw an exception
        return 0;
      }
    
-   memcpy(pTempPacket, &psuedoHdr, sizeof(PsuedoHdr));
-   memcpy((pTempPacket + sizeof(PsuedoHdr)), pPacket, iLength);
+   memcpy(temp_packet, &pseudoHdr, sizeof(PseudoHdr));
+   memcpy((temp_packet + sizeof(PseudoHdr)), packet, length);
    
-   usAnswer = (unsigned short)in_checksum((unsigned short*)pTempPacket,
-					 (iLength + sizeof(PsuedoHdr)));
-   
-   free(pTempPacket);
-   
-   return usAnswer;
+   answer = (unsigned short)in_checksum((unsigned short*)temp_packet,
+					 (length + sizeof(PseudoHdr)));
+   free(temp_packet);
+   return answer;
 }
 
 /**

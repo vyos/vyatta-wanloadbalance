@@ -1,5 +1,5 @@
 /*
- * Module: lbpathtest.cc
+ * Module: lbtest_icmp.cc
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -78,6 +78,7 @@ ICMPEngine::process(LBHealth &health,LBTestICMP *data)
   }
   send(data->_send_icmp_sock, health._interface, target, _packet_id);
   _results.insert(pair<int,PktData>(_packet_id,PktData(health._interface,-1)));
+  return 0;
 }
 
 /**
@@ -140,7 +141,6 @@ ICMPEngine::recv(LBHealth &health,LBTestICMP *data)
   map<int,PktData>::iterator r_iter = _results.begin();
   data->_state = LBTest::K_FAILURE;
   while (r_iter != _results.end()) {
-
     if (r_iter->second._iface == health._interface) {
       if (r_iter->second._rtt < data->_resp_time) {
 	data->_state = LBTest::K_SUCCESS;

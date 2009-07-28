@@ -146,7 +146,9 @@ public:
     _is_active(true),
     _state_changed(true),
     _last_time_state_changed(0),
-    _interface_index(0)
+    _interface_index(0),
+    _timeout(5),
+    _time_start(0)
       {}
 
   LBHealth(int interface_index, string &interface) :
@@ -157,7 +159,9 @@ public:
     _state_changed(true),
     _last_time_state_changed(0),
     _interface(interface),
-    _interface_index(interface_index)
+    _interface_index(interface_index),
+    _timeout(5),			      
+    _time_start(0)
       {}
 
   void put(int rtt);
@@ -181,7 +185,7 @@ public:
   void
   send_test();
 
-  bool
+  int
   recv_test();
 
 public: //variables
@@ -201,6 +205,8 @@ public: //variables
 private: //variables
   TestIter _test_iter;
   bool _test_success;
+  unsigned long _timeout;
+  unsigned long _time_start;
 };
 
 /**
