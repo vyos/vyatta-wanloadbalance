@@ -1,3 +1,21 @@
+vyatta-wanloadbalance (0.13.18) unstable; urgency=low
+
+  * bug fixes on mult targets. added packet rate limit option to rules
+  * release socks on shutdown
+  * fix for mixed test type configuration where ttl would fail. now
+    works.
+  * fixed iptables command for when limit is applied--only for state=NEW
+    w/o source-based-policy applied
+  * additional fix on test cyclex
+  * clean up all of mangle table on exit, including new entries. fixed
+    bug in target iteration where some targets never completed test
+    cycle
+  * fix bug in failed test completion.
+  * reworked tests to fix bug in handling of received packets. modified
+    show cmd output.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Tue, 28 Jul 2009 14:49:17 -0700
+
 vyatta-wanloadbalance (0.13.17) unstable; urgency=low
 
   [ root ]
