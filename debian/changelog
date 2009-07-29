@@ -1,3 +1,12 @@
+vyatta-wanloadbalance (0.13.19) unstable; urgency=low
+
+  * remove debug code
+  * fix for bug 4762. exclude packets from the mangle output table where
+    the inbound interface for wlb is the same as the packet outbound
+    interface.
+
+ -- slioch <slioch@eng-140.vyatta.com>  Wed, 29 Jul 2009 15:39:03 -0700
+
 vyatta-wanloadbalance (0.13.18) unstable; urgency=low
 
   * bug fixes on mult targets. added packet rate limit option to rules
