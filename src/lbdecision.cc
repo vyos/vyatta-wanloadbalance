@@ -452,8 +452,13 @@ LBDecision::get_application_cmd(LBRule &rule, bool local)
 {
   string filter;
 
-  if (rule._in_iface.empty() == false && local == false) {
-    filter += "-i " + rule._in_iface + " ";
+  if (rule._in_iface.empty() == false) {
+    if (local == true) {
+      filter += " ! -o " + rule._in_iface + " ";
+    }
+    else {
+      filter += "-i " + rule._in_iface + " ";
+    }
   }
 
   if (rule._proto.empty() == false) {
