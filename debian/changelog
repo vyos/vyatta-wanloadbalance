@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.7+jenner17) unstable; urgency=low
+
+  *     remove interface syntax checks. added icmp exclusion to locally
+    sourced packets.
+
+ -- Michael Larson <mike@ft1.vyatta.com>  Fri, 25 Sep 2009 10:18:06 -0700
+
 vyatta-wanloadbalance (0.13.7+jenner16) unstable; urgency=low
 
   * fix in jenner for 4672--inbound interface is now excluded from
