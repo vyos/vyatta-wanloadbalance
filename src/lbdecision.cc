@@ -240,6 +240,7 @@ LBDecision::run(LBData &lb_data)
   execute("iptables -t mangle -F PREROUTING", stdout);
   execute("iptables -t mangle -F OUTPUT", stdout);
   execute("iptables -t mangle -A OUTPUT -m mark ! --mark 0 -j ACCEPT", stdout); //avoid packets set in prerouting table
+  execute("iptables -t mangle -A OUTPUT --proto icmp --icmp-type any -j ACCEPT", stdout); //avoid packets set in prerouting table
 
   //new request, bug 4112. flush conntrack tables if configured
   if (lb_data._flush_conntrack == true) {
