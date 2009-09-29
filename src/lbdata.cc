@@ -346,6 +346,17 @@ LBData::update_dhcp_nexthop()
 	}
 	fclose(fp);
       }
+      else {
+	//check if this is a ppp interface
+	string pppfile("/var/load-balance/ppp/"+h_iter->first);
+	FILE *fp = fopen(pppfile.c_str(),"r");
+	if (fp) {
+	  char str[1025];
+	  if (fgets(str, 1024, fp)) {
+	    h_iter->second._dhcp_nexthop = string(str);
+	  }
+	}
+      }
     }
     ++h_iter;
   }

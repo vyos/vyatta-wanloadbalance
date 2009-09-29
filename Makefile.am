@@ -1,4 +1,6 @@
 dhcphookdir = /etc/dhcp3/dhclient-exit-hooks.d
+ppphookdir = /etc/ppp/ip-up.d
+pppwanlbdir = /var/load-balance/ppp
 cfgdir = $(datadir)/vyatta-cfg/templates
 bin_sudo_usersdir = $(bindir)/sudo-users
 curverdir = $(sysconfdir)/config-migrate/current
@@ -17,6 +19,7 @@ bin_sudo_users_SCRIPTS  = scripts/vyatta-wlb-status
 bin_sudo_users_SCRIPTS  += scripts/vyatta-wlb-connection.pl
 
 dhcphook_SCRIPTS = scripts/dhcp/dhcp-wanlb
+ppphook_SCRIPTS = scripts/ppp/ppp-wanlb
 
 curver_DATA = cfg-version/wanloadbalance@1
 
@@ -39,6 +42,8 @@ cpiop = find  . ! -regex '\(.*~\|.*\.bak\|.*\.swp\|.*\#.*\#\)' -print0 | \
 
 install-exec-hook:
 	mkdir -p $(DESTDIR)$(dhcphookdir)
+	mkdir -p $(DESTDIR)$(pppwanlbdir)
+	mkdir -p $(DESTDIR)$(ppphookdir)
 	mkdir -p $(DESTDIR)$(cfgdir)
 	cd templates; $(cpiop) $(DESTDIR)$(cfgdir)
 	find etc ! -regex '\(.*~\|.*\.bak\|.*\.swp\|.*\#.*\#\)' -print0 |  cpio -0pd $(DESTDIR)
