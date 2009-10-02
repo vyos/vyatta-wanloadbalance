@@ -1,3 +1,12 @@
+vyatta-wanloadbalance (0.13.7+jenner19) unstable; urgency=low
+
+  * change name of local packet balancing tag from "disable-local-
+    traffic" to "enable-local-traffic". This preserves previous behavior
+    (i.e. no balancing of local traffic) by default, but can be enable
+  * Set correct flag in conf script for enable-local-traffic
+
+ -- Michael Larson <mike@ft1.vyatta.com>  Fri, 02 Oct 2009 14:35:16 -0700
+
 vyatta-wanloadbalance (0.13.7+jenner18) unstable; urgency=low
 
   * bug 4971 fix.
