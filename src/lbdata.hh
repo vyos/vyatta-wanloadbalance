@@ -196,7 +196,7 @@ class LBData {
   typedef map<string,LBHealth>::iterator InterfaceHealthIter;
   typedef map<string,LBHealth>::const_iterator InterfaceHealthConstIter;
 
-  LBData() : _disable_source_nat(false),_disable_local_traffic(false),_flush_conntrack(false) {}
+  LBData() : _disable_source_nat(false),_enable_local_traffic(false),_flush_conntrack(false) {}
 
   bool
   error() {return false;}
@@ -223,7 +223,7 @@ class LBData {
   InterfaceHealthColl _iface_health_coll;
 
   bool _disable_source_nat;
-  bool _disable_local_traffic;
+  bool _enable_local_traffic;
   bool _flush_conntrack;
   string _hook;
 };
