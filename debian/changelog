@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.7+jenner18) unstable; urgency=low
+
+  * bug 4971 fix.
+
+ -- Michael Larson <mike@ft1.vyatta.com>  Thu, 01 Oct 2009 20:53:51 -0700
+
 vyatta-wanloadbalance (0.13.7+jenner17) unstable; urgency=low
 
   *     remove interface syntax checks. added icmp exclusion to locally
