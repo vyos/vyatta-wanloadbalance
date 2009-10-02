@@ -26,8 +26,8 @@ sub write_health {
     my $valid = "false";
 
 
-    if ($config->exists("load-balancing wan disable-source-nat")) {
-	print FILE_LCK "disable-source-nat\n";
+    if ($config->exists("load-balancing wan enable-source-nat")) {
+	print FILE_LCK "enable-source-nat\n";
     }
 
     if ($config->exists("load-balancing wan disable-local-traffic")) {
