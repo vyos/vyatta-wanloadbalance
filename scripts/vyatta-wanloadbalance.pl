@@ -30,6 +30,10 @@ sub write_health {
 	print FILE_LCK "disable-source-nat\n";
     }
 
+    if ($config->exists("load-balancing wan disable-local-traffic")) {
+	print FILE_LCK "disable-local-traffic\n";
+    }
+
     if ($config->exists("load-balancing wan flush-connections")) {
 	print FILE_LCK "flush-conntrack\n";
     }

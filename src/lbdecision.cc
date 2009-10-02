@@ -118,9 +118,10 @@ if so then this stuff goes here!
   execute(string("iptables -t raw -A WLB_CONNTRACK -j ACCEPT"), stdout);
   execute(string("iptables -t raw -D PREROUTING -j WLB_CONNTRACK"), stdout);
   execute(string("iptables -t raw -I PREROUTING 1 -j WLB_CONNTRACK"), stdout);
-  execute(string("iptables -t raw -D OUTPUT -j WLB_CONNTRACK"), stdout);
-  execute(string("iptables -t raw -I OUTPUT 1 -j WLB_CONNTRACK"), stdout);
-
+  if (lbdata._disable_local_traffic == false) {
+    execute(string("iptables -t raw -D OUTPUT -j WLB_CONNTRACK"), stdout);
+    execute(string("iptables -t raw -I OUTPUT 1 -j WLB_CONNTRACK"), stdout);
+  }
 
   LBData::InterfaceHealthIter iter = lbdata._iface_health_coll.begin();
   while (iter != lbdata._iface_health_coll.end()) {
@@ -238,9 +239,12 @@ LBDecision::run(LBData &lb_data)
 
   //then if we do, flush all
   execute("iptables -t mangle -F PREROUTING", stdout);
-  execute("iptables -t mangle -F OUTPUT", stdout);
-  execute("iptables -t mangle -A OUTPUT -m mark ! --mark 0 -j ACCEPT", stdout); //avoid packets set in prerouting table
-  execute("iptables -t mangle -A OUTPUT --proto icmp --icmp-type any -j ACCEPT", stdout); //avoid packets set in prerouting table
+  if (lb_data._disable_local_traffic == false) {
+    execute("iptables -t mangle -F OUTPUT", stdout);
+    execute("iptables -t mangle -A OUTPUT -m mark ! --mark 0 -j ACCEPT", stdout); //avoid packets set in prerouting table
+    execute("iptables -t mangle -A OUTPUT --proto icmp --icmp-type any -j ACCEPT", stdout); //avoid packets set in prerouting table
+    execute("iptables -t mangle -A OUTPUT --source 127.0.0.1/8 --destination 127.0.0.1/8 -j ACCEPT", stdout); //avoid packets set in prerouting table
+  }
 
   //new request, bug 4112. flush conntrack tables if configured
   if (lb_data._flush_conntrack == true) {
@@ -257,7 +261,9 @@ LBDecision::run(LBData &lb_data)
 
     if (iter->second._exclude == true) {
       execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j ACCEPT", stdout);
-      execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -j ACCEPT", stdout);
+      if (lb_data._disable_local_traffic == false) {
+	execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -j ACCEPT", stdout);
+      }
     }
     else {
       map<int,float> weights = get_new_weights(lb_data,iter->second);
@@ -273,24 +279,34 @@ LBDecision::run(LBData &lb_data)
 	  sprintf(dbuf,"%d",w_iter->first);
 	  if (iter->second._enable_source_based_routing) {
 	    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
-	    execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    if (lb_data._disable_local_traffic == false) {
+	      execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    }
 	  }
 	  else {
 	    execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
-	    execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    if (lb_data._disable_local_traffic == false) {
+	      execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	    }
 	  }
 	}
 	sprintf(dbuf,"%d",(--weights.end())->first);
 	if (iter->second._enable_source_based_routing) {
 	  execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j ISP_" + dbuf, stdout);
-	  execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -j ISP_" + dbuf, stdout);
+	  if (lb_data._disable_local_traffic == false) {
+	    execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -j ISP_" + dbuf, stdout);
+	  }
 	}
 	else {
 	  execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
-	  execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	  if (lb_data._disable_local_traffic == false) {
+	    execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	  }
 	}
 	execute(string("iptables -t mangle -A PREROUTING ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
-	execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -j CONNMARK --restore-mark", stdout);
+	if (lb_data._disable_local_traffic == false) {
+	  execute(string("iptables -t mangle -A OUTPUT ") + app_cmd_local + " -j CONNMARK --restore-mark", stdout);
+	}
       }
     }
     ++iter;
@@ -309,7 +325,9 @@ LBDecision::shutdown(LBData &data)
 
   //then if we do, flush all
   execute("iptables -t mangle -F PREROUTING", stdout);
-  execute("iptables -t mangle -F OUTPUT", stdout);
+  if (data._disable_local_traffic == false) {
+    execute("iptables -t mangle -F OUTPUT", stdout);
+  }
 
   //clear out nat as well
   execute("iptables -t nat -F WANLOADBALANCE", stdout);
@@ -317,7 +335,9 @@ LBDecision::shutdown(LBData &data)
 
   //clear out conntrack hooks
   execute(string("iptables -t raw -D PREROUTING -j WLB_CONNTRACK"), stdout);
-  execute(string("iptables -t raw -D OUTPUT -j WLB_CONNTRACK"), stdout);
+  if (data._disable_local_traffic == false) {
+    execute(string("iptables -t raw -D OUTPUT -j WLB_CONNTRACK"), stdout);
+  }
   execute(string("iptables -t raw -F WLB_CONNTRACK"), stdout);
   execute(string("iptables -t raw -X WLB_CONNTRACK"), stdout);
 

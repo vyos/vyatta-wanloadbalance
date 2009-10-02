@@ -44,6 +44,9 @@ private:
   process_disablesourcenat(const string &key, const string &value);
 
   void
+  process_disablelocaltraffic(const string &key, const string &value);
+
+  void
   process_flushconntrack(const string &key, const string &value);
 
   void
