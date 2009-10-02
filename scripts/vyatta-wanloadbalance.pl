@@ -26,12 +26,12 @@ sub write_health {
     my $valid = "false";
 
 
-    if ($config->exists("load-balancing wan enable-source-nat")) {
-	print FILE_LCK "enable-source-nat\n";
+    if ($config->exists("load-balancing wan disable-source-nat")) {
+	print FILE_LCK "disable-source-nat\n";
     }
 
-    if ($config->exists("load-balancing wan disable-local-traffic")) {
-	print FILE_LCK "disable-local-traffic\n";
+    if ($config->exists("load-balancing wan enable-local-traffic")) {
+	print FILE_LCK "enable-local-traffic\n";
     }
 
     if ($config->exists("load-balancing wan flush-connections")) {
