@@ -283,6 +283,7 @@ LBDecision::run(LBData &lb_data)
   if (lb_data._enable_local_traffic == true) {
     execute("iptables -t mangle -F WANLOADBALANCE_OUT", stdout);
     execute("iptables -t mangle -A WANLOADBALANCE_OUT -m mark ! --mark 0 -j ACCEPT", stdout); //avoid packets set in prerouting table
+    execute("iptables -t mangle -A WANLOADBALANCE_OUT --proto icmp --icmp-type any -j ACCEPT", stdout); //avoid packets set in prerouting table
     execute("iptables -t mangle -A WANLOADBALANCE_OUT --source 127.0.0.1/8 --destination 127.0.0.1/8 -j ACCEPT", stdout); //avoid packets set in prerouting table
   }
 
