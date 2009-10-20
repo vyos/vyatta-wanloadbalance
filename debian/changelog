@@ -1,3 +1,20 @@
+vyatta-wanloadbalance (0.13.20) unstable; urgency=low
+
+  [ Michael Larson ]
+  * fix for ppp type interfaces that use the wanlb dhcp configuration
+    option.
+  * bug 4971 fix.
+  * change name of local packet balancing tag from "disable-local-
+    traffic" to "enable-local-traffic". This preserves previous behavior
+    (i.e. no balancing of local traffic) by default, but can be enable
+
+  [ slioch ]
+  * Should handle all of the merge issues.
+  * updated merge exclusion file.
+  * added priority to project node
+
+ -- slioch <slioch@eng-140.vyatta.com>  Tue, 20 Oct 2009 16:18:51 -0700
+
 vyatta-wanloadbalance (0.13.19) unstable; urgency=low
 
   * remove debug code
