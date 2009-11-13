@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.21) unstable; urgency=low
+
+  * dependency update
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Fri, 13 Nov 2009 14:05:15 -0800
+
 vyatta-wanloadbalance (0.13.20) unstable; urgency=low
 
   [ Michael Larson ]
