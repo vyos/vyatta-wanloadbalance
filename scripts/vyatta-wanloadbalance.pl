@@ -70,29 +70,25 @@ sub write_health {
 	    print "nexthop must be specified\n";
 	    exit 1;
 	}
-
+	
 	$config->setLevel("load-balancing wan interface-health $ethNode test");
 	my @rules = $config->listNodes();
 	foreach my $rule (@rules) {
 	    print FILE_LCK "\t\trule " . $rule . " {\n";
-
-	    my $icmp = $config->exists("$rule ping");
-	    if (defined $icmp) {
+	    
+	    my $test_type = $config->returnValue("$rule type");
+	    if ((defined $test_type) && ($test_type eq "ttl")) {
+		print FILE_LCK "\t\t\ttype udp {\n";
+		my $ttl_limit = $config->returnValue("$rule ttl-limit");
+		if (defined $ttl_limit) {
+		    print FILE_LCK "\t\t\t\tttl $ttl_limit\n";
+		}
+	    }
+	    else {
 		print FILE_LCK "\t\t\ttype ping {\n";
 	    }
 	    
-	    my $udp = $config->returnValue("$rule ttl");
-	    if (defined $udp) {
-		print FILE_LCK "\t\t\ttype udp {\n";
-		print FILE_LCK "\t\t\t\tttl $udp\n";
-	    }
-	    
-	    if (defined $icmp && defined $udp) {
-		print "Only a single test type can be defined (ttl or icmp)\n";
-		exit 1;
-	    }
-
-	    $option = $config->returnValue("$rule target");
+	    my $option = $config->returnValue("$rule target");
 	    if (defined $option) {
 		print FILE_LCK "\t\t\t\ttarget  " . $option . "\n";
 	    }
@@ -102,13 +98,13 @@ sub write_health {
 		print FILE_LCK "\t\t\t\tresp-time  " . $option*1000 . "\n";
 	    }
 	    print FILE_LCK "\t\t\t}\n";
-
+	    
 	    print FILE_LCK "\t\t}\n";
 	}
 	print FILE_LCK "\t}\n";
     }
     print FILE_LCK "}\n\n";
-
+    
     if ($valid eq "false") {
 	print "A valid WAN load-balance configuration requires an interface with a nexthop\n";
     }

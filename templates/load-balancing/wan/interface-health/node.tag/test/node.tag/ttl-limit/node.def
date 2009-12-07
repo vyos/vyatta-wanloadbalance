@@ -1,3 +1,4 @@
 type: u32
+default: 1
 help: Set ttl limit (hop count)
 
