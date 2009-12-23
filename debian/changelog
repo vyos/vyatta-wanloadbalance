@@ -1,3 +1,11 @@
+vyatta-wanloadbalance (0.13.23) unstable; urgency=low
+
+  * small modification to test type configuration--improved layout.
+  * updated version of config.
+  * fix for bug 5178. initialize resp-time if not set.
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Wed, 23 Dec 2009 15:41:59 -0800
+
 vyatta-wanloadbalance (0.13.22) unstable; urgency=low
 
   * add help string modifications to support webgui mandatory behavior.
