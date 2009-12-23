@@ -41,6 +41,7 @@ public:
 public:
   LBTest(bool debug) : 
     _debug(debug),
+    _resp_time(5),
     _state(K_NONE)
   {init();}
 
