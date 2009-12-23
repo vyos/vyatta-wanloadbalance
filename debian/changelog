@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.24) unstable; urgency=low
+
+  * Revert "updated version of config."
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Wed, 23 Dec 2009 15:47:48 -0800
+
 vyatta-wanloadbalance (0.13.23) unstable; urgency=low
 
   * small modification to test type configuration--improved layout.
