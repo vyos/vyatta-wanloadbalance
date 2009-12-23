@@ -1,3 +1,11 @@
+vyatta-wanloadbalance (0.13.25) unstable; urgency=low
+
+  * Revert "Revert "updated version of config.""
+  * OK--now commit with version update is compatible and won't break
+    build.
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Wed, 23 Dec 2009 15:53:53 -0800
+
 vyatta-wanloadbalance (0.13.24) unstable; urgency=low
 
   * Revert "updated version of config."
