@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.26) unstable; urgency=low
+
+  * remove command 'clear wan-load-balance connections' as this clears
+    all
+
+ -- Mohit Mehta <mohit.mehta@vyatta.com>  Wed, 03 Feb 2010 18:28:41 -0800
+
 vyatta-wanloadbalance (0.13.25) unstable; urgency=low
 
   * Revert "Revert "updated version of config.""
