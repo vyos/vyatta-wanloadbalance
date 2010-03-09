@@ -43,7 +43,7 @@ private:
   get_new_weights(LBData &data, LBRule &rule);
 
   string
-  get_application_cmd(LBRule &rule, bool local = false);
+  get_application_cmd(LBRule &rule, bool local = false, bool exclude = false);
 
   string
   fetch_iface_addr(const string &iface);
