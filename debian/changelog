@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.28) unstable; urgency=low
+
+  * bugfix for 5427. remove outbound interface exclusion on OUTPUT table
+    (i.e. local) traffic when exclude rule is specified.
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Tue, 09 Mar 2010 13:06:44 -0800
+
 vyatta-wanloadbalance (0.13.27) unstable; urgency=low
 
   * UNRELEASED
