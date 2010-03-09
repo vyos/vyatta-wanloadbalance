@@ -298,7 +298,7 @@ LBDecision::run(LBData &lb_data)
   while (iter != lb_data._lb_rule_coll.end()) {
     //NEED TO HANDLE APPLICATION SPECIFIC DETAILS
     string app_cmd = get_application_cmd(iter->second);
-    string app_cmd_local = get_application_cmd(iter->second,true);
+    string app_cmd_local = get_application_cmd(iter->second,true,iter->second._exclude);
 
     if (iter->second._exclude == true) {
       execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j ACCEPT", stdout);
@@ -586,13 +586,15 @@ LBDecision::get_new_weights(LBData &data, LBRule &rule)
  *
  **/
 string
-LBDecision::get_application_cmd(LBRule &rule, bool local)
+LBDecision::get_application_cmd(LBRule &rule, bool local, bool exclude)
 {
   string filter;
 
   if (rule._in_iface.empty() == false) {
     if (local == true) {
-      filter += " ! -o " + rule._in_iface + " ";
+      if (exclude == false) {
+	filter += " ! -o " + rule._in_iface + " ";
+      }
     }
     else {
       filter += "-i " + rule._in_iface + " ";
