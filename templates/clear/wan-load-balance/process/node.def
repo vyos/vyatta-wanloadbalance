@@ -1,6 +1,6 @@
 help: Restart wan-load-balance process
 run:  if [ -f /var/load-balance/wlb.out ] ; then 
-      /opt/vyatta/sbin/vyatta-wanloadbalance.init restart /var/load-balance/wlb.conf 2>/dev/null
+      sudo /opt/vyatta/sbin/vyatta-wanloadbalance.init restart /var/load-balance/wlb.conf 2>/dev/null
       else
          echo WAN load balancing is not configured
       fi 
