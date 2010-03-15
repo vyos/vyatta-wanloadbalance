@@ -1,3 +1,11 @@
+vyatta-wanloadbalance (0.13.26+kenwood3) unstable; urgency=low
+
+  * fix for 4649.
+  * Revert "fix for 4649."
+  * fix for 4649
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Mon, 15 Mar 2010 16:30:04 -0700
+
 vyatta-wanloadbalance (0.13.26+kenwood2) unstable; urgency=low
 
   * bugfix for 5427. remove outbound interface exclusion on OUTPUT table
