@@ -355,6 +355,7 @@ LBData::update_dhcp_nexthop()
 	  if (fgets(str, 1024, fp)) {
 	    h_iter->second._dhcp_nexthop = string(str);
 	  }
+	  fclose(fp);
 	}
       }
     }
