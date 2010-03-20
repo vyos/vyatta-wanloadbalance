@@ -1,4 +1,4 @@
 #!/bin/sh
 
-iptables -L PREROUTING -t mangle -v
+iptables -L WANLOADBALANCE_PRE -t mangle -v
 
