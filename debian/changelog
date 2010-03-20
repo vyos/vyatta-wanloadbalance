@@ -1,3 +1,11 @@
+vyatta-wanloadbalance (0.13.30) unstable; urgency=low
+
+  * need to close file when configured for dhcp on ppp interface--file
+    handle leak otherwise.
+  * fix for bug 5485.
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Fri, 19 Mar 2010 17:13:37 -0700
+
 vyatta-wanloadbalance (0.13.29) unstable; urgency=low
 
   * fix for 4649
