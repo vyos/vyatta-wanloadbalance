@@ -1,3 +1,13 @@
+vyatta-wanloadbalance (0.13.31) unstable; urgency=low
+
+  * fix debug state for test modules. debug flag was not being
+    initialized correctly when configured.
+  * when a test is not configured the response time window is
+    incorrectly scaled into milliseconds, therefore without a configured
+    test it is much more likely that a ping test
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Tue, 23 Mar 2010 15:23:48 -0700
+
 vyatta-wanloadbalance (0.13.30) unstable; urgency=low
 
   * need to close file when configured for dhcp on ppp interface--file
