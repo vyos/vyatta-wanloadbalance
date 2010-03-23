@@ -185,8 +185,13 @@ LBTest::recv(LBHealth &health)
 	else {
 	  secs = recv_time.tv_sec - send_time.tv_sec;
 	}
+
+	if (_debug) {
+	  printf("LBTest::recv(): usecs: %d, secs: %d\n",msecs,secs);
+	}
+
 	//time in milliseconds below
-	r_iter->second._rtt = abs(msecs) / 1000 + 1000 * secs;
+	r_iter->second._rtt = (abs(msecs) / 1000) + 1000 * secs;
 	--pending_result_ct;
       }
     }
@@ -201,7 +206,7 @@ LBTest::recv(LBHealth &health)
   while (r_iter != _results.end()) {
     if (r_iter->second._iface == health._interface) {
 
-      if (r_iter->second._rtt < _resp_time && r_iter->second._rtt >= 0) {
+      if (r_iter->second._rtt >= 0 && r_iter->second._rtt < _resp_time) {
 	_state = LBTest::K_SUCCESS;
 	if (_debug) {
 	  cout << "LBTest::recv(): success for " << r_iter->second._iface << " : " << r_iter->second._rtt << endl;
