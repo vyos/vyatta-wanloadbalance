@@ -46,7 +46,6 @@ private:
   in_checksum(const unsigned short *buf, int lenght) const;
 
 private:
-  bool _debug;
 };
 
 #endif //__LBTEST_ICMP_HH__

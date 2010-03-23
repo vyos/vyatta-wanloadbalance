@@ -79,7 +79,6 @@ private:
 
 
 private:
-  bool _debug;
   unsigned short _ttl;
   unsigned short _port;
   unsigned short _min_port_id;
