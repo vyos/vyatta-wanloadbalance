@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.26+kenwood5) unstable; urgency=low
+
+  * fix for bug 5504. needed to correctly set nesting on internal
+    configuration file for wlb.conf for the hook parameter.
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Tue, 30 Mar 2010 15:54:06 -0700
+
 vyatta-wanloadbalance (0.13.26+kenwood4) unstable; urgency=low
 
   * need to close file when configured for dhcp on ppp interface--file
