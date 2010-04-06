@@ -152,7 +152,6 @@ if so then this stuff goes here!
     //NOTE, WILL NEED A WAY TO CLEAN UP THIS RULE ON RESTART...
     execute(string("iptables -t mangle -A ISP_") + iface + " -j ACCEPT", stdout);
     
-    //    insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, ct);
     //need to force the entry on restart as the configuration may have changed.
     if (iter->second._nexthop == "dhcp") {
       if (iter->second._dhcp_nexthop.empty() == false) {
@@ -203,11 +202,11 @@ LBDecision::update_paths(LBData &lbdata)
       //now let's update the nexthop here in the route table
       if (iter->second._nexthop == "dhcp") {
 	if (iter->second._dhcp_nexthop.empty() == false) {
-	  insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._dhcp_nexthop, iter->second._interface_index);
+	  insert_default(iter->second, iter->second._dhcp_nexthop);
 	}
       }
       else {
-	insert_default(string("ip route replace table ") + buf + " default dev " + iface + " via " + iter->second._nexthop, iter->second._interface_index);
+	insert_default(iter->second, iter->second._nexthop);
       }
       
       if (lbdata._disable_source_nat == false) {
@@ -686,17 +685,27 @@ LBDecision::get_application_cmd(LBRule &rule, bool local, bool exclude)
  * should be replaced by netlink in the next release.
  **/
 void
-LBDecision::insert_default(string cmd, int table)
+LBDecision::insert_default(LBHealth &h, string &nexthop)
 {
+  //if found will return something of the form:
+  // "default via 10.3.0.1 dev eth0"
+
+  //retrieve route entry
   string stdout;
   char buf[40];
+  sprintf(buf,"%d",h._interface_index);
+  string default_route = string("ip route replace table ") + buf + " default dev " + h._interface + " via " + nexthop;
   string showcmd("ip route show table ");
-  sprintf(buf,"%d",table);
   showcmd += string(buf);
   execute(showcmd,stdout,true);
-
-  if (stdout.empty() == true) {
-    execute(cmd,stdout);
+  if (stdout.empty() == false) {
+    //compare string:
+    if (stdout.find(nexthop) == string::npos || stdout.find(h._interface) == string::npos) { //compare expected string
+      execute(default_route,stdout); //apply entry because this doesn't match
+    }
+  }
+  else {
+    execute(default_route,stdout); //apply entry because this doesn't match
   }
 }
 
