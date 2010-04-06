@@ -37,7 +37,7 @@ private:
   execute(string cmd, string &stdout, bool read = false);
 
   void
-  insert_default(string cmd, int table);
+  insert_default(LBHealth &h, string &nexthop);
 
   map<string,float> 
   get_new_weights(LBData &data, LBRule &rule);
