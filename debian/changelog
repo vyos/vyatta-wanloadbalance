@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.33) unstable; urgency=low
+
+  * fix for bug 5520.
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Tue, 06 Apr 2010 11:42:09 -0700
+
 vyatta-wanloadbalance (0.13.32) unstable; urgency=low
 
   * fix for bug 5504. needed to correctly set nesting on internal
