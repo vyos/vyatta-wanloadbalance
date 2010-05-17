@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.34) unstable; urgency=low
+
+  * add help to parent clear command in wlb
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Mon, 17 May 2010 10:24:32 -0700
+
 vyatta-wanloadbalance (0.13.33) unstable; urgency=low
 
   * fix for bug 5520.
