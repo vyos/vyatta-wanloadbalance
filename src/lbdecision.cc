@@ -211,8 +211,13 @@ LBDecision::update_paths(LBData &lbdata)
       
       if (lbdata._disable_source_nat == false) {
 	if (new_addr != iter->second._address) {
-	  int err = execute(string("iptables -t nat -D WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._address, stdout);
-	  err |= execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + new_addr, stdout);
+	  int err = 0;
+	  if (iter->second._address.empty() == false) {
+	    int err = execute(string("iptables -t nat -D WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._address, stdout);
+	  }
+	  if (new_addr.empty() == false) {
+	    err |= execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + new_addr, stdout);
+	  }
 	  if (err == 0) { //only set if both are 0
 	    iter->second._address = new_addr;
 	  }
