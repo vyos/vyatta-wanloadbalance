@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.36) unstable; urgency=low
+
+  * submission in reponse to forum posting on multiple entries found in
+    snat table with adsl dhcp configuration:
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Sat, 19 Jun 2010 18:52:17 -0700
+
 vyatta-wanloadbalance (0.13.35) unstable; urgency=low
 
   * UNRELEASED
