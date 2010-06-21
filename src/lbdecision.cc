@@ -213,7 +213,7 @@ LBDecision::update_paths(LBData &lbdata)
 	if (new_addr != iter->second._address) {
 	  int err = 0;
 	  if (iter->second._address.empty() == false) {
-	    int err = execute(string("iptables -t nat -D WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._address, stdout);
+	    err = execute(string("iptables -t nat -D WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._address, stdout);
 	  }
 	  if (new_addr.empty() == false) {
 	    err |= execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + new_addr, stdout);
@@ -706,11 +706,17 @@ LBDecision::insert_default(LBHealth &h, string &nexthop)
   if (stdout.empty() == false) {
     //compare string:
     if (stdout.find(nexthop) == string::npos || stdout.find(h._interface) == string::npos) { //compare expected string
-      execute(default_route,stdout); //apply entry because this doesn't match
+      int err = execute(default_route,stdout); //apply entry because this doesn't match
+      if (err != 0) {
+	syslog(LOG_WARNING, string("failure to insert default route on active path with this command: " + default_route + ", resp: " + stdout).c_str());
+      }
     }
   }
   else {
-    execute(default_route,stdout); //apply entry because this doesn't match
+    int err = execute(default_route,stdout); //apply entry because this doesn't match
+    if (err != 0) {
+      syslog(LOG_WARNING, string("failure to insert default route on active path with this command: " + default_route + ", resp: " + stdout).c_str());
+    }
   }
 }
 
