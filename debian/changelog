@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.38) unstable; urgency=low
+
+  * fix for bug 5583.
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Fri, 16 Jul 2010 15:19:53 -0700
+
 vyatta-wanloadbalance (0.13.37) unstable; urgency=low
 
   * added syslog messages on failure to insert default route into policy
