@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.39) unstable; urgency=low
+
+  * part of fix for BZ 5839 - move clear process cmds under restart
+
+ -- Mohit Mehta <mohit.mehta@vyatta.com>  Tue, 20 Jul 2010 14:18:26 -0700
+
 vyatta-wanloadbalance (0.13.38) unstable; urgency=low
 
   * fix for bug 5583.
