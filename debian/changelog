@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.39+larkspur2) unstable; urgency=low
+
+  * fix for bug 5991 and 5715.
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Fri, 06 Aug 2010 09:32:30 -0700
+
 vyatta-wanloadbalance (0.13.39+larkspur1) unstable; urgency=low
 
   * UNRELEASED
