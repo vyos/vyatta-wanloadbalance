@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.39+larkspur3) unstable; urgency=low
+
+  * fix for bug 6019
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Tue, 10 Aug 2010 13:03:21 -0700
+
 vyatta-wanloadbalance (0.13.39+larkspur2) unstable; urgency=low
 
   * fix for bug 5991 and 5715.
