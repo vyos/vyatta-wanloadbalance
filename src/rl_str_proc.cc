@@ -10,7 +10,7 @@ StrProc::StrProc(const string &in_str, const string &token)
   string tmp = in_str;
   
   //convert tabs to spaces
-  uint32_t pos = 0;
+  size_t pos = 0;
   string tabtospace = "    ";
   string::iterator iter = tmp.begin();
   while ((pos = tmp.find("\t", pos)) != string::npos) {
@@ -26,7 +26,7 @@ StrProc::StrProc(const string &in_str, const string &token)
 
   //now handle the case of the multiple length token
   //note that we are using the '~' as a token internally
-  uint32_t start = 0, end;
+  size_t start = 0, end;
   while ((start = tmp.find(token, start)) != string::npos) {
     tmp.replace(start, token.length(), "~");
   }
@@ -49,6 +49,7 @@ StrProc::StrProc(const string &in_str, const string &token)
 string
 StrProc::get(int i)
 {
+  /* uint32_t probably ok here */
   if (uint32_t(i) >= _str_coll.size()) {
     return string("");
   }
@@ -61,11 +62,13 @@ StrProc::get(int i)
 string
 StrProc::get(int start, int end)
 {
+  /* uint32_t probably ok here */
   if (uint32_t(start) >= _str_coll.size()) {
     return string("");
   }
 
   string tmp;
+  /* uint32_t probably ok here */
   for (int i = start; (i < end) && (uint32_t(i) < _str_coll.size()); ++i) {
     tmp += _str_coll[i] + " ";
   }
