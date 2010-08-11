@@ -56,7 +56,7 @@ LBDataFactory::load(const string &conf_file)
   while (fgets(str, 1024, fp) != 0) {
     string line(str);
 
-    unsigned int pos = line.find("#");
+    size_t pos = line.find("#");
     line = line.substr(0,pos);
     
     string key,value;
@@ -71,7 +71,7 @@ LBDataFactory::load(const string &conf_file)
 	}
 	else if (value.empty()) {
 	  if ((pos = line.find("\"")) != string::npos) {
-	    unsigned int end_pos = line.rfind("\"");
+	    size_t end_pos = line.rfind("\"");
 	    symbol = line.substr(pos+1,end_pos-pos-1);
 	  }
 	  value = symbol;
