@@ -46,4 +46,5 @@ install-exec-hook:
 	mkdir -p $(DESTDIR)$(ppphookdir)
 	mkdir -p $(DESTDIR)$(cfgdir)
 	cd templates; $(cpiop) $(DESTDIR)$(cfgdir)
-	find etc ! -regex '\(.*~\|.*\.bak\|.*\.swp\|.*\#.*\#\)' -print0 |  cpio -0pd $(DESTDIR)
+	mkdir -p $(DESTDIR)/etc
+	cd etc; $(cpiop) $(DESTDIR)/etc
