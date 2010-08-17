@@ -3,6 +3,5 @@ help: Outbound interface nexthop address. Can be 'dhcp or ip address' [REQUIRED]
 syntax:expression: exec "/opt/vyatta/sbin/vyatta-wanloadbalance.pl --valid-nexthop $VAR(@)"\
      ; "Invalid nexthop [$VAR(@)]"
 allowed: echo "dhcp <>"
-comp_help:Possible completions:
-  <x.x.x.x>		Set the nexthop
-  dhcp			Set the nexthop via DHCP
+val_help: ipv4; Nexthop IP address
+val_help: dhcp; Set the nexthop via DHCP

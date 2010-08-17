@@ -2,6 +2,5 @@ type: u32
 default: 1
 syntax:expression: $VAR(@) >= 0 && $VAR(@) <= 10; "success count must be between 1 and 10"
 help: Set success count
-comp_help: possible completions:
-<1-10>	    set success count
+val_help: u32:1-10; Success count
 

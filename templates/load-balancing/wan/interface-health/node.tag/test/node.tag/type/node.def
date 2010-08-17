@@ -5,9 +5,8 @@ help: Set WLB test type
 syntax:expression: $VAR(@) in "ping", "ttl";
                    "action must be either ping or ttl expired test"
 
-comp_help: Possible completions:
-  ping     Set rule test type to icmp echo response
-  ttl      Set rule test type to udp ttl expired response
+val_help: ping; Set rule test type to icmp echo response
+val_help: ttl; Set rule test type to udp ttl expired response
 
 
 

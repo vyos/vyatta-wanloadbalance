@@ -1,3 +1,2 @@
 type: txt
-help: Set inbound interface name [REQUIRED]
-comp_help: Enter a network interface name, for example, "eth0"
+help: Inbound interface name (e.g., "eth0") [REQUIRED]

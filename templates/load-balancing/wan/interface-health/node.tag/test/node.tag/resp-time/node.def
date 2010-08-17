@@ -2,5 +2,4 @@ type: u32
 default: 5
 syntax:expression: $VAR(@) >= 0 && $VAR(@) <= 30; "response must be between 1 and 30 seconds"
 help: Set ping response time (seconds)
-comp_help: possible completions:
-<1-30>	    set response time (seconds)
+val_help: u32:1-30; Response time (seconds)
