@@ -2,6 +2,7 @@ dhcphookdir = /etc/dhcp3/dhclient-exit-hooks.d
 ppphookdir = /etc/ppp/ip-up.d
 pppwanlbdir = /var/load-balance/ppp
 cfgdir = $(datadir)/vyatta-cfg/templates
+opdir = $(datadir)/vyatta-op/templates
 bin_sudo_usersdir = $(bindir)/sudo-users
 curverdir = $(sysconfdir)/config-migrate/current
 
@@ -46,5 +47,7 @@ install-exec-hook:
 	mkdir -p $(DESTDIR)$(ppphookdir)
 	mkdir -p $(DESTDIR)$(cfgdir)
 	cd templates; $(cpiop) $(DESTDIR)$(cfgdir)
+	mkdir -p $(DESTDIR)$(opdir)
+	cd templates-op; $(cpiop) $(DESTDIR)$(opdir)
 	mkdir -p $(DESTDIR)/etc
 	cd etc; $(cpiop) $(DESTDIR)/etc
