@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.44) unstable; urgency=low
+
+  * don't duplicate code
+  * fix packaging problem
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Tue, 17 Aug 2010 14:52:54 -0700
+
 vyatta-wanloadbalance (0.13.43) unstable; urgency=low
 
   * fix for bug 6029
