@@ -268,7 +268,7 @@ sub write_rules {
 	my @eths = $config->listNodes();
 
 	if ($#eths < 0 && $exclude eq "false") {
-	    print "WARNING: rule $rule will be inactive because no output interfaces have been defined for this rule\n";
+	    print "WARNING: rule $rule will be inactive because no (outbound) interfaces have been defined for this rule\n";
 	}
 	elsif ($#eths >= 0 && $exclude eq "true") {
 	    print "WARNING: interfaces (outbound) are not used when exclude has been defined for rule $rule\n";

@@ -477,6 +477,7 @@ LBDecision::shutdown(LBData &data)
     sprintf(buf,"%d",h_iter->second._interface_index);
     
     execute(string("ip rule del table ") + buf, stdout);
+    execute(string("ip route del table ") + buf, stdout);
 
     //need to delete ip rule here as well!
 
