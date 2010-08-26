@@ -68,7 +68,7 @@ sub write_health {
 	    $valid = "true";
 	}
 	else {
-	    print "nexthop must be specified\n";
+	    print "ERROR: nexthop must be specified\n";
 	    exit 1;
 	}
 	
@@ -107,7 +107,7 @@ sub write_health {
     print FILE_LCK "}\n\n";
     
     if ($valid eq "false") {
-	print "A valid WAN load-balance configuration requires an interface with a nexthop\n";
+	print "WARNING: A valid WAN load-balance configuration requires an interface with a nexthop\n";
     }
     return $valid;
 }
@@ -115,7 +115,7 @@ sub write_health {
 sub write_rules {
     my $config = new Vyatta::Config;
 
-    my $valid = "false";
+    my $outbound_defined = "false";
 
     $config->setLevel('load-balancing wan rule');
     my @rules = $config->listNodes();
@@ -124,10 +124,12 @@ sub write_rules {
     foreach my $rule (@rules) {
 	print FILE_LCK "rule " . $rule . " {\n";
 	
+	my $exclude = "false";
+	
 	$config->setLevel('load-balancing wan rule');
 
 	if ($config->exists("$rule exclude")) {
-	    $valid = "true";
+	    $exclude = "true";
 	    print FILE_LCK "\texclude\n";
 	}
 
@@ -140,12 +142,12 @@ sub write_rules {
 	}
 
 	if ($config->exists("$rule failover") && $config->exists("$rule exclude")) {
-	    print "failover cannot be configured with exclude\n";
+	    print "ERROR: failover cannot be configured with exclude\n";
 	    exit 1;
 	}
 
 	if ($config->exists("$rule limit") && $config->exists("$rule exclude")) {
-	    print "limit cannot be used with exclude\n";
+	    print "ERROR: limit cannot be used with exclude\n";
 	    exit 1;
 	}
 
@@ -257,20 +259,29 @@ sub write_rules {
 	    print FILE_LCK "\tinbound-interface " . $inbound . "\n"
 	}
 	else {
-	    print "inbound-interface must be specified\n";
+	    print "ERROR: inbound-interface must be specified\n";
 	    exit 1;
 	}
 
 	#interface
 	$config->setLevel("load-balancing wan rule $rule interface");
 	my @eths = $config->listNodes();
-	
+
+	if ($#eths < 0 && $exclude eq "false") {
+	    print "WARNING: rule $rule will be inactive because no output interfaces have been defined for this rule\n";
+	}
+	elsif ($#eths >= 0 && $exclude eq "true") {
+	    print "WARNING: interfaces (outbound) are not used when exclude has been defined for rule $rule\n";
+	}
+
 	foreach my $ethNode (@eths) {
 	    if ($inbound eq $ethNode) {
 		print "WARNING: inbound interface is the same as the outbound interface\n";
 	    }
 
-	    $valid = "true";
+	    if ($exclude ne "true") {
+		$outbound_defined = "true";
+	    }
 
 	    print FILE_LCK "\tinterface " . $ethNode . " {\n";
 	    
@@ -283,12 +294,12 @@ sub write_rules {
 	print FILE_LCK "}\n";
     }
 
-    if ($valid eq "false") {
-	print "At least one rule with interface must be defined for WAN load balancing to be active\n";
+    if ($outbound_defined eq "false") {
+	print "WARNING: At least one rule with an (outbound) interface must be defined for WAN load balancing to be active\n";
 	#allow this configuration, just generate the warning
 	return "true";
     }
-    return $valid;
+    return $outbound_defined;
 }
 
 my $nexthop;
