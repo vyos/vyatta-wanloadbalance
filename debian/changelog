@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.47) unstable; urgency=low
+
+  * fix for bug 5990
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Thu, 26 Aug 2010 12:04:59 -0700
+
 vyatta-wanloadbalance (0.13.46) unstable; urgency=low
 
   * fix for bug 5998.
