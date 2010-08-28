@@ -5,6 +5,7 @@
  * under the terms of the GNU General Public License version 2 as published
  * by the Free Software Foundation.
  */
+#include <stdio.h>
 #include <sys/sysinfo.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

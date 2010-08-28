@@ -24,6 +24,7 @@ libtool
 /debian/vyatta-wanloadbalance.postrm
 /debian/vyatta-wanloadbalance
 /debian/vyatta-wanloadbalance.debhelper.log
+/debian/vyatta-wanloadbalance.substvars
 /INSTALL
 /Makefile.in
 /Makefile

@@ -6,6 +6,7 @@
  * by the Free Software Foundation.
  */
 
+#include <stdio.h>
 #include <sys/time.h>
 #include <syslog.h>
 #include <sys/time.h>
