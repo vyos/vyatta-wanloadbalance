@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.48) unstable; urgency=low
+
+  * fix squeeze build issues
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Fri, 27 Aug 2010 17:34:48 -0700
+
 vyatta-wanloadbalance (0.13.47) unstable; urgency=low
 
   * fix for bug 5990
