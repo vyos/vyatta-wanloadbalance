@@ -120,7 +120,7 @@ if so then this stuff goes here!
 
   execute(string("iptables -t raw -D PREROUTING -j WLB_CONNTRACK"), stdout);
 
-  int index = find_iptables_index("raw","PREROUTING","VYATTA_PRE_CT_PREROUTING_HOOK");
+  int index = find_iptables_index("raw","PREROUTING","VYATTA_CT_PREROUTING_HOOK");
   ++index;
   sprintf(buf,"%d",index);
   execute(string("iptables -t raw -I PREROUTING ") + buf + " -j WLB_CONNTRACK", stdout);
@@ -129,7 +129,7 @@ if so then this stuff goes here!
   if (lbdata._enable_local_traffic == true) {
     execute(string("iptables -t raw -D OUTPUT -j WLB_CONNTRACK"), stdout);
 
-    int index = find_iptables_index("raw","OUTPUT","VYATTA_PRE_CT_OUTPUT_HOOK");
+    int index = find_iptables_index("raw","OUTPUT","VYATTA_CT_OUTPUT_HOOK");
     ++index;
     sprintf(buf,"%d",index);
     execute(string("iptables -t raw -I OUTPUT ") + buf + " -j WLB_CONNTRACK", stdout);
