@@ -68,8 +68,8 @@ StrProc::get(int start, int end)
   }
 
   string tmp;
-  /* uint32_t probably ok here */
-  for (int i = start; (i < end) && (uint32_t(i) < _str_coll.size()); ++i) {
+  for (size_t i = (size_t) start;
+       (i < (size_t) end) && (i < _str_coll.size()); ++i) {
     tmp += _str_coll[i] + " ";
   }
   return tmp.substr(0,tmp.length()-1);
