@@ -1,5 +1,14 @@
 #! /bin/bash
 
+### BEGIN INIT INFO
+# Provides:          vyatta-wanloadbalnce
+# Required-Start:    $network $remote_fs $syslog
+# Required-Stop:     $network $remote_fs $syslog
+# Default-Start:
+# Default-Stop:
+# Short-Description: Vyatta WAN loadbalance service
+### END INIT INFO
+
 declare progname=${0##*/}
 declare action=$1; shift
 
