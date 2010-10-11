@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.52) unstable; urgency=low
+
+  * Add LSB comment to init script
+
+ -- Stephen Hemminger <stephen.hemminger@vyatta.com>  Mon, 11 Oct 2010 08:55:39 -0700
+
 vyatta-wanloadbalance (0.13.51) unstable; urgency=low
 
   * UNRELEASED
