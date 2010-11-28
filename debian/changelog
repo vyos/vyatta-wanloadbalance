@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.53) unstable; urgency=low
+
+  * remove deprecated linda override
+
+ -- Stephen Hemminger <stephen.hemminger@vyatta.com>  Sun, 28 Nov 2010 11:33:24 -0800
+
 vyatta-wanloadbalance (0.13.52) unstable; urgency=low
 
   * Add LSB comment to init script
