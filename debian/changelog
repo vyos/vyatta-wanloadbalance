@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.54) unstable; urgency=low
+
+  * don't install linda now that it's been removed
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Sun, 28 Nov 2010 12:49:41 -0800
+
 vyatta-wanloadbalance (0.13.53) unstable; urgency=low
 
   * remove deprecated linda override
