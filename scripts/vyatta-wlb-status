@@ -1,4 +1,5 @@
 #!/bin/sh
 
-iptables -L WANLOADBALANCE_PRE -t mangle -v
+
+iptables $1 -L WANLOADBALANCE_PRE -t mangle -v
 
