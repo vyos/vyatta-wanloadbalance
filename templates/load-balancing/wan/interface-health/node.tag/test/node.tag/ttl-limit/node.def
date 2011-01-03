@@ -1,3 +1,6 @@
 type: u32
 default: 1
 help: Ttl limit (hop count)
+val_help: u32:1-254; Number of hops
+
+syntax:expression: $VAR(@) >=1 && $VAR(@) <= 254; "ttl limit hops must be between 1 and 254"
