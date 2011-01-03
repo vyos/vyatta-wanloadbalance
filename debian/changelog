@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.54+mendocino3) unstable; urgency=low
+
+  * Remove use of 'Set' from help
+  * Add range checking for TTL hop count
+
+ -- Stephen Hemminger <stephen.hemminger@vyatta.com>  Mon, 03 Jan 2011 10:08:30 -0800
+
 vyatta-wanloadbalance (0.13.54+mendocino2) unstable; urgency=low
 
   * fix for bug 4966.
