@@ -1,5 +1,5 @@
 type: txt
-help: Set protocol to match (protocol name in /etc/protocols or protocol number or "all")
+help: Protocol to match
 default: "all"
 syntax:expression: exec "/opt/vyatta/sbin/vyatta-validate-type.pl protocol_negate '$VAR(@)'" ; "invalid protocol \"$VAR(@)\""
 val_help: txt; IP protocol name from /etc/protocols (e.g. "tcp" or "udp")

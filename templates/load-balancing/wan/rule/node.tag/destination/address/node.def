@@ -1,5 +1,7 @@
 type: txt
-help: Set source IP address, subnet, or range
+
+help: Source IP address, subnet, or range
+
 val_help: ipv4; IP address to match
 val_help: ipv4net; Subnet to match
 val_help: ipv4range; IP range to match

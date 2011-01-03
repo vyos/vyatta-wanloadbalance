@@ -1,5 +1,3 @@
 tag:
 type: u32
-help: Set rule number
-
-
+help: Rule number

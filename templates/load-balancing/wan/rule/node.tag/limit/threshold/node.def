@@ -1,4 +1,4 @@
 type: txt
-help: Set threshold behavior for limit
+help: Threshold behavior for limit
 default: "below"
 syntax:expression: $VAR(@) in "below", "above"; "limit can apply above or below rate"

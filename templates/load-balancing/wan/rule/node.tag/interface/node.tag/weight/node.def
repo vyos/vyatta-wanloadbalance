@@ -1,5 +1,5 @@
 type: u32
 default: 1
 syntax:expression: $VAR(@) >= 0 && $VAR(@) <= 255; "Interface weight must be between 1 and 255"
-help: Set load-balance weight
+help: Load-balance weight
 val_help: u32:1-255; Interface weight

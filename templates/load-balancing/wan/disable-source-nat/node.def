@@ -1,1 +1,1 @@
-help: Set to disable source nat rules from being configured for wan load balancing.
+help: Disable source nat rules from being configured for wan load balancing
