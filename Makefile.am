@@ -1,6 +1,6 @@
 dhcphookdir = /etc/dhcp3/dhclient-exit-hooks.d
 ppphookdir = /etc/ppp/ip-up.d
-pppwanlbdir = /var/load-balance/ppp
+pppwanlbdir = /var/run/load-balance/ppp
 cfgdir = $(datadir)/vyatta-cfg/templates
 opdir = $(datadir)/vyatta-op/templates
 bin_sudo_usersdir = $(bindir)/sudo-users

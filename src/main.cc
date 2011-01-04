@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
   bool debug = false;
   bool config_debug_mode = false, daemon = false;
   string pid_path = "/var/run";
-  string output_path = "/var/load-balance";
+  string output_path = "/var/run/load-balance";
   string c_file;
 
   //grab inputs
