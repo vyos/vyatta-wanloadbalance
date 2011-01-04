@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.54+mendocino4) unstable; urgency=low
+
+  * convert wlb runtime directory to /var/run/load-balance from
+    /var/load-balance. fix for bug 6630
+
+ -- Michael Larson <mike@vyatta.com>  Tue, 04 Jan 2011 10:40:58 -0800
+
 vyatta-wanloadbalance (0.13.54+mendocino3) unstable; urgency=low
 
   * Remove use of 'Set' from help
