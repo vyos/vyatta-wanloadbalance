@@ -349,7 +349,7 @@ LBData::update_dhcp_nexthop()
       }
       else {
 	//check if this is a ppp interface
-	string pppfile("/var/load-balance/ppp/"+h_iter->first);
+	string pppfile("/var/run/load-balance/ppp/"+h_iter->first);
 	FILE *fp = fopen(pppfile.c_str(),"r");
 	if (fp) {
 	  char str[1025];

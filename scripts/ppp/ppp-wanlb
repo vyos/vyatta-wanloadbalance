@@ -1,6 +1,6 @@
 #! /bin/sh
 
-echo $5 > /var/load-balance/ppp/$6
+echo $5 > /var/run/load-balance/ppp/$6
 
 pid=/var/run/vyatta/wlb.pid
 if [ -f $pid ]; then

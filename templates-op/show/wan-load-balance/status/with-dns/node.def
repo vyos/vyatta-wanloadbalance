@@ -1,5 +1,5 @@
 help: Show WAN load-balancing statistics
-run:  if [ -f /var/load-balance/wlb.out ] ; then 
+run:  if [ -f /var/run/load-balance/wlb.out ] ; then 
       	 sudo ${vyatta_bindir}/sudo-users/vyatta-wlb-status 
       else
          echo WAN load balancing is not configured

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOADBALANCE_DIR=/var/load-balance
+LOADBALANCE_DIR=/var/run/load-balance
 
 
 prefix=/opt/vyatta

@@ -312,8 +312,8 @@ GetOptions("valid-nexthop=s" => \$nexthop,
     ) or usage();
 
 ####main
-my $conf_file = '/var/load-balance/wlb.conf';
-my $conf_lck_file = '/var/load-balance/wlb.conf.lck';
+my $conf_file = '/var/run/load-balance/wlb.conf';
+my $conf_lck_file = '/var/run/load-balance/wlb.conf.lck';
 
 ####are we just validating?
 if (defined $nexthop) {
