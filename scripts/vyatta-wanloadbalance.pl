@@ -325,7 +325,6 @@ if (defined $nexthop) {
 }
 
 #open file
-open(FILE, "<$conf_file") or die "Can't open wlb config file"; 
 open(FILE_LCK, "+>$conf_lck_file") or die "Can't open wlb lock file";
 
 my $success = write_health();
@@ -338,7 +337,6 @@ if ($success eq "false") {
     exit 1;
 }
 
-close FILE;
 close FILE_LCK;
 
 copy ($conf_lck_file,$conf_file);
