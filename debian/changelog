@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.54+mendocino5) unstable; urgency=low
+
+  * fix for regression failure w/ change of runtime directory.
+
+ -- Michael Larson <mike@vyatta.com>  Thu, 06 Jan 2011 10:24:14 -0800
+
 vyatta-wanloadbalance (0.13.54+mendocino4) unstable; urgency=low
 
   * convert wlb runtime directory to /var/run/load-balance from
