@@ -1,3 +1,20 @@
+vyatta-wanloadbalance (0.13.56) unstable; urgency=low
+
+  [ Michael ]
+  * fix for bug 4966.
+
+  [ Stephen Hemminger ]
+  * Remove use of 'Set' from help
+  * Add range checking for TTL hop count
+
+  [ Michael Larson ]
+  * convert wlb runtime directory to /var/run/load-balance from
+    /var/load-balance. fix for bug 6630
+  * fix for bug 6761.
+  * fix for bug 6779. make sure ppp directory is available.
+
+ -- Michael Larson <mike@vyatta.com>  Fri, 11 Feb 2011 17:01:15 -0800
+
 vyatta-wanloadbalance (0.13.55) unstable; urgency=low
 
   * new branch
