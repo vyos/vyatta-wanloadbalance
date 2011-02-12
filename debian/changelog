@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.57) unstable; urgency=low
+
+  * fix for 6711. Changed configuration node as requested by support.
+  * fix for missing wlb.conf file.
+
+ -- Michael Larson <mike@vyatta.com>  Sat, 12 Feb 2011 10:26:47 -0800
+
 vyatta-wanloadbalance (0.13.56) unstable; urgency=low
 
   [ Michael ]
