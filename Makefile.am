@@ -22,7 +22,7 @@ bin_sudo_users_SCRIPTS  += scripts/vyatta-wlb-connection.pl
 dhcphook_SCRIPTS = scripts/dhcp/dhcp-wanlb
 ppphook_SCRIPTS = scripts/ppp/ppp-wanlb
 
-curver_DATA = cfg-version/wanloadbalance@2
+curver_DATA = cfg-version/wanloadbalance@3
 
 src_wan_lb_SOURCES = src/main.cc
 src_wan_lb_SOURCES += src/lbdata.cc

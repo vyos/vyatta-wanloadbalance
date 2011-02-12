@@ -196,7 +196,7 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
     else if (depth > 0 && path[1] == "failover") {
       process_rule_failover(l_key,l_value);
     }
-    else if (depth > 0 && path[1] == "enable-source-based-routing") {
+    else if (depth > 0 && path[1] == "per-packet-balancing") {
       process_rule_enablesourcebasedrouting(l_key,l_value);
     }
     else if (depth > 1 && path[1] == "limit") {

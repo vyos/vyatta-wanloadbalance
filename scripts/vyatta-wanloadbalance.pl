@@ -137,8 +137,8 @@ sub write_rules {
 	    print FILE_LCK "\tfailover\n";
 	}
 
-	if ($config->exists("$rule enable-source-based-routing")) {
-	    print FILE_LCK "\tenable-source-based-routing\n";
+	if ($config->exists("$rule per-packet-balancing")) {
+	    print FILE_LCK "\tper-packet-balancing\n";
 	}
 
 	if ($config->exists("$rule failover") && $config->exists("$rule exclude")) {
