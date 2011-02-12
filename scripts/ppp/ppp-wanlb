@@ -1,5 +1,6 @@
 #! /bin/sh
 
+mkdir -p /var/run/load-balance/ppp
 echo $5 > /var/run/load-balance/ppp/$6
 
 pid=/var/run/vyatta/wlb.pid
