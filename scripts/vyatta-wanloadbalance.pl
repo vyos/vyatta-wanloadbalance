@@ -326,6 +326,7 @@ if (defined $nexthop) {
 }
 
 #open file
+`touch $conf_file`; #creates file on first access
 open(FILE, "<$conf_file") or die "Can't open wlb config file"; 
 open(FILE_LCK, "+>$conf_lck_file") or die "Can't open wlb lock file";
 
