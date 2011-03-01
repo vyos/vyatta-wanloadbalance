@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.59) unstable; urgency=low
+
+  * fix typo in help. bug w6850
+
+ -- Michael Larson <mike@vyatta.com>  Mon, 28 Feb 2011 17:32:47 -0800
+
 vyatta-wanloadbalance (0.13.58) unstable; urgency=low
 
   * fix for bug 6831--typo in val_help.
