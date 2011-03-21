@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.60) unstable; urgency=low
+
+  * fix for 6938. incorrectly checking value of key rather than value of
+    value.
+
+ -- Michael Larson <mike@vyatta.com>  Mon, 21 Mar 2011 16:17:37 -0700
+
 vyatta-wanloadbalance (0.13.59) unstable; urgency=low
 
   * fix typo in help. bug w6850
