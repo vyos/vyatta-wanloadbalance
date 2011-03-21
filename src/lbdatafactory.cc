@@ -521,13 +521,13 @@ LBDataFactory::process_rule_limit(const string &key, const string &value)
     _rule_iter->second._limit_rate = value;
   }
   else if (key == "period") {
-    if (key == "second") {
+    if (value == "second") {
       _rule_iter->second._limit_period = LBRule::K_SECOND;
     }
-    else if (key == "minute") {
+    else if (value == "minute") {
       _rule_iter->second._limit_period = LBRule::K_MINUTE;
     }
-    else if (key == "hour") {
+    else if (value == "hour") {
       _rule_iter->second._limit_period = LBRule::K_HOUR;
     }
   }
