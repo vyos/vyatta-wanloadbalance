@@ -32,6 +32,7 @@ src_wan_lb_SOURCES += src/rl_str_proc.cc
 src_wan_lb_SOURCES += src/lbpathtest.cc
 src_wan_lb_SOURCES += src/lbtest_icmp.cc
 src_wan_lb_SOURCES += src/lbtest_ttl.cc
+src_wan_lb_SOURCES += src/lbtest_user.cc
 src_wan_lb_SOURCES += src/lbdecision.cc
 src_wan_lb_SOURCES += src/lboutput.cc
 src_wan_lb_SOURCES += src/lbtest.cc

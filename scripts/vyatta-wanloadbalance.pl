@@ -85,6 +85,17 @@ sub write_health {
 		    print FILE_LCK "\t\t\t\tttl $ttl_limit\n";
 		}
 	    }
+	    elsif (defined($test_type) && ($test_type eq "user-defined")) {
+		print FILE_LCK "\t\t\ttype user-defined {\n";
+		my $test_script = $config->returnValue("$rule test-script");
+		if (defined $test_script) {
+		    print FILE_LCK "\t\t\t\ttest-script $test_script\n";
+		}
+		else {
+		    print "ERROR: script must be defined for test-script\n";
+		    exit 1;
+		}
+	    }
 	    else {
 		print FILE_LCK "\t\t\ttype ping {\n";
 	    }

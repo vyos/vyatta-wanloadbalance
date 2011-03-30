@@ -59,11 +59,14 @@ public:
   virtual string
   dump() = 0;
 
-  int
+  virtual int
   recv(LBHealth &health);
 
   virtual string
   name() = 0;
+
+  virtual string
+  status() {return _status_line;}
 
 private:
   int
@@ -75,6 +78,8 @@ public:
   string _target;
   int    _resp_time;
   int _state;
+  string _status_line;
+  
 
   static int _recv_icmp_sock;
   static int _send_raw_sock;

@@ -49,11 +49,17 @@ LBTestICMP::send(LBHealth &health)
     }
   }
   
+  //set the status line to be used when the show command is invoked
+  _status_line = name() + "\t" + string("Target: ") + target;
+
   //don't have target yet...
   if (target.empty()) {
     return;
   }
-  _packet_id = ++_packet_id % 32767;
+
+  //instead of prefix to avoid this compilier warning:
+  //warning: operation on ‘LBTest::_packet_id’ may be undefined
+  _packet_id = int((_packet_id + 1) % int(32767));
   if (_debug) {
     cout << "ICMPEngine::start(): sending ping test for: " << health._interface << " for " << target << " id: " << _packet_id << endl;
   }
@@ -195,3 +201,5 @@ LBTestICMP::dump()
   sprintf(buf,"%u",_resp_time);
   return (string("target: ") + _target + ", resp_time: " + buf);
 }
+
+

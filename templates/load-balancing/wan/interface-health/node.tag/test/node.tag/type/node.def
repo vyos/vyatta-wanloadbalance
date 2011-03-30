@@ -2,8 +2,9 @@ type:  txt
 
 help: WLB test type
 
-syntax:expression: $VAR(@) in "ping", "ttl";
-                   "action must be either ping or ttl expired test"
+syntax:expression: $VAR(@) in "ping", "ttl", "user-defined";
+                   "action must be either ping, ttl expired or user defined test"
 
 val_help: ping; Test with icmp echo response
 val_help: ttl; Test with udp TTL expired response
+val_help: user-defined; User defined test script

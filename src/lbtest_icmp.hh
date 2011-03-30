@@ -27,7 +27,7 @@ public:
   ~LBTestICMP() {}
 
   void
-  init() {}
+  init() {_status_line=name();}
 
   void
   send(LBHealth &health);
@@ -38,14 +38,15 @@ public:
   string
   name() {return string("ping");}
 
+  string
+  status() {return _status_line;}
+
 private:
   void
   send(int sock, const string &iface, const string &target_addr, int packet_id);
 
   unsigned short
-  in_checksum(const unsigned short *buf, int lenght) const;
-
-private:
+  in_checksum(const unsigned short *buf, int length) const;
 };
 
 #endif //__LBTEST_ICMP_HH__

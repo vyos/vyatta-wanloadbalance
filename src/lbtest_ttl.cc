@@ -37,18 +37,6 @@ using namespace std;
  *
  **/
 void
-LBTestTTL::init() 
-{
-  if (_debug) {
-    cout << "LBTestTTL::init(): initializing test system" << endl;
-  }
-}
-
-/**
- *
- *
- **/
-void
 LBTestTTL::send(LBHealth &health)
 {
   if (_debug) {
@@ -65,6 +53,9 @@ LBTestTTL::send(LBHealth &health)
     }
   }
   
+  //set the status line to be used when the show command is invoked
+  _status_line = name() + "\t" + string("Target: ") + target;
+
   //don't have target yet...
   if (target.empty()) {
     return;

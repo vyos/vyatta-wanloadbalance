@@ -74,6 +74,9 @@ private:
   process_health_interface_rule_type_udp(const string &key, const string &value);
 
   void
+  process_health_interface_rule_type_user(const string &key, const string &value);
+
+  void
   process_rule(const string &key, const string &value);
 
   void

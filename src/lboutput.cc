@@ -81,15 +81,17 @@ LBOutput::write(const LBData &lbdata)
 	}
       }
       
+      string status;
       if (titer->second->_state == LBTest::K_NONE) {
-	line += space + "*Test:  " + titer->second->name() + "\t" + string("Target:  ") + target + "\n";
+	status = "*";
       }
       else if (titer->second->_state == LBTest::K_FAILURE) {
-	line += space + "-Test:  " + titer->second->name() + "\t" + string("Target:  ") + target + "\n";
+	status = "-";
       }
       else if (titer->second->_state == LBTest::K_SUCCESS) {
-	line += space + "+Test:  " + titer->second->name() + "\t" + string("Target:  ") + target + "\n";
+	status = "+";
       }
+      line += space + status + "Test:  " + titer->second->status() + "\n";
 
       ++titer;
     }

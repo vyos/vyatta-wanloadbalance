@@ -40,7 +40,7 @@ public:
   ~LBTestTTL() {}
 
   void
-  init();
+  init() {_status_line=name();}
 
   void
   send(LBHealth &health);

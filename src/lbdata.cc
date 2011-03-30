@@ -107,7 +107,7 @@ LBHealth::recv_test()
     put(-1);
     return 0; //means stop iteration, no more tests...
   }
-  int rtt =  _test_iter->second->recv(*this);
+  int rtt = _test_iter->second->recv(*this);
   ++_test_iter;
   if (rtt >= 0) {
     put(rtt);

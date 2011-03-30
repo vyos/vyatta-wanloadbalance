@@ -19,6 +19,7 @@
 #include "lbdata.hh"
 #include "lbtest_icmp.hh"
 #include "lbtest_ttl.hh"
+#include "lbtest_user.hh"
 #include "lbdatafactory.hh"
 
 using namespace std;
@@ -173,6 +174,9 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
     else if (depth == 4 && key == "ttl") {
       process_health_interface_rule_type_udp(l_key,l_value);
     }
+    else if (depth == 4 && key == "test-script") {
+      process_health_interface_rule_type_user(l_key,l_value);
+    }
   }
   else if (path[0] == "rule") {
     if (depth > 0 && path[1] == "source") {
@@ -320,17 +324,28 @@ LBDataFactory::process_health_interface_rule_type_udp(const string &key, const s
 }
 
 void
+LBDataFactory::process_health_interface_rule_type_user(const string &key, const string &value)
+{
+  if (_test_iter != _health_iter->second._test_coll.end()) {
+    if (key == "test-script") {
+      ((LBTestUser*)_test_iter->second)->set_script((string&)value);
+    }
+  }
+}
+
+void
 LBDataFactory::process_health_interface_rule_type(const string &key, const string &value)
 {
   if (value == "ping") {
-    if (_debug) {
-      cout << "LBDataFactory::process_health_interface_rule_type(): setting up icmp test" << endl;
-    }
     LBTestICMP *test = new LBTestICMP(_debug);
     _health_iter->second._test_coll.insert(pair<int,LBTest*>(_current_test_rule_number,test));
   }
   else if (value == "udp") {
     LBTestTTL *test = new LBTestTTL(_debug);
+    _health_iter->second._test_coll.insert(pair<int,LBTest*>(_current_test_rule_number,test));
+  }
+  else if (value == "user-defined") {
+    LBTestUser *test = new LBTestUser(_debug);
     _health_iter->second._test_coll.insert(pair<int,LBTest*>(_current_test_rule_number,test));
   }
   _test_iter = _health_iter->second._test_coll.find(_current_test_rule_number);
