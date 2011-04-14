@@ -1,2 +1,4 @@
 type: txt
 help: Script to be executed on interface status change
+syntax:expression: exec "/opt/vyatta/sbin/check_file_in_config_dir $VAR(@) '/config/scripts'"
+val_help: Script in /config/scripts
