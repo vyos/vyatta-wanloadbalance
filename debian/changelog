@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.62) unstable; urgency=low
+
+  * * Add help and checks for WLB hook node to push
+
+ -- Mohit Mehta <mohit@vyatta.com>  Wed, 13 Apr 2011 18:14:14 -0700
+
 vyatta-wanloadbalance (0.13.61) unstable; urgency=low
 
   * check in for Bug 6959
