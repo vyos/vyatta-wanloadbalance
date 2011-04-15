@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.63) unstable; urgency=low
+
+  * add help and check for missed script node so users put script in
+    /config
+
+ -- Mohit Mehta <mohit@vyatta.com>  Fri, 15 Apr 2011 11:36:38 -0700
+
 vyatta-wanloadbalance (0.13.62) unstable; urgency=low
 
   * * Add help and checks for WLB hook node to push
