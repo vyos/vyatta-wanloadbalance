@@ -1,3 +1,4 @@
 type: txt
 help: Path to user defined script
-
+syntax:expression: exec "/opt/vyatta/sbin/check_file_in_config_dir $VAR(@) '/config/scripts'"
+val_help: Script in /config/scripts
