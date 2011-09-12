@@ -1,3 +1,10 @@
+vyatta-wanloadbalance (0.13.65) unstable; urgency=low
+
+  * fix for bug 7315. Target status behavior has been modified to fix
+    this bug:
+
+ -- Michael Larson <mike@vyatta.com>  Mon, 12 Sep 2011 15:03:42 -0700
+
 vyatta-wanloadbalance (0.13.64) unstable; urgency=low
 
   * new branch
