@@ -83,7 +83,7 @@ LBOutput::write(const LBData &lbdata)
       
       string status;
       if (titer->second->_state == LBTest::K_NONE) {
-	status = "*";
+	status = " ";
       }
       else if (titer->second->_state == LBTest::K_FAILURE) {
 	status = "-";

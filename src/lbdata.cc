@@ -66,6 +66,12 @@ LBHealth::put(int rtt)
 void
 LBHealth::start_new_test_cycle()
 {
+  //let's first clear out all the old results                                                                                                                 
+  TestIter t = _test_coll.begin();
+  while (t != _test_coll.end()) {
+    t->second->_state = LBTest::K_NONE;
+    ++t;
+  }
   _test_iter = _test_coll.begin();
   //  _test_iter->second->start();
 }

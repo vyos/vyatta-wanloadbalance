@@ -39,7 +39,7 @@ public:
   name() {return string("ping");}
 
   string
-  status() {return _status_line;}
+  status();
 
 private:
   void
