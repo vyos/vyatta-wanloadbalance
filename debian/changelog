@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.68+hydrogen1) unstable; urgency=low
+
+  * New branch
+
+ -- Daniil Baturin <daniil@baturin.org>  Sun, 17 Nov 2013 01:26:00 +0100
+
 vyatta-wanloadbalance (0.13.67) unstable; urgency=low
 
   * new branch
