@@ -146,6 +146,11 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
   else if (path[0] == "enable-local-traffic") {
     process_enablelocaltraffic(l_key,l_value);
   }
+  else if (path[0] == "sticky-connections") {
+	if (l_value == "inbound") {
+      process_stickyinboundconnections(l_key,l_value);
+    }
+  }  
   else if (path[0] == "flush-conntrack") {
     process_flushconntrack(l_key,l_value);
   }
@@ -222,6 +227,12 @@ void
 LBDataFactory::process_enablelocaltraffic(const string &key, const string &value)
 {
   _lb_data._enable_local_traffic = true;
+}
+
+void
+LBDataFactory::process_stickyinboundconnections(const string &key, const string &value)
+{
+  _lb_data._sticky_inbound_connections = true;
 }
 
 void
