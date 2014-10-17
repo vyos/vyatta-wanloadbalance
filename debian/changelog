@@ -1,3 +1,17 @@
+vyatta-wanloadbalance (0.13.68+vyos1+helium3) unstable; urgency=low
+
+  [ Daniil Baturin ]
+  * Revert "Vyatta Bugfix 6245: Sticky incoming connection support for
+    WLB"
+
+  [ Ewald van Geffen ]
+  * Vyatta Bugfix 6245: Sticky incoming connection support for WLB
+
+  [ Daniil Baturin ]
+  * Proper capitalization in help string.
+
+ -- Daniil Baturin <daniil@baturin.org>  Fri, 17 Oct 2014 09:50:03 +0200
+
 vyatta-wanloadbalance (0.13.68+vyos1+helium2) unstable; urgency=low
 
   [ Ewald van Geffen ]
