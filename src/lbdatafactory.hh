@@ -47,9 +47,6 @@ private:
   process_enablelocaltraffic(const string &key, const string &value);
 
   void
-  process_stickyinboundconnections(const string &key, const string &value);
-  
-  void
   process_flushconntrack(const string &key, const string &value);
 
   void

@@ -32,10 +32,6 @@ sub write_health {
     if ($config->exists("load-balancing wan enable-local-traffic")) {
 	print FILE_LCK "enable-local-traffic\n";
     }
-	
-    if ($config->exists("load-balancing wan sticky-connections inbound")) {
-	print FILE_LCK "sticky-connections inbound\n";
-    }
 
     if ($config->exists("load-balancing wan flush-connections")) {
 	print FILE_LCK "flush-conntrack\n";

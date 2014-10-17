@@ -22,6 +22,7 @@
 #include "lbdecision.hh"
 
 using namespace std;
+
 /*
 iptables -t mangle -N ISP1
 iptables -t mangle -A ISP1 -j CONNMARK --set-mark 1
@@ -163,15 +164,7 @@ if so then this stuff goes here!
 
     //NOTE, WILL NEED A WAY TO CLEAN UP THIS RULE ON RESTART...
     execute(string("iptables -t mangle -A ISP_") + iface + " -j ACCEPT", stdout);
-
-	if (lbdata._sticky_inbound_connections == true) {
-		//Mark incoming connections so that return packets go back on the same interface
-		execute(string("iptables -t mangle -N ISP_") + iface + "_IN", stdout);
-		execute(string("iptables -t mangle -F ISP_") + iface + "_IN", stdout);
-		execute(string("iptables -t mangle -A ISP_") + iface + "_IN -j CONNMARK --set-mark " + buf, stdout);
-		execute(string("iptables -t mangle -I PREROUTING -i ") + iface + " -m state --state NEW -j ISP_" + iface + "_IN", stdout);	
-	}
-	
+    
     //need to force the entry on restart as the configuration may have changed.
     if (iter->second._nexthop == "dhcp") {
       if (iter->second._dhcp_nexthop.empty() == false) {
@@ -493,12 +486,6 @@ LBDecision::shutdown(LBData &data)
     execute(string("iptables -t mangle -F ISP_") + h_iter->first,stdout);
     execute(string("iptables -t mangle -X ISP_") + h_iter->first,stdout);
 
-	if (data._sticky_inbound_connections == true) {
-		execute(string("iptables -t mangle -D PREROUTING -i ") + h_iter->first + " -m state --state NEW -j ISP_" + h_iter->first + "_IN", stdout);
-		execute(string("iptables -t mangle -F ISP_") + h_iter->first + "_IN",stdout);
-		execute(string("iptables -t mangle -X ISP_") + h_iter->first + "_IN",stdout);
-	}
-	
     ++h_iter;
   }
 }
