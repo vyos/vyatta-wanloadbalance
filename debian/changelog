@@ -1,4 +1,11 @@
-vyatta-wanloadbalance (0.13.68+vyos2+lithium2) unstable; urgency=low
+vyatta-wanloadbalance (0.13.68+vyos2+lithium4) unstable; urgency=low
+
+  * Force release
+  * 0.13.68+vyos2+lithium2
+
+ -- Daniil Baturin <daniil@baturin.org>  Fri, 24 Oct 2014 22:00:33 +0200
+
+vyatta-wanloadbalance (0.13.68+vyos2+lithium3) unstable; urgency=low
 
   * Force release
 
