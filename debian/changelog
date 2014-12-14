@@ -1,3 +1,12 @@
+vyatta-wanloadbalance (0.13.68+vyos2+lithium5) unstable; urgency=low
+
+  [ Benjamin Beret ]
+  * Make iptables rules use RETURN instead of ACCEPT (#362/#61)
+  
+  [ Alex Harpin ]
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Sun, 14 Dec 2014 13:07:21 +0000
+ 
 vyatta-wanloadbalance (0.13.68+vyos2+lithium4) unstable; urgency=low
 
   * Force release
