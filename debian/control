@@ -1,7 +1,7 @@
 Source: vyatta-wanloadbalance
 Section: contrib/net
 Priority: extra
-Maintainer: Vyatta Package Maintainers <maintainers@vyatta.com>
+Maintainer: VyOS Package Maintainers <maintainers@vyos.net>
 Build-Depends: debhelper (>= 5), autotools-dev
 Standards-Version: 3.7.2
 
@@ -23,6 +23,6 @@ Suggests: util-linux (>= 2.13-5),
  ethtool,
  ncurses-bin (>= 5.5-5),
  ntpdate
-Description: Vyatta configuration system
- This package has the Vyatta wan load balance project. It includes support for
- the vyatta CLI for configuration. 
+Description: VyOS load balancing configuration system
+ This package has the VyOS wan load balance project. It includes support for
+ the VyOS CLI for configuration. 
