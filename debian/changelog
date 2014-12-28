@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.68+vyos2+lithium6) unstable; urgency=low
+
+  * Update maintainer address 
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Sun, 28 Dec 2014 08:26:27 +0000
+ 
 vyatta-wanloadbalance (0.13.68+vyos2+lithium5) unstable; urgency=low
 
   [ Benjamin Beret ]
