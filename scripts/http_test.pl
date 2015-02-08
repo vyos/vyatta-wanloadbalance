@@ -17,7 +17,6 @@ use JSON;
 use Data::Dumper;
 use URI::Escape;
 
-
 my $iface = $ENV{WLB_SCRIPT_IFACE};
 
 my $code;
@@ -28,10 +27,9 @@ my @out = `curl -s -m 3 --interface $iface -i -X GET www.google.com`;
 #now process output, for http status code and for response body
 foreach my $out (@out) {
     if ($out =~ /^HTTP\/[\d.]+\s+(\d+)\s+.*$/) {
-	$code = $1;
-    }
-    elsif ($out =~ /^\r/ || defined $body) {
-	$body .= $out;
+        $code = $1;
+    } elsif ($out =~ /^\r/ || defined $body) {
+        $body .= $out;
     }
 }
 
