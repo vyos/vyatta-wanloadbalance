@@ -2,7 +2,6 @@
 
 LOADBALANCE_DIR=/var/run/load-balance
 
-
 prefix=/opt/vyatta
 
 mkdir -p $LOADBALANCE_DIR
