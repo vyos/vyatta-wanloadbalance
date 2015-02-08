@@ -6,9 +6,6 @@ opdir = $(datadir)/vyatta-op/templates
 bin_sudo_usersdir = $(bindir)/sudo-users
 curverdir = $(sysconfdir)/config-migrate/current
 
-initddir	 = /etc/init.d
-etcdir           = /etc
-
 AM_CPPFLAGS = -I src -Wall -DDEBUG
 
 CLEANFILES = src/main.o src/lbdata.o src/lbdatafactory.o src/loadbalance.o src/rl_str_proc.o src/lbpathtest.o src/lbtest_icmp.o src/lbtest_ttl.o src/lboutput.o src/lbtest.o
@@ -50,5 +47,3 @@ install-exec-hook:
 	cd templates; $(cpiop) $(DESTDIR)$(cfgdir)
 	mkdir -p $(DESTDIR)$(opdir)
 	cd templates-op; $(cpiop) $(DESTDIR)$(opdir)
-	mkdir -p $(DESTDIR)/etc
-	cd etc; $(cpiop) $(DESTDIR)/etc

@@ -1,5 +1,4 @@
 #!/bin/sh
 
-
 iptables $1 -L WANLOADBALANCE_PRE -t mangle -v
 
