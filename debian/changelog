@@ -1,3 +1,14 @@
+vyatta-wanloadbalance (0.13.68+vyos1+helium5) unstable; urgency=low
+
+  [ Alex Harpin ]
+  * vyatta-wanloadbalance: formatting changes for style consistency
+  * vyatta-wanloadbalance: formatting changes for style consistency
+  * vyatta-wanloadbalance: remove legacy load balancing code and tidy up
+  * vyatta-wanloadbalance: ensure the load balancing daemon is started
+  * vyatta-wanloadbalance: ensure the load balancing daemon is stopped 
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Wed, 25 Feb 2015 07:08:35 +0000
+ 
 vyatta-wanloadbalance (0.13.68+vyos1+helium4) unstable; urgency=low
 
   * Revert "0.13.68+vyos2+lithium2"
