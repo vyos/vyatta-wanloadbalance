@@ -1,3 +1,9 @@
+vyatta-wanloadbalance (0.13.68+vyos2+lithium8) unstable; urgency=low
+
+  * vyatta-wanloadbalance: update dh_gencontrol with new development flag
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Sun, 21 Jun 2015 11:24:19 +0100
+ 
 vyatta-wanloadbalance (0.13.68+vyos2+lithium7) unstable; urgency=low
 
   [ Alex Harpin ]
