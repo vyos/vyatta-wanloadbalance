@@ -21,6 +21,8 @@
 #include "lbdata.hh"
 #include "lbdecision.hh"
 
+#define IPT_MARK_OFFSET 0xc8
+
 using namespace std;
 /*
 iptables -t mangle -N ISP1
@@ -152,7 +154,7 @@ if so then this stuff goes here!
   while (iter != lbdata._iface_health_coll.end()) {
     string iface = iter->first;
     
-    int ct = iter->second._interface_index;
+    int ct = iter->second._interface_index + IPT_MARK_OFFSET;
 
     sprintf(buf,"%d",ct);
 
@@ -217,7 +219,7 @@ LBDecision::update_paths(LBData &lbdata)
       string iface = iter->first;
       string new_addr = fetch_iface_addr(iface);
       char buf[20];
-      sprintf(buf,"%d",iter->second._interface_index);
+      sprintf(buf,"%d",iter->second._interface_index + IPT_MARK_OFFSET);
       
       //now let's update the nexthop here in the route table
       if (iter->second._nexthop == "dhcp") {
@@ -482,7 +484,7 @@ LBDecision::shutdown(LBData &data)
   LBData::InterfaceHealthIter h_iter = data._iface_health_coll.begin();
   while (h_iter != data._iface_health_coll.end()) {
     char buf[40];
-    sprintf(buf,"%d",h_iter->second._interface_index);
+    sprintf(buf,"%d",h_iter->second._interface_index + IPT_MARK_OFFSET);
     
     execute(string("ip rule del table ") + buf, stdout);
     execute(string("ip route del table ") + buf, stdout);
@@ -725,7 +727,7 @@ LBDecision::insert_default(LBHealth &h, string &nexthop)
   //retrieve route entry
   string stdout;
   char buf[40];
-  sprintf(buf,"%d",h._interface_index);
+  sprintf(buf,"%d",h._interface_index + IPT_MARK_OFFSET);
   string default_route = string("ip route replace table ") + buf + " default dev " + h._interface + " via " + nexthop;
   string showcmd("ip route show table ");
   showcmd += string(buf);
