@@ -21,22 +21,17 @@
 #include "lbdata.hh"
 #include "lbdecision.hh"
 
-// This constant offsets fwmarks and ip route tables to prevent conflicts with other VyOS parts (fw / pbr) (bug #61)
-#define IPT_MARK_OFFSET 0xC8 /* PBR will use up to (dec) 200, offset by 200 */ 
-
 using namespace std;
 /*
 iptables -t mangle -N ISP1
-iptables -t mangle -A ISP1 -m mark ! --mark 0 -j RETURN
 iptables -t mangle -A ISP1 -j CONNMARK --set-mark 1
 iptables -t mangle -A ISP1 -j MARK --set-mark 1
-iptables -t mangle -A ISP1 -j RETURN
+iptables -t mangle -A ISP1 -j ACCEPT
 
 iptables -t mangle -N ISP2
-iptables -t mangle -A ISP2 -m mark ! --mark 0 -j RETURN
 iptables -t mangle -A ISP2 -j CONNMARK --set-mark 2
 iptables -t mangle -A ISP2 -j MARK --set-mark 2
-iptables -t mangle -A ISP2 -j RETURN
+iptables -t mangle -A ISP2 -j ACCEPT
 
 
 #THIS APPEARS TO ROUGHLY WORK BELOW, AND CAN BE SET UP WITH SPECIFIC FILTERS.
@@ -47,7 +42,7 @@ iptables -t mangle -A PREROUTING -i eth0 -j ISP2
 #iptables -t mangle -A PREROUTING -i eth0 -j MARK --set-mark 2
 
 iptables -t raw -N NAT_CONNTRACK
-iptables -t raw -A NAT_CONNTRACK -j RETURN
+iptables -t raw -A NAT_CONNTRACK -j ACCEPT
 iptables -t raw -I PREROUTING 1 -j NAT_CONNTRACK
 iptables -t raw -I OUTPUT 1 -j NAT_CONNTRACK
 ip ro add table 10 default via 192.168.1.2  dev eth1
@@ -88,10 +83,9 @@ LBDecision::init(LBData &lbdata)
   //here is where we set up iptables and policy routing for the interfaces
   /*
     iptables -t mangle -N ISP1
-    iptables -t mangle -A ISP1 -m mark ! --mark 0 -j RETURN
     iptables -t mangle -A ISP1 -j CONNMARK --set-mark 1
     iptables -t mangle -A ISP1 -j MARK --set-mark 1
-    iptables -t mangle -A ISP1 -j RETURN
+    iptables -t mangle -A ISP1 -j ACCEPT
    */
 
   char buf[20];
@@ -99,7 +93,7 @@ LBDecision::init(LBData &lbdata)
   /*
     do we need: 
 iptables -t raw -N NAT_CONNTRACK
-iptables -t raw -A NAT_CONNTRACK -j RETURN
+iptables -t raw -A NAT_CONNTRACK -j ACCEPT
 iptables -t raw -I PREROUTING 1 -j NAT_CONNTRACK
 iptables -t raw -I OUTPUT 1 -j NAT_CONNTRACK
 
@@ -121,7 +115,7 @@ if so then this stuff goes here!
   //set up the conntrack table
   execute(string("iptables -t raw -N WLB_CONNTRACK"), stdout);
   execute(string("iptables -t raw -F WLB_CONNTRACK"), stdout);
-  execute(string("iptables -t raw -A WLB_CONNTRACK -j RETURN"), stdout);
+  execute(string("iptables -t raw -A WLB_CONNTRACK -j ACCEPT"), stdout);
 
   execute(string("iptables -t raw -D PREROUTING -j WLB_CONNTRACK"), stdout);
 
@@ -143,17 +137,13 @@ if so then this stuff goes here!
   //set up mangle table
   execute(string("iptables -t mangle -N WANLOADBALANCE_PRE"), stdout);
   execute(string("iptables -t mangle -F WANLOADBALANCE_PRE"), stdout);
-  execute(string("iptables -t mangle -A WANLOADBALANCE_PRE -j RETURN"), stdout);
+  execute(string("iptables -t mangle -A WANLOADBALANCE_PRE -j ACCEPT"), stdout);
   execute(string("iptables -t mangle -D PREROUTING -j WANLOADBALANCE_PRE"), stdout);
   execute(string("iptables -t mangle -I PREROUTING 1 -j WANLOADBALANCE_PRE"), stdout);
   if (lbdata._enable_local_traffic == true) {
     execute(string("iptables -t mangle -N WANLOADBALANCE_OUT"), stdout);
     execute(string("iptables -t mangle -F WANLOADBALANCE_OUT"), stdout);
-    if (lbdata._sticky_inbound_connections == true) {
-      // See bug #297
-      execute("iptables -t mangle -A WANLOADBALANCE_OUT -j CONNMARK --restore-mark", stdout);
-    }
-    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT -j RETURN"), stdout);
+    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT -j ACCEPT"), stdout);
     execute(string("iptables -t mangle -D OUTPUT -j WANLOADBALANCE_OUT"), stdout);
     execute(string("iptables -t mangle -I OUTPUT 1 -j WANLOADBALANCE_OUT"), stdout);
   }
@@ -162,19 +152,17 @@ if so then this stuff goes here!
   while (iter != lbdata._iface_health_coll.end()) {
     string iface = iter->first;
     
-    int ct = iter->second._interface_index + IPT_MARK_OFFSET;
+    int ct = iter->second._interface_index;
 
     sprintf(buf,"%d",ct);
 
     execute(string("iptables -t mangle -N ISP_") + iface, stdout);
     execute(string("iptables -t mangle -F ISP_") + iface, stdout);
-    /* Packets already marked should not be marked again since we use target RETURN instead of ACCEPT now */
-    execute(string("iptables -t mangle -A ISP_") + iface + " -m mark ! --mark 0 -j RETURN", stdout); // Don't overwrite marks 
     execute(string("iptables -t mangle -A ISP_") + iface + " -j CONNMARK --set-mark " + buf, stdout);
     execute(string("iptables -t mangle -A ISP_") + iface + " -j MARK --set-mark " + buf, stdout);
 
     //NOTE, WILL NEED A WAY TO CLEAN UP THIS RULE ON RESTART...
-    execute(string("iptables -t mangle -A ISP_") + iface + " -j RETURN", stdout);
+    execute(string("iptables -t mangle -A ISP_") + iface + " -j ACCEPT", stdout);
 
 	if (lbdata._sticky_inbound_connections == true) {
 		//Mark incoming connections so that return packets go back on the same interface
@@ -197,7 +185,7 @@ if so then this stuff goes here!
     execute(string("ip rule delete table ") + buf, stdout);
 
     char hex_buf[40];
-    sprintf(hex_buf,"%#X",ct);
+    sprintf(hex_buf,"%X",ct);
     execute(string("ip rule add fwmark ") + hex_buf + " table " + buf, stdout);
 
     if (lbdata._disable_source_nat == false) {
@@ -229,7 +217,7 @@ LBDecision::update_paths(LBData &lbdata)
       string iface = iter->first;
       string new_addr = fetch_iface_addr(iface);
       char buf[20];
-      sprintf(buf,"%d",iter->second._interface_index + IPT_MARK_OFFSET);
+      sprintf(buf,"%d",iter->second._interface_index);
       
       //now let's update the nexthop here in the route table
       if (iter->second._nexthop == "dhcp") {
@@ -318,13 +306,9 @@ LBDecision::run(LBData &lb_data)
   execute("iptables -t mangle -F WANLOADBALANCE_PRE", stdout);
   if (lb_data._enable_local_traffic == true) {
     execute("iptables -t mangle -F WANLOADBALANCE_OUT", stdout);
-    if (lb_data._sticky_inbound_connections == true) {
-      // See bug #297
-      execute("iptables -t mangle -A WANLOADBALANCE_OUT -j CONNMARK --restore-mark", stdout);
-    }
-    execute("iptables -t mangle -A WANLOADBALANCE_OUT -m mark ! --mark 0 -j RETURN", stdout); //avoid packets set in prerouting table
-    execute("iptables -t mangle -A WANLOADBALANCE_OUT --proto icmp --icmp-type any -j RETURN", stdout); //avoid packets set in prerouting table
-    execute("iptables -t mangle -A WANLOADBALANCE_OUT --source 127.0.0.1/8 --destination 127.0.0.1/8 -j RETURN", stdout); //avoid packets set in prerouting table
+    execute("iptables -t mangle -A WANLOADBALANCE_OUT -m mark ! --mark 0 -j ACCEPT", stdout); //avoid packets set in prerouting table
+    execute("iptables -t mangle -A WANLOADBALANCE_OUT --proto icmp --icmp-type any -j ACCEPT", stdout); //avoid packets set in prerouting table
+    execute("iptables -t mangle -A WANLOADBALANCE_OUT --source 127.0.0.1/8 --destination 127.0.0.1/8 -j ACCEPT", stdout); //avoid packets set in prerouting table
   }
 
   //new request, bug 4112. flush conntrack tables if configured
@@ -341,9 +325,9 @@ LBDecision::run(LBData &lb_data)
     string app_cmd_local = get_application_cmd(iter->second,true,iter->second._exclude);
 
     if (iter->second._exclude == true) {
-      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j RETURN", stdout);
+      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j ACCEPT", stdout);
       if (lb_data._enable_local_traffic == true) {
-	execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j RETURN", stdout);
+	execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j ACCEPT", stdout);
       }
     }
     else {
@@ -410,10 +394,10 @@ LBDecision::run(LBData &lb_data)
 	  if (iter->second._limit) {
 	    //fill in limit statement here
 	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -j ISP_" + dbuf, stdout);
-	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -j RETURN", stdout);
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -j ACCEPT", stdout);
 	    if (lb_data._enable_local_traffic == true) {
 	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -j ISP_" + dbuf, stdout);
-	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -j RETURN", stdout);
+	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -j ACCEPT", stdout);
 	    }
 	  }
 	  else {
@@ -498,7 +482,7 @@ LBDecision::shutdown(LBData &data)
   LBData::InterfaceHealthIter h_iter = data._iface_health_coll.begin();
   while (h_iter != data._iface_health_coll.end()) {
     char buf[40];
-    sprintf(buf,"%d",h_iter->second._interface_index + IPT_MARK_OFFSET);
+    sprintf(buf,"%d",h_iter->second._interface_index);
     
     execute(string("ip rule del table ") + buf, stdout);
     execute(string("ip route del table ") + buf, stdout);
@@ -741,7 +725,7 @@ LBDecision::insert_default(LBHealth &h, string &nexthop)
   //retrieve route entry
   string stdout;
   char buf[40];
-  sprintf(buf,"%d",h._interface_index + IPT_MARK_OFFSET);
+  sprintf(buf,"%d",h._interface_index);
   string default_route = string("ip route replace table ") + buf + " default dev " + h._interface + " via " + nexthop;
   string showcmd("ip route show table ");
   showcmd += string(buf);
