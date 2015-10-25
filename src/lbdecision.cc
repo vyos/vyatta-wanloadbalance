@@ -187,7 +187,7 @@ if so then this stuff goes here!
     execute(string("ip rule delete table ") + buf, stdout);
 
     char hex_buf[40];
-    sprintf(hex_buf,"%X",ct);
+    sprintf(hex_buf,"%#X",ct);
     execute(string("ip rule add fwmark ") + hex_buf + " table " + buf, stdout);
 
     if (lbdata._disable_source_nat == false) {
