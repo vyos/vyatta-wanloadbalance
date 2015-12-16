@@ -6,6 +6,7 @@
  * by the Free Software Foundation.
  */
 #include <string>
+#include <unistd.h>
 #include "lbpathtest.hh"
 #include "loadbalance.hh"
 

@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include "stdlib.h"
 #include <iostream>
+#include <unistd.h>
 #include "loadbalance.hh"
 
 bool g_check_path = false;
