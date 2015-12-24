@@ -1,6 +1,6 @@
 type: u32
 default: 1
-syntax:expression: $VAR(@) >= 0 && $VAR(@) <= 10; "success count must be between 1 and 10"
+syntax:expression: $VAR(@) >= 0 && $VAR(@) <= 10000; "success count must be between 1 and 10000"
 help: Success count
 val_help: u32:1-10; Success count
 
