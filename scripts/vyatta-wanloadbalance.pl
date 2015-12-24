@@ -47,6 +47,11 @@ sub write_health {
         print FILE_LCK "hook \"" . $hook . "\"\n";
     }
 
+	my $post_hook = $config->returnValue("load-balancing wan post-hook");
+    if (defined $post_hook) {
+        print FILE_LCK "post-hook \"" . $post_hook . "\"\n";
+    }
+
     print FILE_LCK "health {\n";
 
     $config->setLevel("load-balancing wan interface-health");
