@@ -253,6 +253,14 @@ LBDataFactory::process_hook(const string &key, const string &value)
 }
 
 void
+LBDataFactory::process_post_hook(const string &key, const string &value)
+{
+  if (value.empty() == false) {
+    _lb_data._post_hook = value;
+  }
+}
+
+void
 LBDataFactory::process_health(const string &key, const string &value) 
 {
   if (value.empty() == false) {
