@@ -433,6 +433,25 @@ LBDecision::run(LBData &lb_data)
     }
     ++iter;
   }
+  
+  map<string,string>::iterator post_iter = state_changed_coll.begin();
+  while (post_iter != state_changed_coll.end()) {
+    //set state
+    //set interface
+    if (lb_data._post_hook.empty() == false) {
+      setenv("WLB_INTERFACE_NAME",post_iter->first.c_str(),1);
+      setenv("WLB_INTERFACE_STATE",post_iter->second.c_str(),1);
+
+      syslog(LOG_WARNING, "executing script: %s",lb_data._post_hook.c_str());
+
+      execute(lb_data._post_hook, stdout);
+      //unset state
+      //unset interface
+      unsetenv("WLB_INTERFACE_NAME");
+      unsetenv("WLB_INTERFACE_STATE");
+    }
+    ++post_iter;
+  }
 }
 
 /**
