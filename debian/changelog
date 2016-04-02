@@ -1,3 +1,13 @@
+vyatta-wanloadbalance (0.13.68+vyos2+current1) unstable; urgency=medium
+
+  [ Thomas Jepp ]
+  * Fix build depends.
+  * Fix build failures when building for jessie.
+
+  [ Kim Hagen ]
+
+ -- Kim Hagen <kim.sidney@gmail.com>  Sun, 24 Jan 2016 15:27:39 -0500
+
 vyatta-wanloadbalance (0.13.68+vyos2+lithium9) unstable; urgency=low
 
   [ Alex Harpin ]

@@ -1,4 +1,4 @@
-dhcphookdir = /etc/dhcp3/dhclient-exit-hooks.d
+dhcphookdir = /etc/dhcp/dhclient-exit-hooks.d
 ppphookdir = /etc/ppp/ip-up.d
 pppwanlbdir = /var/run/load-balance/ppp
 cfgdir = $(datadir)/vyatta-cfg/templates
