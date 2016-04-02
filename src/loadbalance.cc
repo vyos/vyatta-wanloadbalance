@@ -6,6 +6,7 @@
  * by the Free Software Foundation.
  */
 #include <string>
+#include <unistd.h>
 #include "lbpathtest.hh"
 #include "loadbalance.hh"
 
@@ -114,6 +115,6 @@ LoadBalance::output()
 void 
 LoadBalance::sleep() 
 {
-  ::sleep(5);
+  usleep(5000000);
 }
 
