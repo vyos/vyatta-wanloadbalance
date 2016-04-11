@@ -115,6 +115,6 @@ LoadBalance::output()
 void 
 LoadBalance::sleep() 
 {
-  ::sleep(5);
+  usleep(5000000);
 }
 
