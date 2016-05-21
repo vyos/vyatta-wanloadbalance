@@ -265,7 +265,7 @@ void
 LBDataFactory::process_health_interface(const string &key, const string &value) 
 {
   if (key == "success-ct") {
-    int num = strtoul(value.c_str(), NULL, 10);
+    int num = strtoul(value.c_str(), NULL, 10000);
     if (num > 0) {
       _health_iter->second._success_ct = num;
     }
@@ -277,7 +277,7 @@ LBDataFactory::process_health_interface(const string &key, const string &value)
     }
   }
   else if (key == "failure-ct") {
-    int num = strtoul(value.c_str(), NULL, 10);
+    int num = strtoul(value.c_str(), NULL, 10000);
     if (num > 0) {
       _health_iter->second._failure_ct = num;
     }
