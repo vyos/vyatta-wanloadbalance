@@ -157,6 +157,9 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
   else if (path[0] == "hook") {
     process_hook(l_key,l_value);
   }
+  else if (path[0] == "post-hook") {
+    process_post_hook(l_key,l_value);
+  }
   else if (path[0] == "health") {
     if (depth == 2 && key == "interface") {
       process_health(l_key,l_value);
@@ -246,6 +249,14 @@ LBDataFactory::process_hook(const string &key, const string &value)
 {
   if (value.empty() == false) {
     _lb_data._hook = value;
+  }
+}
+
+void
+LBDataFactory::process_post_hook(const string &key, const string &value)
+{
+  if (value.empty() == false) {
+    _lb_data._post_hook = value;
   }
 }
 
