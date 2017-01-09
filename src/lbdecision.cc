@@ -28,12 +28,12 @@ using namespace std;
 iptables -t mangle -N ISP1
 iptables -t mangle -A ISP1 -j CONNMARK --set-mark 1
 iptables -t mangle -A ISP1 -j MARK --set-mark 1
-iptables -t mangle -A ISP1 -j ACCEPT
+iptables -t mangle -A ISP1 -j RETURN
 
 iptables -t mangle -N ISP2
 iptables -t mangle -A ISP2 -j CONNMARK --set-mark 2
 iptables -t mangle -A ISP2 -j MARK --set-mark 2
-iptables -t mangle -A ISP2 -j ACCEPT
+iptables -t mangle -A ISP2 -j RETURN
 
 
 #THIS APPEARS TO ROUGHLY WORK BELOW, AND CAN BE SET UP WITH SPECIFIC FILTERS.
@@ -44,7 +44,7 @@ iptables -t mangle -A PREROUTING -i eth0 -j ISP2
 #iptables -t mangle -A PREROUTING -i eth0 -j MARK --set-mark 2
 
 iptables -t raw -N NAT_CONNTRACK
-iptables -t raw -A NAT_CONNTRACK -j ACCEPT
+iptables -t raw -A NAT_CONNTRACK -j RETURN
 iptables -t raw -I PREROUTING 1 -j NAT_CONNTRACK
 iptables -t raw -I OUTPUT 1 -j NAT_CONNTRACK
 ip ro add table 10 default via 192.168.1.2  dev eth1
@@ -87,7 +87,7 @@ LBDecision::init(LBData &lbdata)
     iptables -t mangle -N ISP1
     iptables -t mangle -A ISP1 -j CONNMARK --set-mark 1
     iptables -t mangle -A ISP1 -j MARK --set-mark 1
-    iptables -t mangle -A ISP1 -j ACCEPT
+    iptables -t mangle -A ISP1 -j RETURN
    */
 
   char buf[20];
@@ -95,7 +95,7 @@ LBDecision::init(LBData &lbdata)
   /*
     do we need: 
 iptables -t raw -N NAT_CONNTRACK
-iptables -t raw -A NAT_CONNTRACK -j ACCEPT
+iptables -t raw -A NAT_CONNTRACK -j RETURN
 iptables -t raw -I PREROUTING 1 -j NAT_CONNTRACK
 iptables -t raw -I OUTPUT 1 -j NAT_CONNTRACK
 
@@ -117,7 +117,7 @@ if so then this stuff goes here!
   //set up the conntrack table
   execute(string("iptables -t raw -N WLB_CONNTRACK"), stdout);
   execute(string("iptables -t raw -F WLB_CONNTRACK"), stdout);
-  execute(string("iptables -t raw -A WLB_CONNTRACK -j ACCEPT"), stdout);
+  execute(string("iptables -t raw -A WLB_CONNTRACK -j RETURN"), stdout);
 
   execute(string("iptables -t raw -D PREROUTING -j WLB_CONNTRACK"), stdout);
 
@@ -139,13 +139,13 @@ if so then this stuff goes here!
   //set up mangle table
   execute(string("iptables -t mangle -N WANLOADBALANCE_PRE"), stdout);
   execute(string("iptables -t mangle -F WANLOADBALANCE_PRE"), stdout);
-  execute(string("iptables -t mangle -A WANLOADBALANCE_PRE -j ACCEPT"), stdout);
+  execute(string("iptables -t mangle -A WANLOADBALANCE_PRE -j RETURN"), stdout);
   execute(string("iptables -t mangle -D PREROUTING -j WANLOADBALANCE_PRE"), stdout);
   execute(string("iptables -t mangle -I PREROUTING 1 -j WANLOADBALANCE_PRE"), stdout);
   if (lbdata._enable_local_traffic == true) {
     execute(string("iptables -t mangle -N WANLOADBALANCE_OUT"), stdout);
     execute(string("iptables -t mangle -F WANLOADBALANCE_OUT"), stdout);
-    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT -j ACCEPT"), stdout);
+    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT -j RETURN"), stdout);
     execute(string("iptables -t mangle -D OUTPUT -j WANLOADBALANCE_OUT"), stdout);
     execute(string("iptables -t mangle -I OUTPUT 1 -j WANLOADBALANCE_OUT"), stdout);
   }
@@ -164,7 +164,7 @@ if so then this stuff goes here!
     execute(string("iptables -t mangle -A ISP_") + iface + " -j MARK --set-mark " + buf, stdout);
 
     //NOTE, WILL NEED A WAY TO CLEAN UP THIS RULE ON RESTART...
-    execute(string("iptables -t mangle -A ISP_") + iface + " -j ACCEPT", stdout);
+    execute(string("iptables -t mangle -A ISP_") + iface + " -j RETURN", stdout);
 
     if (lbdata._sticky_inbound_connections == true) {
       //Mark incoming connections so that return packets go back on the same interface
@@ -308,9 +308,9 @@ LBDecision::run(LBData &lb_data)
   execute("iptables -t mangle -F WANLOADBALANCE_PRE", stdout);
   if (lb_data._enable_local_traffic == true) {
     execute("iptables -t mangle -F WANLOADBALANCE_OUT", stdout);
-    execute("iptables -t mangle -A WANLOADBALANCE_OUT -m mark ! --mark 0 -j ACCEPT", stdout); //avoid packets set in prerouting table
-    execute("iptables -t mangle -A WANLOADBALANCE_OUT --proto icmp --icmp-type any -j ACCEPT", stdout); //avoid packets set in prerouting table
-    execute("iptables -t mangle -A WANLOADBALANCE_OUT --source 127.0.0.1/8 --destination 127.0.0.1/8 -j ACCEPT", stdout); //avoid packets set in prerouting table
+    execute("iptables -t mangle -A WANLOADBALANCE_OUT -m mark ! --mark 0 -j RETURN", stdout); //avoid packets set in prerouting table
+    execute("iptables -t mangle -A WANLOADBALANCE_OUT --proto icmp --icmp-type any -j RETURN", stdout); //avoid packets set in prerouting table
+    execute("iptables -t mangle -A WANLOADBALANCE_OUT --source 127.0.0.1/8 --destination 127.0.0.1/8 -j RETURN", stdout); //avoid packets set in prerouting table
   }
 
   //new request, bug 4112. flush conntrack tables if configured
@@ -327,9 +327,9 @@ LBDecision::run(LBData &lb_data)
     string app_cmd_local = get_application_cmd(iter->second,true,iter->second._exclude);
 
     if (iter->second._exclude == true) {
-      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j ACCEPT", stdout);
+      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j RETURN", stdout);
       if (lb_data._enable_local_traffic == true) {
-	execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j ACCEPT", stdout);
+	execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j RETURN", stdout);
       }
     }
     else {
@@ -396,10 +396,10 @@ LBDecision::run(LBData &lb_data)
 	  if (iter->second._limit) {
 	    //fill in limit statement here
 	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -j ISP_" + dbuf, stdout);
-	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -j ACCEPT", stdout);
+	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -j RETURN", stdout);
 	    if (lb_data._enable_local_traffic == true) {
 	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -j ISP_" + dbuf, stdout);
-	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -j ACCEPT", stdout);
+	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -j RETURN", stdout);
 	    }
 	  }
 	  else {
