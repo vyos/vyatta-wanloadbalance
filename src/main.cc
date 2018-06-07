@@ -15,12 +15,12 @@
 #include <unistd.h>
 #include <iostream>
 #include <unistd.h>
+#include <grp.h>
 #include "loadbalance.hh"
 
 bool g_check_path = false;
 LoadBalance *g_lb = NULL;
 pid_t pid_output (const char *path);
-
 
 static void usage()
 {
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
     cout << "Configuration file is empty" << endl;
     exit(0);
   }
- 
+
   int s = 0;
   if (daemon) {
     if (fork() != 0) {
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
   }
 
   g_lb = new LoadBalance(debug, output_path);
-  
+
   bool success = g_lb->set_conf(c_file);
   if (success == false) {
     syslog(LOG_ERR, "wan_lb: error loading configuration file: %s", c_file.c_str());
@@ -136,9 +136,21 @@ int main(int argc, char* argv[])
     cout << "STARTING CYCLE" << endl;
   }
 
+  // Get config owners group GID and set the GID to it to avoid
+  // ruining the permissions of the running config if hooks
+  // execute VyOS configuration commands
+  group* vyattacfg_group = getgrnam("vyattacfg");
+  if (vyattacfg_group == NULL) {
+    syslog(LOG_ERR, "Could not get vyattacfg group ID, exiting");
+    exit(1);
+  }
+  gid_t cfg_gid = vyattacfg_group->gr_gid;
+  setgid(cfg_gid);
+
+
   g_lb->init();
 
-  
+
   //signal handler here
   //  sighup...
   signal(SIGINT, sig_end);
@@ -193,7 +205,7 @@ pid_output (const char *path)
 
   oldumask = umask(0777 & ~PIDFILE_MASK);
   fp = fopen (path, "w");
-  if (fp != NULL) 
+  if (fp != NULL)
     {
       fprintf (fp, "%d\n", (int) pid);
       fclose (fp);
