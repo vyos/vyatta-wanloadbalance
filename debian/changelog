@@ -1,8 +1,8 @@
-vyatta-wanloadbalance (1.2.0-1) stable; urgency=medium
+vyatta-wanloadbalance (1.2.4) unstable; urgency=low
 
-  * New branch.
+  * T258 wan load-balancing on vyos-1.2 permission issue /var/run
 
- -- Daniil Baturin <daniil@baturin.org>  Fri, 28 Sep 2018 22:20:51 +0200
+ -- Daniil Baturin <daniil@vyos.io>  Fri, 29 Nov 2019 10:42:05 +0100
 
 vyatta-wanloadbalance (0.13.68+vyos2+current1) unstable; urgency=medium
 
