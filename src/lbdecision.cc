@@ -687,7 +687,7 @@ LBDecision::get_application_cmd(LBRule &rule, bool local, bool exclude)
     }
     else {
       if (negate_flag) {
-	filter += "--destination ! " + tmp + " ";
+	filter += "! --destination  " + tmp + " ";
       }
       else {
 	filter += "--destination " + tmp + " ";
