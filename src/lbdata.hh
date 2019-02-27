@@ -227,6 +227,7 @@ class LBData {
   bool _flush_conntrack;
   bool _sticky_inbound_connections;
   string _hook;
+  string _post_hook;
 };
 
 #endif //__LBDATA_HH__

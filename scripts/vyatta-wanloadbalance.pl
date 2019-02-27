@@ -49,6 +49,11 @@ sub write_health {
 
     print FILE_LCK "health {\n";
 
+	my $post_hook = $config->returnValue("load-balancing wan post-hook");
+    if (defined $post_hook) {
+        print FILE_LCK "post-hook \"" . $post_hook . "\"\n";
+    }
+	
     $config->setLevel("load-balancing wan interface-health");
     my @eths = $config->listNodes();
     foreach my $ethNode (@eths) {

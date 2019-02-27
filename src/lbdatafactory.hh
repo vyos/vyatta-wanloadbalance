@@ -59,6 +59,9 @@ private:
   process_hook(const string &key, const string &value);
 
   void
+  process_post_hook(const string &key, const string &value);
+
+  void
   process_health_interface(const string &key, const string &value);
 
   void
