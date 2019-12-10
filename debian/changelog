@@ -1,5 +1,11 @@
 vyatta-wanloadbalance (1.2.4) unstable; urgency=low
 
+  * New release.
+
+ -- VyOS maintainers <maintainers@vyos.io>  Tue, 10 Dec 2019 23:40:06 +0200
+
+vyatta-wanloadbalance (1.2.4) unstable; urgency=low
+
   * T258 wan load-balancing on vyos-1.2 permission issue /var/run
 
  -- Daniil Baturin <daniil@vyos.io>  Fri, 29 Nov 2019 10:42:05 +0100
