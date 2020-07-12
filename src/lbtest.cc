@@ -244,7 +244,7 @@ int
 LBTest::receive(int recv_sock)
 {
   timeval wait_time;
-  int icmp_pktsize = 40;
+  int icmp_pktsize = 56;
   char resp_buf[icmp_pktsize];
   icmphdr *icmp_hdr;
   fd_set readfs;

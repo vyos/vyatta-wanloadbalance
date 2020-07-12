@@ -179,6 +179,9 @@ LBDataFactory::process(const vector<string> &path, int depth, const string &key,
     else if (depth == 4 && key == "ttl") {
       process_health_interface_rule_type_udp(l_key,l_value);
     }
+    else if (depth == 4 && key == "port") {
+      process_health_interface_rule_type_udp(l_key,l_value);
+    }
     else if (depth == 4 && key == "test-script") {
       process_health_interface_rule_type_user(l_key,l_value);
     }
@@ -294,7 +297,7 @@ LBDataFactory::process_health_interface(const string &key, const string &value)
   else if (key == "health") {
     //nothing
   }
-  else {
+  else if (key != "") {
     if (_debug) {
       cout << "LBDataFactory::process_health(): " << "don't understand this symbol: " << key << endl;
     }
