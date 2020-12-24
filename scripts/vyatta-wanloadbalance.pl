@@ -319,6 +319,9 @@ my $conf_file = '/var/run/load-balance/wlb.conf';
 my $conf_lck_file = '/var/run/load-balance/wlb.conf.lck';
 `sudo mkdir -p /var/run/load-balance`;
 
+# Enable conntrack counters
+`sudo sysctl -w net.netfilter.nf_conntrack_acct=1`;
+
 ####are we just validating?
 if (defined $nexthop) {
     my $rc = Vyatta::TypeChecker::validateType('ipv4', $nexthop, 1);
