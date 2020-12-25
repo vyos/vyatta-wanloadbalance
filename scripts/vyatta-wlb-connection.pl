@@ -29,9 +29,11 @@ use lib "/opt/vyatta/share/perl5/";
 if (!open($CONFFILE, "<", "/var/run/load-balance/wlb.conf")) {
     return;
 }
+$nat_source_disabled = 0;
 $_ = <$CONFFILE>;
 if (/disable-source-nat/) {
-    if (!open($FILE, "<", "/proc/net/ip_conntrack")) {
+    $nat_source_disabled = 1;
+    if (!open($FILE, "<", "/proc/net/nf_conntrack")) {
         return;
     }
 } else {
@@ -48,11 +50,20 @@ foreach (@line) {
 
     my $proto,$tmp,$state,$src,$dst,$sport,$dport,$pkts,$bytes;
 
-    if (/tcp/) {
-        ($proto,$tmp,$tmp,$state,$src,$dst,$sport,$dport,$pkts,$bytes) = split(' ',$_);
-    } elsif (/udp/) {
-        $state = "";
-        ($proto,$tmp,$tmp,$src,$dst,$sport,$dport,$pkts,$bytes) = split(' ',$_);
+    if($nat_source_disabled){
+        if (/tcp/) {
+            ($tmp,$tmp,$proto,$tmp,$tmp,$state,$src,$dst,$sport,$dport,$pkts,$bytes) = split(' ',$_);
+        } elsif (/udp/) {
+            $state = "";
+            ($tmp,$tmp,$proto,$tmp,$tmp,$src,$dst,$sport,$dport,$pkts,$bytes) = split(' ',$_);
+        }
+    } else {
+         if (/tcp/) {
+            ($proto,$tmp,$tmp,$state,$src,$dst,$sport,$dport,$pkts,$bytes) = split(' ',$_);
+        } elsif (/udp/) {
+            $state = "";
+            ($proto,$tmp,$tmp,$src,$dst,$sport,$dport,$pkts,$bytes) = split(' ',$_);
+        }
     }
 
     ($tmp,$src) = split('=',$src);
