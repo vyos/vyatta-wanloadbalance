@@ -173,17 +173,6 @@ LBTestICMP::send(int send_sock, const string &iface, const string &target_addr, 
   }
 }
 
-/**
- *
- *
- **/
-string
-LBTestICMP::status()
-{
-  //set the status line to be used when the show command is invoked
-  return name() + "\t" + string("Target: ") + _target;
-}
-
 
 
 /**
