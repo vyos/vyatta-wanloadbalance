@@ -38,9 +38,6 @@ public:
   string
   name() {return string("ping");}
 
-  string
-  status();
-
 private:
   void
   send(int sock, const string &iface, const string &target_addr, int packet_id);
