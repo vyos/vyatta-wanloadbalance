@@ -110,45 +110,45 @@ if so then this stuff goes here!
   string stdout;
   //set up special nat rules
   if (lbdata._disable_source_nat == false) {
-    execute(string("iptables -t nat -N WANLOADBALANCE"), stdout);
-    execute(string("iptables -t nat -F WANLOADBALANCE"), stdout);
-    execute(string("iptables -t nat -D VYATTA_PRE_SNAT_HOOK -j WANLOADBALANCE"), stdout);
-    execute(string("iptables -t nat -I VYATTA_PRE_SNAT_HOOK 1 -j WANLOADBALANCE"), stdout);
+    execute(string("iptables-nft -t nat -N WANLOADBALANCE"), stdout);
+    execute(string("iptables-nft -t nat -F WANLOADBALANCE"), stdout);
+    execute(string("iptables-nft -t nat -D VYOS_PRE_SNAT_HOOK -j WANLOADBALANCE"), stdout);
+    execute(string("iptables-nft -t nat -I VYOS_PRE_SNAT_HOOK 1 -j WANLOADBALANCE"), stdout);
   }
   //set up the conntrack table
-  execute(string("iptables -t raw -N WLB_CONNTRACK"), stdout);
-  execute(string("iptables -t raw -F WLB_CONNTRACK"), stdout);
-  execute(string("iptables -t raw -A WLB_CONNTRACK -j ACCEPT"), stdout);
+  execute(string("iptables-nft -t raw -N WLB_CONNTRACK"), stdout);
+  execute(string("iptables-nft -t raw -F WLB_CONNTRACK"), stdout);
+  execute(string("iptables-nft -t raw -A WLB_CONNTRACK -j ACCEPT"), stdout);
 
-  execute(string("iptables -t raw -D PREROUTING -j WLB_CONNTRACK"), stdout);
+  execute(string("iptables-nft -t raw -D PREROUTING -j WLB_CONNTRACK"), stdout);
 
-  int index = find_iptables_index("raw","PREROUTING","VYATTA_CT_PREROUTING_HOOK");
+  int index = find_iptables_index("raw","PREROUTING","VYOS_CT_PREROUTING_HOOK");
   ++index;
   sprintf(buf,"%d",index);
-  execute(string("iptables -t raw -I PREROUTING ") + buf + " -j WLB_CONNTRACK", stdout);
+  execute(string("iptables-nft -t raw -I PREROUTING ") + buf + " -j WLB_CONNTRACK", stdout);
 
 
   if (lbdata._enable_local_traffic == true) {
-    execute(string("iptables -t raw -D OUTPUT -j WLB_CONNTRACK"), stdout);
+    execute(string("iptables-nft -t raw -D OUTPUT -j WLB_CONNTRACK"), stdout);
 
     int index = find_iptables_index("raw","OUTPUT","VYATTA_CT_OUTPUT_HOOK");
     ++index;
     sprintf(buf,"%d",index);
-    execute(string("iptables -t raw -I OUTPUT ") + buf + " -j WLB_CONNTRACK", stdout);
+    execute(string("iptables-nft -t raw -I OUTPUT ") + buf + " -j WLB_CONNTRACK", stdout);
 
   }
   //set up mangle table
-  execute(string("iptables -t mangle -N WANLOADBALANCE_PRE"), stdout);
-  execute(string("iptables -t mangle -F WANLOADBALANCE_PRE"), stdout);
-  execute(string("iptables -t mangle -A WANLOADBALANCE_PRE -j ACCEPT"), stdout);
-  execute(string("iptables -t mangle -D PREROUTING -j WANLOADBALANCE_PRE"), stdout);
-  execute(string("iptables -t mangle -I PREROUTING 1 -j WANLOADBALANCE_PRE"), stdout);
+  execute(string("iptables-nft -t mangle -N WANLOADBALANCE_PRE"), stdout);
+  execute(string("iptables-nft -t mangle -F WANLOADBALANCE_PRE"), stdout);
+  execute(string("iptables-nft -t mangle -A WANLOADBALANCE_PRE -j ACCEPT"), stdout);
+  execute(string("iptables-nft -t mangle -D PREROUTING -j WANLOADBALANCE_PRE"), stdout);
+  execute(string("iptables-nft -t mangle -I PREROUTING 1 -j WANLOADBALANCE_PRE"), stdout);
   if (lbdata._enable_local_traffic == true) {
-    execute(string("iptables -t mangle -N WANLOADBALANCE_OUT"), stdout);
-    execute(string("iptables -t mangle -F WANLOADBALANCE_OUT"), stdout);
-    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT -j ACCEPT"), stdout);
-    execute(string("iptables -t mangle -D OUTPUT -j WANLOADBALANCE_OUT"), stdout);
-    execute(string("iptables -t mangle -I OUTPUT 1 -j WANLOADBALANCE_OUT"), stdout);
+    execute(string("iptables-nft -t mangle -N WANLOADBALANCE_OUT"), stdout);
+    execute(string("iptables-nft -t mangle -F WANLOADBALANCE_OUT"), stdout);
+    execute(string("iptables-nft -t mangle -A WANLOADBALANCE_OUT -j ACCEPT"), stdout);
+    execute(string("iptables-nft -t mangle -D OUTPUT -j WANLOADBALANCE_OUT"), stdout);
+    execute(string("iptables-nft -t mangle -I OUTPUT 1 -j WANLOADBALANCE_OUT"), stdout);
   }
 
   LBData::InterfaceHealthIter iter = lbdata._iface_health_coll.begin();
@@ -159,20 +159,20 @@ if so then this stuff goes here!
 
     sprintf(buf,"%d",ct);
 
-    execute(string("iptables -t mangle -N ISP_") + iface, stdout);
-    execute(string("iptables -t mangle -F ISP_") + iface, stdout);
-    execute(string("iptables -t mangle -A ISP_") + iface + " -j CONNMARK --set-mark " + buf, stdout);
-    execute(string("iptables -t mangle -A ISP_") + iface + " -j MARK --set-mark " + buf, stdout);
+    execute(string("iptables-nft -t mangle -N ISP_") + iface, stdout);
+    execute(string("iptables-nft -t mangle -F ISP_") + iface, stdout);
+    execute(string("iptables-nft -t mangle -A ISP_") + iface + " -j CONNMARK --set-mark " + buf, stdout);
+    execute(string("iptables-nft -t mangle -A ISP_") + iface + " -j MARK --set-mark " + buf, stdout);
 
     //NOTE, WILL NEED A WAY TO CLEAN UP THIS RULE ON RESTART...
-    execute(string("iptables -t mangle -A ISP_") + iface + " -j ACCEPT", stdout);
+    execute(string("iptables-nft -t mangle -A ISP_") + iface + " -j ACCEPT", stdout);
 
     if (lbdata._sticky_inbound_connections == true) {
       //Mark incoming connections so that return packets go back on the same interface
-      execute(string("iptables -t mangle -N ISP_") + iface + "_IN", stdout);
-      execute(string("iptables -t mangle -F ISP_") + iface + "_IN", stdout);
-      execute(string("iptables -t mangle -A ISP_") + iface + "_IN -j CONNMARK --set-mark " + buf, stdout);
-      execute(string("iptables -t mangle -I PREROUTING -i ") + iface + " -m state --state NEW -j ISP_" + iface + "_IN", stdout);
+      execute(string("iptables-nft -t mangle -N ISP_") + iface + "_IN", stdout);
+      execute(string("iptables-nft -t mangle -F ISP_") + iface + "_IN", stdout);
+      execute(string("iptables-nft -t mangle -A ISP_") + iface + "_IN -j CONNMARK --set-mark " + buf, stdout);
+      execute(string("iptables-nft -t mangle -I PREROUTING -i ") + iface + " -m state --state NEW -j ISP_" + iface + "_IN", stdout);
     }
 
     //need to force the entry on restart as the configuration may have changed.
@@ -193,7 +193,7 @@ if so then this stuff goes here!
 
     if (lbdata._disable_source_nat == false) {
       string new_addr = fetch_iface_addr(iface);
-      int err = execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + new_addr, stdout);
+      int err = execute(string("iptables-nft -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + new_addr, stdout);
       if (err == 0) {
 	iter->second._address = new_addr;
       }
@@ -236,10 +236,10 @@ LBDecision::update_paths(LBData &lbdata)
 	if (new_addr != iter->second._address) {
 	  int err = 0;
 	  if (iter->second._address.empty() == false) {
-	    err = execute(string("iptables -t nat -D WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._address, stdout);
+	    err = execute(string("iptables-nft -t nat -D WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + iter->second._address, stdout);
 	  }
 	  if (new_addr.empty() == false) {
-	    err |= execute(string("iptables -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + new_addr, stdout);
+	    err |= execute(string("iptables-nft -t nat -A WANLOADBALANCE -m connmark --mark ") + buf + " -j SNAT --to-source " + new_addr, stdout);
 	  }
 	  if (err == 0) { //only set if both are 0
 	    iter->second._address = new_addr;
@@ -306,12 +306,12 @@ LBDecision::run(LBData &lb_data)
   }
 
   //then if we do, flush all
-  execute("iptables -t mangle -F WANLOADBALANCE_PRE", stdout);
+  execute("iptables-nft -t mangle -F WANLOADBALANCE_PRE", stdout);
   if (lb_data._enable_local_traffic == true) {
-    execute("iptables -t mangle -F WANLOADBALANCE_OUT", stdout);
-    execute("iptables -t mangle -A WANLOADBALANCE_OUT -m mark ! --mark 0 -j ACCEPT", stdout); //avoid packets set in prerouting table
-    execute("iptables -t mangle -A WANLOADBALANCE_OUT --proto icmp --icmp-type any -j ACCEPT", stdout); //avoid packets set in prerouting table
-    execute("iptables -t mangle -A WANLOADBALANCE_OUT --source 127.0.0.1/8 --destination 127.0.0.1/8 -j ACCEPT", stdout); //avoid packets set in prerouting table
+    execute("iptables-nft -t mangle -F WANLOADBALANCE_OUT", stdout);
+    execute("iptables-nft -t mangle -A WANLOADBALANCE_OUT -m mark ! --mark 0 -j ACCEPT", stdout); //avoid packets set in prerouting table
+    execute("iptables-nft -t mangle -A WANLOADBALANCE_OUT --proto icmp --icmp-type any -j ACCEPT", stdout); //avoid packets set in prerouting table
+    execute("iptables-nft -t mangle -A WANLOADBALANCE_OUT --source 127.0.0.1/8 --destination 127.0.0.1/8 -j ACCEPT", stdout); //avoid packets set in prerouting table
   }
 
   //new request, bug 4112. flush conntrack tables if configured
@@ -328,9 +328,9 @@ LBDecision::run(LBData &lb_data)
     string app_cmd_local = get_application_cmd(iter->second,true,iter->second._exclude);
 
     if (iter->second._exclude == true) {
-      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j ACCEPT", stdout);
+      execute(string("iptables-nft -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j ACCEPT", stdout);
       if (lb_data._enable_local_traffic == true) {
-	execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j ACCEPT", stdout);
+	execute(string("iptables-nft -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j ACCEPT", stdout);
       }
     }
     else {
@@ -345,14 +345,14 @@ LBDecision::run(LBData &lb_data)
 
 	if (iter->second._limit) {
 	  string limit_cmd = get_limit_cmd(iter->second);
-	  execute(string("iptables -t mangle -N WANLOADBALANCE_PRE_LIMIT_") + rule_str, stdout);
-	  execute(string("iptables -t mangle -F WANLOADBALANCE_PRE_LIMIT_") + rule_str, stdout);
-	  execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " " + limit_cmd + " -j WANLOADBALANCE_PRE_LIMIT_" + rule_str, stdout);
+	  execute(string("iptables-nft -t mangle -N WANLOADBALANCE_PRE_LIMIT_") + rule_str, stdout);
+	  execute(string("iptables-nft -t mangle -F WANLOADBALANCE_PRE_LIMIT_") + rule_str, stdout);
+	  execute(string("iptables-nft -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " " + limit_cmd + " -j WANLOADBALANCE_PRE_LIMIT_" + rule_str, stdout);
 
 	  if (lb_data._enable_local_traffic == true) {
-	    execute(string("iptables -t mangle -N WANLOADBALANCE_OUT_LIMIT_") + rule_str, stdout);
-	    execute(string("iptables -t mangle -F WANLOADBALANCE_OUT_LIMIT_") + rule_str, stdout);	  
-	    execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " " + limit_cmd + " -j WANLOADBALANCE_OUT_LIMIT_" + rule_str, stdout);
+	    execute(string("iptables-nft -t mangle -N WANLOADBALANCE_OUT_LIMIT_") + rule_str, stdout);
+	    execute(string("iptables-nft -t mangle -F WANLOADBALANCE_OUT_LIMIT_") + rule_str, stdout);	  
+	    execute(string("iptables-nft -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " " + limit_cmd + " -j WANLOADBALANCE_OUT_LIMIT_" + rule_str, stdout);
 	  }
 	}
 
@@ -364,30 +364,30 @@ LBDecision::run(LBData &lb_data)
 	  if (iter->second._enable_source_based_routing) {
 	    if (iter->second._limit) {
 	      //fill in limit statement here
-	      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	      execute(string("iptables-nft -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	      if (lb_data._enable_local_traffic == true) {
-		execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+		execute(string("iptables-nft -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	      }
 	    }
 	    else {
-	      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	      execute(string("iptables-nft -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	      if (lb_data._enable_local_traffic == true) {
-		execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+		execute(string("iptables-nft -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	      }
 	    }
 	  }
 	  else {
 	    if (iter->second._limit) {
 	      //fill in limit statement here
-	      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	      execute(string("iptables-nft -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	      if (lb_data._enable_local_traffic == true) {
-		execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+		execute(string("iptables-nft -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	      }
 	    }
 	    else {
-	      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+	      execute(string("iptables-nft -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	      if (lb_data._enable_local_traffic == true) {
-		execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
+		execute(string("iptables-nft -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -m state --state NEW -m statistic --mode random --probability " + fbuf + " -j ISP_" + dbuf, stdout);
 	      }
 	    }
 	  }
@@ -396,17 +396,17 @@ LBDecision::run(LBData &lb_data)
 	if (iter->second._enable_source_based_routing) {
 	  if (iter->second._limit) {
 	    //fill in limit statement here
-	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -j ISP_" + dbuf, stdout);
-	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -j ACCEPT", stdout);
+	    execute(string("iptables-nft -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -j ISP_" + dbuf, stdout);
+	    execute(string("iptables-nft -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -j ACCEPT", stdout);
 	    if (lb_data._enable_local_traffic == true) {
-	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -j ISP_" + dbuf, stdout);
-	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -j ACCEPT", stdout);
+	      execute(string("iptables-nft -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -j ISP_" + dbuf, stdout);
+	      execute(string("iptables-nft -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -j ACCEPT", stdout);
 	    }
 	  }
 	  else {
-	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j ISP_" + dbuf, stdout);
+	    execute(string("iptables-nft -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j ISP_" + dbuf, stdout);
 	    if (lb_data._enable_local_traffic == true) {
-	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j ISP_" + dbuf, stdout);
+	      execute(string("iptables-nft -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j ISP_" + dbuf, stdout);
 	    }
 	  }
 	  
@@ -414,21 +414,21 @@ LBDecision::run(LBData &lb_data)
 	else {
 	  if (iter->second._limit) {
 	    //fill in limit statement here
-	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	    execute(string("iptables-nft -t mangle -A WANLOADBALANCE_PRE_LIMIT_") + rule_str + " -m state --state NEW -j ISP_" + dbuf, stdout);
 	    if (lb_data._enable_local_traffic == true) {
-	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	      execute(string("iptables-nft -t mangle -A WANLOADBALANCE_OUT_LIMIT_") + rule_str + " -m state --state NEW -j ISP_" + dbuf, stdout);
 	    }
 	  }
 	  else {
-	    execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	    execute(string("iptables-nft -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -m state --state NEW -j ISP_" + dbuf, stdout);
 	    if (lb_data._enable_local_traffic == true) {
-	      execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -m state --state NEW -j ISP_" + dbuf, stdout);
+	      execute(string("iptables-nft -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -m state --state NEW -j ISP_" + dbuf, stdout);
 	    }
 	  }
 	}
-	execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
+	execute(string("iptables-nft -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j CONNMARK --restore-mark", stdout);
 	if (lb_data._enable_local_traffic == true) {
-	  execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j CONNMARK --restore-mark", stdout);
+	  execute(string("iptables-nft -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j CONNMARK --restore-mark", stdout);
 	}
       }
     }
@@ -446,40 +446,40 @@ LBDecision::shutdown(LBData &data)
   string stdout;
 
   //then if we do, flush all
-  execute("iptables -t mangle -D PREROUTING -j WANLOADBALANCE_PRE", stdout);
-  execute("iptables -t mangle -F WANLOADBALANCE_PRE", stdout);
-  execute("iptables -t mangle -X WANLOADBALANCE_PRE", stdout);
+  execute("iptables-nft -t mangle -D PREROUTING -j WANLOADBALANCE_PRE", stdout);
+  execute("iptables-nft -t mangle -F WANLOADBALANCE_PRE", stdout);
+  execute("iptables-nft -t mangle -X WANLOADBALANCE_PRE", stdout);
   if (data._enable_local_traffic == true) {
-    execute("iptables -t mangle -D OUTPUT -j WANLOADBALANCE_OUT", stdout);
-    execute("iptables -t mangle -F WANLOADBALANCE_OUT", stdout);
-    execute("iptables -t mangle -X WANLOADBALANCE_OUT", stdout);
+    execute("iptables-nft -t mangle -D OUTPUT -j WANLOADBALANCE_OUT", stdout);
+    execute("iptables-nft -t mangle -F WANLOADBALANCE_OUT", stdout);
+    execute("iptables-nft -t mangle -X WANLOADBALANCE_OUT", stdout);
   }
   LBData::LBRuleIter iter = data._lb_rule_coll.begin();
   while (iter != data._lb_rule_coll.end()) {
     if (iter->second._limit) {
       char rule_str[20];
       sprintf(rule_str,"%d",iter->first);
-      execute(string("iptables -t mangle -F WANLOADBALANCE_PRE_LIMIT_") + rule_str,stdout);
-      execute(string("iptables -t mangle -X WANLOADBALANCE_PRE_LIMIT_") + rule_str,stdout);
+      execute(string("iptables-nft -t mangle -F WANLOADBALANCE_PRE_LIMIT_") + rule_str,stdout);
+      execute(string("iptables-nft -t mangle -X WANLOADBALANCE_PRE_LIMIT_") + rule_str,stdout);
       if (data._enable_local_traffic == true) {
-	execute(string("iptables -t mangle -F WANLOADBALANCE_OUT_LIMIT_") + rule_str,stdout);
-	execute(string("iptables -t mangle -X WANLOADBALANCE_OUT_LIMIT_") + rule_str,stdout);
+	execute(string("iptables-nft -t mangle -F WANLOADBALANCE_OUT_LIMIT_") + rule_str,stdout);
+	execute(string("iptables-nft -t mangle -X WANLOADBALANCE_OUT_LIMIT_") + rule_str,stdout);
       }
     }
     ++iter;
   }
 
   //clear out nat as well
-  execute("iptables -t nat -F WANLOADBALANCE", stdout);
-  execute("iptables -t nat -D VYATTA_PRE_SNAT_HOOK -j WANLOADBALANCE", stdout);
+  execute("iptables-nft -t nat -F WANLOADBALANCE", stdout);
+  execute("iptables-nft -t nat -D VYOS_PRE_SNAT_HOOK -j WANLOADBALANCE", stdout);
 
   //clear out conntrack hooks
-  execute(string("iptables -t raw -D PREROUTING -j WLB_CONNTRACK"), stdout);
+  execute(string("iptables-nft -t raw -D PREROUTING -j WLB_CONNTRACK"), stdout);
   if (data._enable_local_traffic == true) {
-    execute(string("iptables -t raw -D OUTPUT -j WLB_CONNTRACK"), stdout);
+    execute(string("iptables-nft -t raw -D OUTPUT -j WLB_CONNTRACK"), stdout);
   }
-  execute(string("iptables -t raw -F WLB_CONNTRACK"), stdout);
-  execute(string("iptables -t raw -X WLB_CONNTRACK"), stdout);
+  execute(string("iptables-nft -t raw -F WLB_CONNTRACK"), stdout);
+  execute(string("iptables-nft -t raw -X WLB_CONNTRACK"), stdout);
 
   //remove the policy entries
   LBData::InterfaceHealthIter h_iter = data._iface_health_coll.begin();
@@ -493,13 +493,13 @@ LBDecision::shutdown(LBData &data)
     //need to delete ip rule here as well!
 
     //clean up mangle final entries here
-    execute(string("iptables -t mangle -F ISP_") + h_iter->first,stdout);
-    execute(string("iptables -t mangle -X ISP_") + h_iter->first,stdout);
+    execute(string("iptables-nft -t mangle -F ISP_") + h_iter->first,stdout);
+    execute(string("iptables-nft -t mangle -X ISP_") + h_iter->first,stdout);
 
     if (data._sticky_inbound_connections == true) {
-      execute(string("iptables -t mangle -D PREROUTING -i ") + h_iter->first + " -m state --state NEW -j ISP_" + h_iter->first + "_IN", stdout);
-      execute(string("iptables -t mangle -F ISP_") + h_iter->first + "_IN",stdout);
-      execute(string("iptables -t mangle -X ISP_") + h_iter->first + "_IN",stdout);
+      execute(string("iptables-nft -t mangle -D PREROUTING -i ") + h_iter->first + " -m state --state NEW -j ISP_" + h_iter->first + "_IN", stdout);
+      execute(string("iptables-nft -t mangle -F ISP_") + h_iter->first + "_IN",stdout);
+      execute(string("iptables-nft -t mangle -X ISP_") + h_iter->first + "_IN",stdout);
     }
 
     ++h_iter;
@@ -822,7 +822,7 @@ int
 LBDecision::find_iptables_index(string location, string table, string name)
 {
   string stdout;
-  string cmd = "iptables -t " + location + " -L " + table;
+  string cmd = "iptables-nft -t " + location + " -L " + table;
   int err = execute(cmd, stdout, true);
   if (err != 0) {
     return 1;
