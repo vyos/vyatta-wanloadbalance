@@ -316,7 +316,9 @@ LBDecision::run(LBData &lb_data)
 
   //new request, bug 4112. flush conntrack tables if configured
   if (lb_data._flush_conntrack == true) {
-    execute("conntrack -F", stdout);
+    //execute("conntrack -F", stdout);
+    // Bug T1311 with "conntrack -F" and "conntrack-sync"
+    execute("conntrack --delete", stdout);
     execute("conntrack -F expect", stdout);
   }
 
