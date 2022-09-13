@@ -328,9 +328,9 @@ LBDecision::run(LBData &lb_data)
     string app_cmd_local = get_application_cmd(iter->second,true,iter->second._exclude);
 
     if (iter->second._exclude == true) {
-      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j ACCEPT", stdout);
+      execute(string("iptables -t mangle -A WANLOADBALANCE_PRE ") + app_cmd + " -j RETURN", stdout);
       if (lb_data._enable_local_traffic == true) {
-	execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j ACCEPT", stdout);
+	execute(string("iptables -t mangle -A WANLOADBALANCE_OUT ") + app_cmd_local + " -j RETURN", stdout);
       }
     }
     else {
