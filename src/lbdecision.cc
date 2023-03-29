@@ -110,10 +110,10 @@ if so then this stuff goes here!
   string stdout;
   //set up special nat rules
   if (lbdata._disable_source_nat == false) {
-    execute(string("iptables-nft -t nat -N WANLOADBALANCE"), stdout);
-    execute(string("iptables-nft -t nat -F WANLOADBALANCE"), stdout);
-    execute(string("iptables-nft -t nat -D VYOS_PRE_SNAT_HOOK -j WANLOADBALANCE"), stdout);
-    execute(string("iptables-nft -t nat -I VYOS_PRE_SNAT_HOOK 1 -j WANLOADBALANCE"), stdout);
+    execute(string("nft add chain ip nat WANLOADBALANCE"), stdout);
+    execute(string("nft flush chain ip nat WANLOADBALANCE"), stdout);
+    execute(string("nft flush chain ip nat VYOS_PRE_SNAT_HOOK"), stdout);
+    execute(string("nft insert rule ip nat VYOS_PRE_SNAT_HOOK counter jump WANLOADBALANCE"), stdout);
   }
   //set up the conntrack table
   execute(string("iptables-nft -t raw -N WLB_CONNTRACK"), stdout);
@@ -472,8 +472,9 @@ LBDecision::shutdown(LBData &data)
   }
 
   //clear out nat as well
-  execute("iptables-nft -t nat -F WANLOADBALANCE", stdout);
-  execute("iptables-nft -t nat -D VYOS_PRE_SNAT_HOOK -j WANLOADBALANCE", stdout);
+  execute("nft flush chain ip nat WANLOADBALANCE", stdout);
+  execute("nft delete chain ip nat WANLOADBALANCE", stdout);
+  execute("nft flush chain ip nat VYOS_PRE_SNAT_HOOK", stdout);
 
   //clear out conntrack hooks
   execute(string("iptables-nft -t raw -D PREROUTING -j WLB_CONNTRACK"), stdout);
