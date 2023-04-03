@@ -16,8 +16,8 @@ sbin_SCRIPTS += scripts/vyatta-wanloadbalance.init
 bin_sudo_users_SCRIPTS  = scripts/vyatta-wlb-status
 bin_sudo_users_SCRIPTS  += scripts/vyatta-wlb-connection.pl
 
-dhcphook_SCRIPTS = scripts/dhcp/dhcp-wanlb
-ppphook_SCRIPTS = scripts/ppp/ppp-wanlb
+dhcphook_SCRIPTS = scripts/dhcp/04-dhcp-wanlb
+ppphook_SCRIPTS = scripts/ppp/04-ppp-wanlb
 
 curver_DATA = cfg-version/wanloadbalance@3
 
