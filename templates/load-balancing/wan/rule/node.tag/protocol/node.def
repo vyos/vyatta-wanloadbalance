@@ -1,8 +1,0 @@
-type: txt
-help: Protocol to match
-default: "all"
-syntax:expression: exec "/opt/vyatta/sbin/vyatta-validate-type.pl protocol_negate '$VAR(@)'" ; "invalid protocol \"$VAR(@)\""
-val_help: txt; IP protocol name from /etc/protocols (e.g. "tcp" or "udp")
-val_help: u32:0-255; IP protocol number
-val_help: all; All IP protocols
-val_help: !<protocol>; All IP protocols except for the specified name or number

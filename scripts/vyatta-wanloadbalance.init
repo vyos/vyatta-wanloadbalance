@@ -10,7 +10,7 @@ test -x $bb  || exit 0
 
 start ()
 {
-	start-stop-daemon --background --start --quiet --oknodo --exec /opt/vyatta/sbin/wan_lb -- -f /var/run/load-balance/wlb.conf -d -i $pid
+	start-stop-daemon --background --start --quiet --oknodo --exec /opt/vyatta/sbin/wan_lb -- -f /run/load-balance/wlb.conf -d -i $pid
 }
 
 stop ()

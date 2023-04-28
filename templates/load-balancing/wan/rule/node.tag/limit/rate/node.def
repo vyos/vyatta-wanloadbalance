@@ -1,3 +1,0 @@
-type: u32
-help: Number of packets used for rate limit
-default: 5
