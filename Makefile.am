@@ -10,8 +10,7 @@ AM_CPPFLAGS = -I src -Wall -DDEBUG
 
 CLEANFILES = src/main.o src/lbdata.o src/lbdatafactory.o src/loadbalance.o src/rl_str_proc.o src/lbpathtest.o src/lbtest_icmp.o src/lbtest_ttl.o src/lboutput.o src/lbtest.o
 
-sbin_SCRIPTS = scripts/vyatta-wanloadbalance.pl
-sbin_SCRIPTS += scripts/vyatta-wanloadbalance.init
+sbin_SCRIPTS = scripts/vyatta-wanloadbalance.init
 
 bin_sudo_users_SCRIPTS  = scripts/vyatta-wlb-status
 bin_sudo_users_SCRIPTS  += scripts/vyatta-wlb-connection.pl
@@ -43,7 +42,5 @@ install-exec-hook:
 	mkdir -p $(DESTDIR)$(dhcphookdir)
 	mkdir -p $(DESTDIR)$(pppwanlbdir)
 	mkdir -p $(DESTDIR)$(ppphookdir)
-	mkdir -p $(DESTDIR)$(cfgdir)
-	cd templates; $(cpiop) $(DESTDIR)$(cfgdir)
 	mkdir -p $(DESTDIR)$(opdir)
 	cd templates-op; $(cpiop) $(DESTDIR)$(opdir)

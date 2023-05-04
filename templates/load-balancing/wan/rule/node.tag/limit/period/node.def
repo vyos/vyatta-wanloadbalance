@@ -1,4 +1,0 @@
-type: txt
-help: Time window for rate calculation
-default: "second"
-syntax:expression: $VAR(@) in "second", "minute", "hour"; "period must be second or minute or hour"

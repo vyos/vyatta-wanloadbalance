@@ -1,5 +1,0 @@
-type: u32
-default: 5
-syntax:expression: $VAR(@) >= 0 && $VAR(@) <= 30; "response must be between 1 and 30 seconds"
-help: Ping response time (seconds)
-val_help: u32:1-30; Response time (seconds)

@@ -25,8 +25,8 @@
 
 use lib "/opt/vyatta/share/perl5/";
 
-#examine /var/run/load-balance/wlb.conf for disable-source-nat
-if (!open($CONFFILE, "<", "/var/run/load-balance/wlb.conf")) {
+#examine //run/load-balance/wlb.conf for disable-source-nat
+if (!open($CONFFILE, "<", "/run/load-balance/wlb.conf")) {
     return;
 }
 $nat_source_disabled = 0;

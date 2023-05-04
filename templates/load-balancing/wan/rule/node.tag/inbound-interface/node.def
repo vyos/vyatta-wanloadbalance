@@ -1,2 +1,0 @@
-type: txt
-help: Inbound interface name (e.g., "eth0") [REQUIRED]
