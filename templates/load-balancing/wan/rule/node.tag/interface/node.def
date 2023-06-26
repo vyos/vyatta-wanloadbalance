@@ -1,3 +1,4 @@
 tag:
 type: txt
 help: Interface name [REQUIRED]
+allowed: sh -c "${vyos_completion_dir}/list_interfaces.py"

@@ -1,2 +1,3 @@
 type: txt
 help: Inbound interface name (e.g., "eth0") [REQUIRED]
+allowed: sh -c "${vyos_completion_dir}/list_interfaces.py"
