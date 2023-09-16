@@ -115,28 +115,6 @@ if so then this stuff goes here!
     execute(string("nft flush chain ip nat VYOS_PRE_SNAT_HOOK"), stdout);
     execute(string("nft insert rule ip nat VYOS_PRE_SNAT_HOOK counter jump WANLOADBALANCE"), stdout);
   }
-  //set up the conntrack table
-  execute(string("iptables-nft -t raw -N WLB_CONNTRACK"), stdout);
-  execute(string("iptables-nft -t raw -F WLB_CONNTRACK"), stdout);
-  execute(string("iptables-nft -t raw -A WLB_CONNTRACK -j ACCEPT"), stdout);
-
-  execute(string("iptables-nft -t raw -D PREROUTING -j WLB_CONNTRACK"), stdout);
-
-  int index = find_iptables_index("raw","PREROUTING","VYOS_CT_PREROUTING_HOOK");
-  ++index;
-  sprintf(buf,"%d",index);
-  execute(string("iptables-nft -t raw -I PREROUTING ") + buf + " -j WLB_CONNTRACK", stdout);
-
-
-  if (lbdata._enable_local_traffic == true) {
-    execute(string("iptables-nft -t raw -D OUTPUT -j WLB_CONNTRACK"), stdout);
-
-    int index = find_iptables_index("raw","OUTPUT","VYATTA_CT_OUTPUT_HOOK");
-    ++index;
-    sprintf(buf,"%d",index);
-    execute(string("iptables-nft -t raw -I OUTPUT ") + buf + " -j WLB_CONNTRACK", stdout);
-
-  }
   //set up mangle table
   execute(string("iptables-nft -t mangle -N WANLOADBALANCE_PRE"), stdout);
   execute(string("iptables-nft -t mangle -F WANLOADBALANCE_PRE"), stdout);
@@ -476,14 +454,6 @@ LBDecision::shutdown(LBData &data)
   execute("nft delete chain ip nat WANLOADBALANCE", stdout);
   execute("nft flush chain ip nat VYOS_PRE_SNAT_HOOK", stdout);
 
-  //clear out conntrack hooks
-  execute(string("iptables-nft -t raw -D PREROUTING -j WLB_CONNTRACK"), stdout);
-  if (data._enable_local_traffic == true) {
-    execute(string("iptables-nft -t raw -D OUTPUT -j WLB_CONNTRACK"), stdout);
-  }
-  execute(string("iptables-nft -t raw -F WLB_CONNTRACK"), stdout);
-  execute(string("iptables-nft -t raw -X WLB_CONNTRACK"), stdout);
-
   //remove the policy entries
   LBData::InterfaceHealthIter h_iter = data._iface_health_coll.begin();
   while (h_iter != data._iface_health_coll.end()) {
@@ -816,29 +786,4 @@ LBDecision::get_limit_cmd(LBRule &rule)
   
   cmd += string("--limit-burst ") + rule._limit_burst;
   return cmd;
-}
-
-/**
- *
- **/
-int
-LBDecision::find_iptables_index(string location, string table, string name)
-{
-  string stdout;
-  string cmd = "iptables-nft -t " + location + " -L " + table;
-  int err = execute(cmd, stdout, true);
-  if (err != 0) {
-    return 1;
-  }
-  
-  size_t loc = stdout.find(name);
-  string found_str = stdout.substr(0,loc);
-  //now count the number of carriage returns
-  loc = 0;
-  int ct = 0;
-  while ((loc = found_str.find("\n",loc)) != string::npos) {
-    ++loc;
-    ++ct;
-  }
-  return ct-1; //offset from headers on command
 }
