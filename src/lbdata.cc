@@ -332,7 +332,7 @@ LBData::update_dhcp_nexthop()
   LBData::InterfaceHealthIter h_iter = _iface_health_coll.begin();
   while (h_iter != _iface_health_coll.end()) {
     if (h_iter->second._nexthop == "dhcp") {
-      string file("/var/lib/dhcp/dhclient_"+h_iter->first+".lease");
+      string file("/run/dhclient/dhclient_"+h_iter->first+".lease");
       FILE *fp = fopen(file.c_str(),"r");
       if (fp) {
 	char str[1025];
