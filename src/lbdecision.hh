@@ -54,9 +54,6 @@ private:
   string
   get_limit_cmd(LBRule &rule);
 
-  int
-  find_iptables_index(string location, string table, string name);
-
 private:
   bool _debug;
 };
